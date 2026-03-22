@@ -1,0 +1,2527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiteDelivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ── MONTONI THEME — Teal Blue ── */
+:root {
+  --bg:#0F3240; --bg2:#12394A; --bg3:#164054; --surface:#1C4D62;
+  --border:rgba(240,235,224,0.08); --border2:rgba(240,235,224,0.15);
+  --text:#F0EBE0; --text2:#9FB8C2; --text3:#4A6E7A;
+  --accent:#C9A96E; --accent2:#DFC088; --accent-dim:rgba(201,169,110,0.16); --accent-bd:rgba(201,169,110,0.42);
+  --green:#7A8C6E; --green-dim:rgba(122,140,110,0.18); --green-bd:rgba(122,140,110,0.4);
+  --red:#D46060; --red-dim:rgba(212,96,96,0.15); --red-bd:rgba(212,96,96,0.35);
+  --amber:#C9A96E; --amber-dim:rgba(201,169,110,0.15); --amber-bd:rgba(201,169,110,0.35);
+  --blue:#5DCAA5; --blue-dim:rgba(93,202,165,0.15); --blue-bd:rgba(93,202,165,0.35);
+  --teal:#1A4D5C; --teal2:#1F5A6A;
+  --r:6px; --r2:10px; --mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+button,input,select,textarea{font-family:'Barlow',sans-serif;}
+
+/* TOPBAR */
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:200;}
+.topbar-logo{display:flex;align-items:center;gap:9px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.05em;color:var(--text);}
+.logo-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.logo-icon svg{width:16px;height:16px;fill:white;}
+.sep{width:1px;height:24px;background:var(--border2);}
+.nav-btn{padding:5px 13px;border-radius:5px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .14s;display:flex;align-items:center;gap:5px;}
+.nav-btn:hover{background:var(--surface);color:var(--text);}
+.nav-btn.active{background:var(--accent-dim);color:var(--accent);}
+.nav-badge{background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+.role-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-bd);}
+.tb-btn{padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .14s;}
+.tb-btn:hover{background:var(--surface);color:var(--text);}
+.tb-btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
+.tb-btn.primary:hover{background:var(--accent2);}
+
+/* VIEWS */
+.view{display:none;min-height:calc(100vh - 52px);}
+.view.active{display:block;}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.stat-item{background:var(--bg2);padding:12px 20px;}
+.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;}
+.c-amber{color:var(--amber);} .c-green{color:var(--green);} .c-blue{color:var(--blue);} .c-red{color:var(--red);}
+
+/* DASHBOARD */
+.dash-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 52px - 50px);overflow:hidden;}
+.dash-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px;overflow-y:auto;height:100%;}
+.proj-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:2px;}
+.proj-addr{font-size:12px;color:var(--text3);margin-bottom:16px;}
+.clk{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:600;line-height:1;margin-bottom:2px;}
+.clk-date{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.quick-btn{padding:10px 8px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;text-align:center;transition:all .14s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.quick-btn:hover{border-color:var(--accent-bd);background:var(--accent-dim);color:var(--accent);}
+.quick-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;}
+.sec-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;margin-top:18px;}
+.info-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-k{font-size:12px;color:var(--text2);}
+.info-v{font-size:12px;color:var(--text);text-align:right;max-width:55%;}
+.edit-info-btn{display:block;width:100%;padding:7px;margin-top:10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r);color:var(--text3);font-size:12px;cursor:pointer;transition:all .14s;}
+.edit-info-btn:hover{border-color:var(--accent-bd);color:var(--accent);}
+
+/* MAP */
+.map-area{position:relative;background:var(--bg3);overflow:hidden;height:100%;}
+.map-canvas{position:relative;width:100%;height:100%;min-height:calc(100vh - 52px - 50px);background:var(--bg3);display:flex;align-items:flex-start;justify-content:flex-start;}
+.map-stage{position:relative;flex-shrink:0;}
+.map-stage img.map-img{display:block;width:100%;height:auto;opacity:.85;pointer-events:none;user-select:none;}
+.map-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text3);}
+.map-placeholder svg{width:52px;height:52px;stroke:currentColor;fill:none;stroke-width:1;}
+.upload-map-btn{padding:9px 20px;background:var(--accent);color:white;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;}
+.zone-rect{position:absolute;border:2px solid;border-radius:4px;cursor:move;display:flex;align-items:center;justify-content:center;}
+..zone-lbl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:3px 9px;border-radius:3px;white-space:nowrap;text-transform:uppercase;cursor:pointer;}
+.zone-resize{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;border-radius:2px;cursor:se-resize;}
+.map-ctrls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;}
+.map-ctrl{padding:7px 14px;background:rgba(17,18,16,.88);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .14s;}
+.map-ctrl:hover{background:var(--surface);color:var(--text);}
+.map-ctrl.ac{background:var(--accent);color:white;border-color:var(--accent);}
+.zone-legend{position:absolute;bottom:12px;left:12px;background:rgba(17,18,16,.88);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--text2);}
+.legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+
+/* DELIVERIES */
+.del-layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 52px);}
+.booking-panel{background:var(--bg2);border-right:1px solid var(--border);padding:20px;overflow-y:auto;}
+.booking-panel h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:16px;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:11px;}
+.fg label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
+.fg input,.fg select,.fg textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 11px;color:var(--text);font-size:13px;outline:none;transition:border .14s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent);}
+.fg textarea{resize:vertical;min-height:60px;}
+.req{color:var(--accent);}
+.zpick-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.zpick{padding:8px 10px;border:1.5px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:all .14s;text-align:left;}
+.zpick:hover{background:var(--surface);}
+.zpick.sel{background:var(--accent-dim);border-color:var(--accent-bd);color:var(--accent);}
+.zpick-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
+.err-box{display:none;background:var(--red-dim);border:1px solid var(--red-bd);border-radius:var(--r);padding:10px 14px;margin-bottom:10px;font-size:12px;color:var(--red);line-height:1.6;}
+.submit-btn{width:100%;padding:11px;background:var(--accent);color:white;border:none;border-radius:var(--r);font-size:14px;font-weight:700;cursor:pointer;transition:background .14s;font-family:'Barlow Condensed',sans-serif;letter-spacing:.05em;}
+.submit-btn:hover{background:var(--accent2);}
+.req-note{font-size:11px;color:var(--text3);margin-top:6px;text-align:center;}
+.success-box{text-align:center;padding:32px 16px;}
+.success-box h3{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--green);margin-bottom:8px;}
+.success-box p{font-size:13px;color:var(--text2);line-height:1.5;}
+.success-box button{margin-top:16px;padding:8px 22px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:13px;cursor:pointer;}
+
+/* CALENDAR */
+.cal-main{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
+.cal-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
+.cal-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--text);}
+.cal-nav{width:28px;height:28px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:14px;transition:all .14s;}
+.cal-nav:hover{background:var(--surface);color:var(--text);}
+.today-btn{padding:5px 14px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .14s;}
+.today-btn:hover{background:var(--surface);color:var(--text);}
+.zf-btn{padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .14s;}
+.week-grid{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;}
+.wg-time-col{width:52px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2);}
+.wg-day-col{flex:1;position:relative;min-width:0;overflow:visible;}
+.wg-corner{border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
+.wg-dh{background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:8px 6px;text-align:center;position:sticky;top:0;z-index:10;}
+.wg-dn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);}
+.wg-dd{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-top:1px;}
+.wg-dh.today .wg-dd{color:var(--accent);}
+.wg-t{height:34px;flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-family:var(--mono);font-size:9px;color:var(--text3);border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+.wg-t.half{border-bottom:1px dashed rgba(255,255,255,0.04);}
+.wg-c{border-right:none;border-bottom:1px solid var(--border);cursor:pointer;}
+.wg-c.half{border-bottom:1px dashed rgba(255,255,255,0.04);}
+.wg-c:hover{background:rgba(232,98,42,0.05);}
+.db{position:absolute;border-radius:3px;padding:3px 6px;font-size:10px;overflow:hidden;cursor:pointer;transition:filter .14s;z-index:5;box-sizing:border-box;}
+.db:hover{filter:brightness(1.2);}
+.db-co{font-size:10px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.db-sub{font-size:9px;opacity:.8;}
+.db-approved{background:var(--green-dim);border:1px solid var(--green-bd);color:var(--green);}
+.db-pending{background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);}
+
+/* ADMIN */
+.admin-wrap{padding:24px;max-width:1060px;margin:0 auto;}
+.admin-wrap h1{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;margin-bottom:4px;}
+.admin-sub{font-size:13px;color:var(--text2);margin-bottom:22px;}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:16px;}
+.panel:last-child{margin-bottom:0;}
+.ph{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pt{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;}
+.pc{font-size:12px;color:var(--text2);}
+.pb{padding:14px 18px;}
+.empty{padding:24px 0;text-align:center;color:var(--text3);font-size:12px;}
+
+/* DELIVERY ROW */
+.dr{padding:12px 0;border-bottom:1px solid var(--border);}
+.dr:last-child{border-bottom:none;}
+.dr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.dr-co{font-size:14px;font-weight:600;}
+.dr-meta{font-size:11px;color:var(--text2);margin-top:1px;line-height:1.4;}
+.dr-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.b-pending{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);}
+.b-approved{background:var(--green-dim);color:var(--green);border:1px solid var(--green-bd);}
+.b-rejected,.b-cancelled{background:var(--red-dim);color:var(--red);border:1px solid var(--red-bd);}
+.b-zone{border:1px solid;}
+.b-time{background:var(--bg3);color:var(--text2);border:1px solid var(--border2);font-family:var(--mono);font-size:10px;text-transform:none;letter-spacing:0;}
+.dr-acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.dr-note{flex:1;min-width:100px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;color:var(--text);font-size:12px;outline:none;}
+.dr-note:focus{border-color:var(--accent);}
+.act{padding:6px 13px;border-radius:5px;border:1px solid;font-size:11px;font-weight:700;cursor:pointer;transition:all .14s;text-transform:uppercase;letter-spacing:.04em;}
+.act-approve{background:var(--green-dim);color:var(--green);border-color:var(--green-bd);}
+.act-approve:hover{background:var(--green);color:#0a1f14;}
+.act-reject{background:var(--red-dim);color:var(--red);border-color:var(--red-bd);}
+.act-reject:hover{background:var(--red);color:white;}
+.act-edit{background:var(--blue-dim);color:var(--blue);border-color:var(--blue-bd);}
+.act-edit:hover{background:var(--blue);color:white;}
+.act-cancel{background:var(--amber-dim);color:var(--amber);border-color:var(--amber-bd);}
+.act-cancel:hover{background:var(--amber);color:#1a0f00;}
+.act-uncancel{background:var(--green-dim);color:var(--green);border-color:var(--green-bd);}
+.act-uncancel:hover{background:var(--green);color:#0a1f14;}
+.act-del{background:var(--red-dim);color:var(--red);border-color:var(--red-bd);padding:6px 10px;font-size:13px;}
+.act-del:hover{background:var(--red);color:white;}
+
+/* CONFLICTS */
+.cg{background:var(--bg3);border:1px solid var(--amber-bd);border-radius:var(--r);padding:12px;margin-bottom:10px;}
+.cg:last-child{margin-bottom:0;}
+.cg-hd{font-size:12px;font-weight:700;color:var(--amber);margin-bottom:8px;}
+.ci{background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;}
+.ci:last-child{margin-bottom:0;}
+.ci-info{font-size:12px;color:var(--text);line-height:1.5;}
+.ci-pick{padding:5px 12px;border-radius:4px;border:none;background:var(--accent);color:white;font-size:11px;font-weight:700;cursor:pointer;}
+.ci-pick:hover{background:var(--accent2);}
+
+/* ZONE MGR */
+.zm-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.zm-row:last-child{border-bottom:none;}
+.zm-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
+.zm-input{flex:1;background:transparent;border:none;color:var(--text);font-size:13px;font-weight:500;outline:none;padding:2px 5px;border-radius:4px;}
+.zm-input:hover,.zm-input:focus{background:var(--bg3);}
+.zm-del{width:24px;height:24px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--red);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.zm-del:hover{background:var(--red-dim);}
+.add-zone-btn{width:100%;padding:8px;border:1.5px dashed var(--border2);border-radius:var(--r);background:transparent;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .14s;}
+.add-zone-btn:hover{border-color:var(--accent-bd);color:var(--accent);background:var(--accent-dim);}
+
+/* NOTIFS */
+.ni{display:flex;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);}
+.ni:last-child{border-bottom:none;}
+.ni-dot{width:7px;height:7px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.ni-msg{flex:1;font-size:12px;color:var(--text2);line-height:1.4;}
+.ni-t{font-size:11px;color:var(--text3);white-space:nowrap;font-family:var(--mono);}
+
+/* MODALS */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-backdrop.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px 30px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.modal h2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;margin-bottom:18px;}
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.mf{display:flex;flex-direction:column;gap:5px;}
+.mf label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
+.mf input,.mf select,.mf textarea{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:9px 11px;color:var(--text);font-size:13px;outline:none;transition:border .14s;}
+.mf input:focus,.mf select:focus{border-color:var(--accent);}
+.mf textarea{resize:vertical;min-height:66px;}
+.m-actions{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+.btn{padding:9px 20px;border-radius:var(--r);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .14s;}
+.btn-ac{background:var(--accent);color:white;} .btn-ac:hover{background:var(--accent2);}
+.btn-gh{background:transparent;color:var(--text2);border:1px solid var(--border2);} .btn-gh:hover{background:var(--surface);color:var(--text);}
+.btn-gr{background:var(--green);color:#0a1f14;} .btn-gr:hover{filter:brightness(1.1);}
+.btn-re{background:var(--red);color:white;} .btn-re:hover{filter:brightness(1.1);}
+.btn-bl{background:var(--blue);color:white;} .btn-bl:hover{filter:brightness(1.1);}
+.m-err{font-size:12px;color:var(--red);margin-top:8px;display:none;}
+
+/* DETAIL FIELDS */
+.df-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.df-lbl{font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;}
+.df-val{font-size:13px;color:var(--text);}
+
+/* ── TABLET (≤900px) ── */
+@media(max-width:900px){
+  .dash-layout,.del-layout,.admin-grid{grid-template-columns:1fr;}
+  .week-grid{grid-template-columns:44px repeat(7,minmax(70px,1fr));overflow-x:auto;}
+}
+
+/* ── MOBILE (≤768px) ── */
+@media(max-width:768px){
+  /* Hide desktop topbar nav, show bottom nav */
+  .topbar .sep,.topbar .nav-btn,.topbar #sync-indicator{display:none!important;}
+  .topbar{padding:0 12px;height:46px;}
+  .topbar-right .tb-btn{display:none!important;}
+  .topbar-right{gap:6px;}
+  .tb-username{display:none!important;}
+
+  /* Bottom nav */
+  .mob-bottom-nav{display:flex!important;}
+
+  /* Push content above bottom nav */
+  #app > .view.active{padding-bottom:56px;}
+
+  /* Stat strip 2x2 */
+  .stat-strip{grid-template-columns:1fr 1fr;}
+
+  /* Dashboard: sidebar fills screen, map hidden */
+  .dash-layout{display:flex;flex-direction:column;height:auto;overflow:visible;}
+  .dash-sidebar{height:auto;overflow:visible;border-right:none;}
+  #map-wrapper{order:2;}
+  .dash-sidebar{order:1;}
+  .dash-sidebar .sec-lbl:first-of-type{order:3;}
+  #map-wrapper{display:flex;height:55vw;min-height:220px;flex-direction:column;}
+  #map-wrapper.mob-hidden{display:none!important;}
+
+  /* Mobile map button */
+  .mob-map-btn{display:flex!important;}
+
+  /* Deliveries: tab bar visible, panels switch */
+  .mob-del-tabs{display:flex!important;}
+  .del-layout{grid-template-columns:1fr;min-height:0;}
+  .booking-panel{border-right:none;border-bottom:1px solid var(--border);}
+  .cal-main{min-height:400px;}
+
+  /* Calendar: horizontal scroll */
+  .week-grid{overflow-x:auto;}
+  .wg-day-col{min-width:90px;}
+
+  /* Admin: single column grids */
+  .admin-grid-2,.an-grid-2{grid-template-columns:1fr!important;}
+
+  /* Analytics 2-col → 1 col */
+  #an-kpis{grid-template-columns:1fr 1fr!important;}
+}
+
+/* ── MOBILE COMPONENTS (hidden on desktop, shown via media query) ── */
+.mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg2);border-top:1px solid var(--border);z-index:300;align-items:stretch;justify-content:space-around;padding:0 4px;padding-bottom:env(safe-area-inset-bottom);}
+.mob-nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:1;border:none;background:transparent;color:var(--text3);font-size:9px;font-weight:600;cursor:pointer;padding:6px 4px;border-radius:8px;position:relative;}
+.mob-nav-item.active{color:var(--accent);}
+.mob-nav-item.active svg{stroke:var(--accent);}
+.mob-badge{position:absolute;top:4px;right:8px;min-width:14px;height:14px;border-radius:7px;background:var(--red);color:white;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.mob-del-tabs{display:none;background:var(--bg2);border-bottom:1px solid var(--border);}
+.mob-del-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;}
+.mob-del-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.mob-map-btn{display:none;align-items:center;gap:6px;width:100%;margin:12px 0 0;padding:10px;background:rgba(28,74,74,0.3);border:1px solid rgba(93,202,165,0.25);border-radius:var(--r);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;justify-content:center;}
+.mob-map-btn:active{opacity:.8;}
+/* Mobile panel visibility — class-based so desktop always wins */
+@media(max-width:768px){
+  .mob-panel-hidden{display:none!important;}
+}
+
+</style>
+  <!-- PDF.js for rendering PDF site plans -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       STEP 1: Paste your Firebase config here (replace the values)
+       Get this from: Firebase Console → Project Settings → Your Apps → Web
+       ═══════════════════════════════════════════════════════════ -->
+  <script type="module">
+    import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, collection, doc, onSnapshot,
+             setDoc, deleteDoc, getDoc }
+                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+             signOut, onAuthStateChanged, updateProfile }
+                                    from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+
+    // ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE ▼▼▼
+    const firebaseConfig = {
+      apiKey:            "AIzaSyAmBUrjyd8__XfwtM1GyUoSxfCzDKYFjLE",
+      authDomain:        "hbml-chapitre.firebaseapp.com",
+      projectId:         "hbml-chapitre",
+      storageBucket:     "hbml-chapitre.firebasestorage.app",
+      messagingSenderId: "820262091849",
+      appId:             "1:820262091849:web:91a358e3945dcad7d35398"
+    };
+    // ▲▲▲ END OF CONFIG ▲▲▲
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
+
+    // ── Collections ──────────────────────────────────────────────────────────
+    const COL_DELIVERIES = 'deliveries';
+    const COL_CONFIG     = 'config';   // zones, projectInfo, notifications stored as docs
+
+    // ── Expose db helpers ────────────────────────────────────────────────────
+    const auth = getAuth(app);
+    window._db         = db;
+    window._auth       = auth;
+    window._col        = (name) => collection(db, name);
+    window._doc        = (col, id) => doc(db, col, id);
+    window._setDoc     = setDoc;
+    window._delDoc     = deleteDoc;
+    window._getDoc     = getDoc;
+    window._onSnapshot = onSnapshot;
+    window._createUser = (email, pass) => createUserWithEmailAndPassword(auth, email, pass);
+    window._signIn     = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
+    window._signOut    = () => signOut(auth);
+    window._updateProfile = (user, data) => updateProfile(user, data);
+
+    // ── Auth state listener — fires on every login/logout ────────────────────
+    onAuthStateChanged(auth, (firebaseUser) => {
+      if (window._onAuthChange) window._onAuthChange(firebaseUser);
+    });
+
+    // ── Boot the app once Firebase is ready ──────────────────────────────────
+    window.addEventListener('DOMContentLoaded', () => {
+      window._firebaseReady = true;
+      if (window._initApp) window._initApp();
+    });
+  </script>
+</head>
+<body>
+<div id="app">
+  <nav class="topbar">
+    <div class="topbar-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <span id="app-name">SiteDelivery</span>
+    </div>
+    <div class="sep"></div>
+    <div id="sync-indicator" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);padding:0 4px;">
+      <span id="sync-dot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);display:inline-block;"></span>
+      <span id="sync-label">Connecting…</span>
+    </div>
+    <div class="sep"></div>
+    <button class="nav-btn active" id="nav-home" onclick="showView('home')">Tableau de bord</button>
+    <button class="nav-btn" id="nav-deliveries" onclick="showView('deliveries')">
+      Livraisons <span class="nav-badge" id="pending-badge" style="display:none"></span>
+    </button>
+    <button class="nav-btn admin-only" id="nav-admin" onclick="showView('admin')">Panneau admin</button>
+    <button class="nav-btn admin-only" id="nav-analytics" onclick="showView('analytics')">Analytique</button>
+    <div class="topbar-right">
+      <span id="tb-username" style="font-size:12px;color:var(--text2);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+      <span class="role-pill admin-only" id="tb-role">Admin</span>
+      <button class="tb-btn" id="btn-user-login" onclick="openMyDeliveries()" style="display:none;">Mes livraisons</button>
+
+      <button class="tb-btn primary" id="btn-login" onclick="openAdminLogin()">Connexion admin</button>
+      <button class="tb-btn admin-only" id="btn-logout" onclick="doLogout()" style="display:none;">Se déconnecter</button>
+    </div>
+  </nav>
+
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="mob-bottom-nav" id="mob-nav">
+    <button class="mob-nav-item active" id="mob-nav-home" onclick="showView('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      <span>Tableau</span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-deliveries" onclick="showView('deliveries')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+      <span>Livraisons</span>
+      <span class="mob-badge" id="mob-pending-badge" style="display:none;"></span>
+    </button>
+    <button class="mob-nav-item admin-only" id="mob-nav-admin" onclick="showView('admin')" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <span>Admin</span>
+    </button>
+    <button class="mob-nav-item admin-only" id="mob-nav-analytics" onclick="showView('analytics')" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Analytique</span>
+    </button>
+    <button class="mob-nav-item" id="mob-nav-account" onclick="mobAccountTap()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="mob-account-lbl">Admin</span>
+    </button>
+  </nav>
+
+  <!-- HOME -->
+  <div class="view active" id="view-home">
+    <div class="stat-strip">
+      <div class="stat-item"><div class="stat-lbl">En attente</div><div class="stat-val c-amber" id="ss-pending">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Approuvées aujourd'hui</div><div class="stat-val c-green" id="ss-today">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Cette semaine</div><div class="stat-val c-blue" id="ss-week">0</div></div>
+      <div class="stat-item"><div class="stat-lbl">Conflits</div><div class="stat-val c-red" id="ss-conflicts">0</div></div>
+    </div>
+    <div class="dash-layout">
+      <div class="dash-sidebar">
+        <div class="proj-name" id="proj-name">My Construction Site</div>
+        <div class="proj-addr" id="proj-addr">123 Site Address</div>
+        <div class="clk" id="clock">00:00</div>
+        <div class="clk-date" id="clock-date"></div>
+        <div class="quick-grid">
+          <button class="quick-btn" onclick="showView('deliveries')">
+            <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+            Réserver une livraison
+          </button>
+          <button class="quick-btn admin-only" onclick="document.getElementById('map-file-inp').click()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Téléverser le plan
+          </button>
+        </div>
+        <div class="sec-lbl">Informations du projet</div>
+        <div id="info-rows"></div>
+        <button class="edit-info-btn admin-only" onclick="openInfoModal()">Modifier les informations…</button>
+        <div class="sec-lbl" style="margin-top:20px;">Zones de livraison</div>
+        <div id="sidebar-zones"></div>
+        <button class="mob-map-btn" onclick="mobShowMap()" id="mob-map-btn-el">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Masquer le plan
+        </button>
+        <div class="sec-lbl" style="margin-top:20px;">Livraisons du jour</div>
+        <div id="sidebar-today"></div>
+      </div>
+      <div id="map-wrapper" style="display:flex;flex-direction:column;flex:1;">
+        <div class="map-area" style="flex:1;">
+          <div class="map-canvas" id="map-canvas">
+            <div class="map-placeholder" id="map-ph">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <p style="font-size:13px;">Aucun plan téléversé</p>
+              <button class="upload-map-btn admin-only" onclick="document.getElementById('map-file-inp').click()">Téléverser le plan</button>
+            </div>
+          </div>
+          <input type="file" id="map-file-inp" accept="image/*,application/pdf" style="display:none;" onchange="uploadMap(event)">
+          <div class="map-ctrls admin-only" id="map-ctrls" style="display:none;">
+            <button class="map-ctrl" onclick="document.getElementById('map-file-inp').click()">Remplacer le plan</button>
+            <button class="map-ctrl ac" onclick="addZone()">+ Ajouter zone</button>
+            <button class="map-ctrl" id="btn-edit-zones" onclick="toggleZoneEdit()" style="border-color:rgba(232,160,42,0.4);color:var(--amber);">Modifier zones</button>
+          </div>
+          <div class="zone-legend" id="zone-legend" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERIES -->
+  <div class="view" id="view-deliveries">
+    <div class="mob-del-tabs">
+        <button class="mob-del-tab active" id="mob-tab-form" onclick="mobSwitchTab('form')">Formulaire</button>
+        <button class="mob-del-tab" id="mob-tab-cal" onclick="mobSwitchTab('cal')">Calendrier</button>
+      </div>
+      <div class="del-layout" id="del-layout-wrap">
+      <div class="booking-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <h2 style="margin-bottom:0;">Créer une livraison</h2>
+          <button id="btn-my-deliveries" onclick="openMyDeliveries()" style="display:none;padding:5px 12px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:11px;font-weight:600;cursor:pointer;">Mes livraisons</button>
+        </div>
+        <div id="booking-content">
+          <div id="signin-banner" style="display:none;background:var(--blue-dim);border:1px solid var(--blue-bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--blue);display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <span>Connectez-vous pour suivre vos livraisons</span>
+            <button onclick="openUserAuthFromBanner()" style="padding:4px 12px;border-radius:4px;border:none;background:var(--blue);color:white;font-size:11px;font-weight:700;cursor:pointer;">Se connecter / S’inscrire</button>
+          </div>
+          <div class="fg"><label>Date de livraison <span class="req">*</span></label><input type="date" id="b-date"></div>
+          <div class="fg"><label>Compagnie / Sous-traitant <span class="req">*</span></label><input type="text" id="b-company" placeholder="ex. Les Constructions Leblanc"></div>
+          <div class="fg"><label>Nom du contact <span class="req">*</span></label><input type="text" id="b-contact" placeholder="ex. Marie Dubois"></div>
+          <div class="fg"><label>Téléphone <span class="req">*</span></label><input type="tel" id="b-phone" placeholder="514-555-0100"></div>
+          <div class="fg"><label>Matériel / Description <span class="req">*</span></label><input type="text" id="b-material" placeholder="ex. Poutrelles d’acier, 12 pcs"></div>
+          <div class="fg"><label>Taille du camion</label>
+            <select id="b-truck"><option value="">Select…</option><option>Pickup / Van</option><option>Single-axle (20 ft)</option><option>Tandem (30 ft)</option><option>Semi-trailer (53 ft)</option><option>Flatbed</option><option>Crane truck</option></select>
+          </div>
+          <div class="fg"><label>Zone de dépôt <span class="req">*</span></label><div class="zpick-grid" id="zone-pick-grid"></div></div>
+          <div class="fg"><label>Heure de début <span class="req">*</span></label><select id="b-time-start" onchange="onStartChange()"><option value="">Sélectionner début…</option></select></div>
+          <div class="fg"><label>Heure de fin <span class="req">*</span></label><select id="b-time-end"><option value="">Sélectionner fin…</option></select></div>
+          <div class="fg"><label>Notes (optionnel)</label><textarea id="b-notes" placeholder="Exigences spéciales, matières dangereuses, accès…"></textarea></div>
+          <div class="err-box" id="err-box"></div>
+          <button class="submit-btn" onclick="submitDelivery()">Soumettre la demande →</button>
+          <p class="req-note"><span class="req">*</span> Champs obligatoires</p>
+        </div>
+        <div id="booking-success" style="display:none;" class="success-box">
+          <h3>Demande soumise</h3>
+          <p>Votre demande est en attente d’approbation.</p>
+          <button onclick="resetBooking()">Soumettre une autre demande</button>
+        </div>
+      </div>
+      <div class="cal-main">
+        <div class="cal-toolbar">
+          <span class="cal-title" id="cal-title"></span>
+          <button class="cal-nav" onclick="changeWeek(-1)">&#8592;</button>
+          <button class="cal-nav" onclick="changeWeek(1)">&#8594;</button>
+          <button class="today-btn" onclick="goToToday()">Aujourd'hui</button>
+          <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;" id="zone-filters"></div>
+        </div>
+        <div class="week-grid" id="week-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="view" id="view-admin">
+    <div class="admin-wrap">
+      <h1>Panneau admin</h1>
+      <p class="admin-sub">Approve deliveries, resolve conflicts, manage zones.</p>
+      <div class="admin-grid">
+        <div>
+          <div class="panel">
+            <div class="ph"><span class="pt">Demandes en attente</span><span class="pc" id="ap-count"></span></div>
+            <div class="pb" id="pending-list"></div>
+          </div>
+          <div class="panel">
+            <div class="ph"><span class="pt">⚡ Conflicts</span><span class="pc" id="conflict-count" style="color:var(--amber);"></span></div>
+            <div class="pb" id="conflict-list"></div>
+          </div>
+        </div>
+        <div>
+          <div class="panel">
+            <div class="ph"><span class="pt">Gestion des zones</span></div>
+            <div class="pb"><div id="zone-mgr"></div><button class="add-zone-btn" onclick="addZone()">+ Ajouter zone</button></div>
+          </div>
+          <div class="panel">
+            <div class="ph">
+              <span class="pt">Dates de blocage</span>
+              <span class="pc">Bloquer une zone pour une date ou plage de dates</span>
+            </div>
+            <div class="pb">
+              <!-- Add blackout form -->
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Zone</label>
+                  <select id="bo-zone" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;"></select>
+                </div>
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Raison</label>
+                  <select id="bo-reason-sel" onchange="boReasonChange()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+                    <option value="Coulée de béton">Coulée de béton</option>
+                    <option value="Inspection">Inspection</option>
+                    <option value="Fermeture du site">Fermeture du site</option>
+                    <option value="Autre">Autre…</option>
+                  </select>
+                </div>
+                <div class="mf" style="margin:0;" id="bo-reason-custom-wrap" style="display:none;">
+                  <label style="font-size:11px;">Préciser la raison</label>
+                  <input type="text" id="bo-reason-custom" placeholder="ex. Levage de structure" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+                </div>
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Date de début</label>
+                  <input type="date" id="bo-date-from" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+                </div>
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Date de fin</label>
+                  <input type="date" id="bo-date-to" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+                </div>
+              </div>
+              <button class="add-zone-btn" onclick="addBlackout()" style="margin-bottom:16px;">+ Ajouter le blocage</button>
+              <div id="blackout-list"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="ph"><span class="pt">Horaires de livraison</span><span class="pc" style="font-size:11px;color:var(--text3);">Heures d'ouverture par jour</span></div>
+            <div class="pb" id="schedule-mgr"></div>
+          </div>
+          <div class="panel">
+            <div class="ph">
+              <span class="pt">Toutes les livraisons</span>
+              <button onclick="exportCSV()" style="padding:3px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;">Exporter CSV</button>
+            </div>
+            <div class="pb" id="all-list"></div>
+          </div>
+          <div class="panel">
+            <div class="ph"><span class="pt">Livraisons annulées</span><span class="pc" id="cancelled-count"></span></div>
+            <div class="pb" id="cancelled-list"></div>
+          </div>
+          <div class="panel">
+            <div class="ph"><span class="pt">Journal des notifications</span></div>
+            <div class="pb" id="notif-log"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ANALYTICS VIEW -->
+<div class="view" id="view-analytics">
+  <div class="admin-wrap">
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <div>
+        <h1 style="margin-bottom:4px;">Analytique</h1>
+        <p style="font-size:13px;color:var(--text2);">Statistiques de livraison — mise à jour en temps réel</p>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="font-size:12px;color:var(--text2);">Période</label>
+        <select id="an-period" onchange="renderAnalytics()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:6px 10px;color:var(--text);font-size:12px;outline:none;">
+          <option value="week">Cette semaine</option>
+          <option value="month">Ce mois</option>
+          <option value="all" selected>Tout</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- KPI strip -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-radius:var(--r2);overflow:hidden;margin-bottom:20px;" id="an-kpis"></div>
+
+    <!-- Row 1: by zone + by status -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="panel">
+        <div class="ph"><span class="pt">Livraisons par zone</span></div>
+        <div class="pb" id="an-by-zone"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Livraisons par statut</span></div>
+        <div class="pb" id="an-by-status"></div>
+      </div>
+    </div>
+
+    <!-- Row 2: top subcontractors + busiest days -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+      <div class="panel">
+        <div class="ph"><span class="pt">Principaux sous-traitants</span></div>
+        <div class="pb" id="an-top-subs"></div>
+      </div>
+      <div class="panel">
+        <div class="ph"><span class="pt">Jours les plus chargés</span></div>
+        <div class="pb" id="an-busiest-days"></div>
+      </div>
+    </div>
+
+    <!-- Row 3: delivery trend by week -->
+    <div class="panel">
+      <div class="ph"><span class="pt">Tendance hebdomadaire</span><span class="pc" style="font-size:11px;color:var(--text3);">Livraisons approuvées par semaine (8 dernières semaines)</span></div>
+      <div class="pb" id="an-trend"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ZONE MODAL -->
+<div class="modal-backdrop" id="modal-zone">
+  <div class="modal" style="width:420px;padding:0;overflow:hidden;border-radius:14px;">
+    <!-- Header -->
+    <div id="zm-header" style="padding:16px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span id="zm-dot" style="width:12px;height:12px;border-radius:3px;flex-shrink:0;display:inline-block;"></span>
+        <div>
+          <div id="zm-name" style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--text);"></div>
+          <div style="font-size:11px;color:var(--text3);margin-top:1px;" id="zm-date"></div>
+        </div>
+      </div>
+      <button class="btn btn-gh" onclick="closeModal('modal-zone')" style="padding:5px 10px;font-size:12px;">✕</button>
+    </div>
+    <!-- Stats strip -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border);">
+      <div style="background:var(--bg2);padding:12px 16px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">Aujourd'hui</div>
+        <div id="zm-stat-today" style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--green);">0</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px 16px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">En attente</div>
+        <div id="zm-stat-pending" style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--amber);">0</div>
+      </div>
+      <div style="background:var(--bg2);padding:12px 16px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:4px;">This week</div>
+        <div id="zm-stat-week" style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:var(--blue);">0</div>
+      </div>
+    </div>
+    <!-- Delivery list -->
+    <div style="padding:16px 20px;max-height:280px;overflow-y:auto;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:10px;">Today's schedule</div>
+      <div id="zm-list"></div>
+    </div>
+    <!-- Footer -->
+    <div style="padding:14px 20px;border-top:1px solid var(--border);">
+      <button id="zm-book-btn" class="submit-btn" style="font-size:13px;padding:10px;" onclick="bookForZone()">+ Book a delivery for this zone</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER AUTH MODAL (signup / login for subcontractors) -->
+<div class="modal-backdrop" id="modal-user-auth">
+  <div class="modal" style="width:380px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <h2 style="margin:0;" id="auth-modal-title">Connexion sous-traitant</h2>
+    </div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:20px;" id="auth-modal-sub">Connectez-vous pour soumettre et suivre vos livraisons.</p>
+    <div id="auth-name-field" style="display:none;" class="mf" style="margin-bottom:11px;">
+      <label>Compagnie / Votre nom <span class="req">*</span></label>
+      <input type="text" id="auth-name" placeholder="e.g. Montoni Group">
+    </div>
+    <div class="mf" style="margin-bottom:11px;"><label>Courriel <span class="req">*</span></label><input type="email" id="auth-email" placeholder="vous@entreprise.com"></div>
+    <div class="mf" style="margin-bottom:6px;"><label>Password <span class="req">*</span></label><input type="password" id="auth-pass" placeholder="Password" onkeydown="if(event.key==='Enter')submitUserAuth()"></div>
+    <div class="modal-err" id="auth-err" style="margin-bottom:8px;"></div>
+    <div class="m-actions" style="margin-top:14px;flex-direction:column;gap:8px;">
+      <button class="btn btn-ac" style="width:100%;padding:11px;" onclick="submitUserAuth()" id="auth-submit-btn">Se connecter</button>
+      <button class="btn btn-gh" style="width:100%;font-size:12px;" onclick="toggleAuthMode()" id="auth-toggle-btn">Pas de compte ? S’inscrire</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      <button onclick="closeModal('modal-user-auth')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">Continuer sans compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY DELIVERIES MODAL -->
+<div class="modal-backdrop" id="modal-my-deliveries">
+  <div class="modal" style="width:500px;max-height:80vh;display:flex;flex-direction:column;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h2 style="margin:0;">Mes livraisons</h2>
+      <button class="btn btn-gh" onclick="closeModal('modal-my-deliveries')" style="padding:5px 10px;">✕</button>
+    </div>
+    <div id="my-del-list" style="overflow-y:auto;flex:1;"></div>
+    <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+      <button class="btn btn-gh" style="flex:1;" onclick="doLogout();closeModal('modal-my-deliveries');">Se déconnecter</button>
+      <button class="btn btn-ac" style="flex:1;" onclick="closeModal('modal-my-deliveries');">+ Nouvelle livraison</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN LOGIN MODAL -->
+<div class="modal-backdrop" id="modal-login">
+  <div class="modal" style="width:320px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+      <div class="logo-icon"><svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
+      <h2 style="margin:0;">Connexion administrateur</h2>
+    </div>
+    <div class="mf" style="margin-bottom:11px;"><label>Username</label><input type="text" id="ali-user" placeholder="admin"></div>
+    <div class="mf"><label>Mot de passe</label><input type="password" id="ali-pass" placeholder="password" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+    <div class="m-err" id="ali-err">Identifiants invalides. Try: admin / admin123</div>
+    <div class="m-actions">
+      <button class="btn btn-gh" onclick="closeModal('modal-login')">Annuler</button>
+      <button class="btn btn-ac" onclick="doAdminLogin()">Se connecter</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="modal-detail">
+  <div class="modal" id="modal-detail-body"></div>
+</div>
+
+<!-- EDIT DELIVERY MODAL -->
+<div class="modal-backdrop" id="modal-edit">
+  <div class="modal">
+    <h2>Modifier la livraison</h2>
+    <input type="hidden" id="ed-id">
+    <div class="mgrid">
+      <div class="mf"><label>Company <span class="req">*</span></label><input type="text" id="ed-company"></div>
+      <div class="mf"><label>Contact <span class="req">*</span></label><input type="text" id="ed-contact"></div>
+      <div class="mf"><label>Phone</label><input type="text" id="ed-phone"></div>
+      <div class="mf"><label>Material <span class="req">*</span></label><input type="text" id="ed-material"></div>
+      <div class="mf"><label>Date <span class="req">*</span></label><input type="date" id="ed-date"></div>
+      <div class="mf"><label>Truck</label>
+        <select id="ed-truck"><option value="">Select…</option><option>Pickup / Van</option><option>Single-axle (20 ft)</option><option>Tandem (30 ft)</option><option>Semi-trailer (53 ft)</option><option>Flatbed</option><option>Crane truck</option></select>
+      </div>
+      <div class="mf"><label>Heure de début <span class="req">*</span></label><select id="ed-start" onchange="edStartChange()"><option value="">Select…</option></select></div>
+      <div class="mf"><label>Heure de fin <span class="req">*</span></label><select id="ed-end"><option value="">Select…</option></select></div>
+    </div>
+    <div class="mf" style="margin-bottom:12px;"><label>Zone <span class="req">*</span></label><div class="zpick-grid" id="ed-zone-grid" style="margin-top:6px;"></div></div>
+    <div class="mf"><label>Notes</label><textarea id="ed-notes"></textarea></div>
+    <div class="m-actions">
+      <button class="btn btn-gh" onclick="closeModal('modal-edit')">Annuler</button>
+      <button class="btn btn-ac" onclick="saveEdit()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- INFO MODAL -->
+<div class="modal-backdrop" id="modal-info">
+  <div class="modal">
+    <h2>Informations du projet</h2>
+    <div class="mgrid">
+      <div class="mf"><label>Nom affiché dans l'en-tête</label><input type="text" id="mi-appname" placeholder="ex. SiteDelivery"></div>
+      <div class="mf"><label>Nom du projet</label><input type="text" id="mi-name"></div>
+      <div class="mf"><label>Adresse</label><input type="text" id="mi-addr"></div>
+      <div class="mf"><label>Heures de livraison</label><input type="text" id="mi-hours"></div>
+      <div class="mf"><label>Contact livraison</label><input type="text" id="mi-contact"></div>
+      <div class="mf"><label>Orientation sécurité</label><input type="text" id="mi-safety"></div>
+      <div class="mf"><label>Réunion de coordination</label><input type="text" id="mi-coord"></div>
+    </div>
+    <div class="mf"><label>Notes</label><textarea id="mi-notes"></textarea></div>
+    <div class="m-actions">
+      <button class="btn btn-gh" onclick="closeModal('modal-info')">Annuler</button>
+      <button class="btn btn-ac" onclick="saveInfo()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONSTANTS ─────────────────────────────────────────────
+const ACCOUNTS = { admin: { pass: 'admin123', role: 'admin', name: 'Superintendent' } };
+const ZONE_COLORS = ['#4A8FD4','#4CAF7D','#E8622A','#A855F7','#E8A02A','#E05555','#0EA5E9','#6B7280'];
+const TIME_SLOTS = [];
+for (let h=6; h<=18; h++) { TIME_SLOTS.push(String(h).padStart(2,'0')+':00'); if(h<18) TIME_SLOTS.push(String(h).padStart(2,'0')+':30'); }
+
+// ── STATE ─────────────────────────────────────────────────
+let currentUser   = { role:'guest' }; // role: 'guest' | 'user' | 'admin'
+let firebaseUser  = null;  // Firebase Auth user object
+let deliveries    = [];
+let zones         = [
+  {id:'z1',name:'Zone A',color:'#4A8FD4',x:40, y:40, w:160,h:100,visible:true},
+  {id:'z2',name:'Zone B',color:'#4CAF7D',x:220,y:40, w:160,h:100,visible:true},
+  {id:'z3',name:'Zone C',color:'#E8622A',x:40, y:160,w:160,h:100,visible:true},
+  {id:'z4',name:'Zone D',color:'#A855F7',x:220,y:160,w:160,h:100,visible:true},
+];
+let projectInfo   = {
+  name:'My Construction Site',addr:'123 Site Address, Montréal, QC',
+  hours:'7:00 AM – 4:00 PM',contact:'514-555-0000',
+  safety:'Mondays @ 9:30 AM',coord:'Tuesdays @ 10:00 AM',notes:'',
+  appname:'SiteDelivery'
+};
+let mapImg        = null;
+let mapPdf        = null;
+let blackoutDates  = []; // [{id, zoneId, dateFrom, dateTo, reason}]
+let siteSchedule  = {
+  Mon: { open: '06:00', close: '18:00', closed: false },
+  Tue: { open: '06:00', close: '18:00', closed: false },
+  Wed: { open: '06:00', close: '18:00', closed: false },
+  Thu: { open: '06:00', close: '18:00', closed: false },
+  Fri: { open: '06:00', close: '18:00', closed: false },
+  Sat: { open: '06:00', close: '12:00', closed: false },
+  Sun: { open: '06:00', close: '12:00', closed: true  },
+};
+let notifications = [];
+let weekStart     = getMonday(new Date());
+let activeZF      = new Set();
+let selZone       = null;
+let zonesLocked   = true; // zones are locked by default; admin can unlock to reposition
+let _unsubDeliveries = null; // Firestore real-time listener handle
+
+// ── PERSISTENCE (Firestore) ───────────────────────────────
+// Deliveries: each delivery = one Firestore document (id = delivery.id)
+// Config: zones, projectInfo, notifications stored as single docs in 'config' collection
+
+async function fbSaveDelivery(d){
+  if(!window._db)return;
+  try{ await window._setDoc(window._doc('deliveries',d.id), d); }catch(e){console.error('fbSaveDelivery',e);}
+}
+async function fbDeleteDelivery(id){
+  if(!window._db)return;
+  try{ await window._delDoc(window._doc('deliveries',id)); }catch(e){console.error('fbDeleteDelivery',e);}
+}
+async function fbSaveConfig(key, value){
+  if(!window._db)return;
+  try{ await window._setDoc(window._doc('config',key), {data: JSON.stringify(value)}); }catch(e){console.error('fbSaveConfig',e);}
+}
+async function fbLoadConfig(key, fallback){
+  if(!window._db)return fallback;
+  try{
+    const snap = await window._getDoc(window._doc('config',key));
+    if(snap.exists()) return JSON.parse(snap.data().data);
+  }catch(e){console.error('fbLoadConfig',e);}
+  return fallback;
+}
+
+// save() now writes to Firestore. Deliveries are individually saved.
+// For bulk ops (decide, edit, cancel etc.) we call save() which syncs all changed deliveries.
+// The real-time listener keeps the local array in sync automatically.
+async function save(){
+  // Write all deliveries to Firestore (upsert each one)
+  if(window._db){
+    for(const d of deliveries){
+      await fbSaveDelivery(d);
+    }
+    await fbSaveConfig('zones', zones);
+    await fbSaveConfig('projectInfo', projectInfo);
+    await fbSaveConfig('notifications', notifications);
+    if(mapImg){ await fbSaveConfig('mapImg', mapImg); }
+  }
+  updateBadges();
+}
+
+// Faster single-delivery save (used after decide/edit/cancel)
+async function saveDelivery(d){
+  if(window._db) await fbSaveDelivery(d);
+  updateBadges();
+}
+async function removeDelivery(id){
+  deliveries = deliveries.filter(x=>x.id!==id);
+  if(window._db) await fbDeleteDelivery(id);
+  updateBadges();
+}
+
+function notif(msg,type){
+  notifications.unshift({msg,type,time:new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})});
+  if(notifications.length>40)notifications.pop();
+  fbSaveConfig('notifications', notifications).catch(()=>{});
+}
+
+// Subscribe to real-time delivery updates
+function subscribeDeliveries(){
+  if(!window._db)return;
+  if(_unsubDeliveries) _unsubDeliveries();
+  _unsubDeliveries = window._onSnapshot(
+    window._col('deliveries'),
+    (snapshot) => {
+      deliveries = snapshot.docs.map(d => d.data());
+      deliveries.sort((a,b)=> new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
+      updateBadges();
+      // Re-render whichever view is active
+      const activeView = document.querySelector('.view.active');
+      if(activeView){
+        const v = activeView.id.replace('view-','');
+        if(v==='deliveries') renderWeekCalendar();
+        if(v==='admin')      renderAdmin();
+        if(v==='home')       { renderHome(); renderTodayDeliveries(); }
+        if(v==='analytics')  renderAnalytics();
+      }
+    },
+    (err) => console.error('Firestore listener error:', err)
+  );
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function today(){ const d=new Date(); return dk(d); }
+function dk(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function getMonday(d){ const dt=new Date(d),day=dt.getDay(); dt.setDate(dt.getDate()-(day===0?6:day-1)); dt.setHours(0,0,0,0); return dt; }
+function addDays(d,n){ const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt; }
+function fmtDate(s){ if(!s)return''; return new Date(s+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}); }
+function overlap(s1,e1,s2,e2){ return s1<e2&&e1>s2; }
+function isAdmin(){ return currentUser.role==='admin'; }
+function g(id){ return document.getElementById(id); }
+
+// ── NAV ───────────────────────────────────────────────────
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  const viewEl=g('view-'+v); if(viewEl) viewEl.classList.add('active');
+  const navEl=g('nav-'+v);   if(navEl)  navEl.classList.add('active');
+  // Sync mobile bottom nav
+  document.querySelectorAll('.mob-nav-item').forEach(el=>el.classList.remove('active'));
+  const mobNav=g('mob-nav-'+v); if(mobNav) mobNav.classList.add('active');
+  if(v==='home')       renderHome();
+  if(v==='deliveries') renderDeliveries();
+  if(v==='admin')      renderAdmin();
+  if(v==='analytics')  renderAnalytics();
+}
+
+// ── MOBILE HELPERS ────────────────────────────────────────────────────────────
+let _mobDelTab = 'form';
+function mobSwitchTab(tab){
+  _mobDelTab = tab;
+  const form = document.querySelector('.booking-panel');
+  const cal  = document.querySelector('.cal-main');
+  if(tab === 'form'){
+    if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
+    if(cal){  cal.classList.add('mob-panel-hidden');     cal.style.display='';  }
+    const tf=g('mob-tab-form'); if(tf) tf.classList.add('active');
+    const tc=g('mob-tab-cal');  if(tc) tc.classList.remove('active');
+  } else {
+    if(form){ form.classList.add('mob-panel-hidden');    form.style.display=''; }
+    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
+    const tf=g('mob-tab-form'); if(tf) tf.classList.remove('active');
+    const tc=g('mob-tab-cal');  if(tc) tc.classList.add('active');
+    renderWeekCalendar();
+  }
+}
+
+function _initMobDelTabs(){
+  if(window.innerWidth > 768){
+    // Desktop: always clear any mobile-applied hiding
+    const form=document.querySelector('.booking-panel');
+    const cal=document.querySelector('.cal-main');
+    if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
+    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
+    return;
+  }
+  // Mobile: hide calendar, show form
+  const form=document.querySelector('.booking-panel');
+  const cal=document.querySelector('.cal-main');
+  if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
+  if(cal){  cal.classList.add('mob-panel-hidden');     cal.style.display='';  }
+  const tf=g('mob-tab-form'); if(tf) tf.classList.add('active');
+  const tc=g('mob-tab-cal');  if(tc) tc.classList.remove('active');
+  _mobDelTab='form';
+}
+
+let _mobMapVisible = true;
+function mobShowMap(){
+  _mobMapVisible = !_mobMapVisible;
+  const wrapper = g('map-wrapper');
+  const btn = g('mob-map-btn-el');
+  if(wrapper) wrapper.classList.toggle('mob-hidden', !_mobMapVisible);
+  if(btn){
+    btn.innerHTML = _mobMapVisible
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Masquer le plan'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Voir le plan du chantier';
+  }
+  if(_mobMapVisible && mapImg) renderMapZones();
+}
+
+function mobAccountTap(){
+  if(isAdmin()){
+    // Admin: offer logout
+    if(confirm('Se déconnecter en tant qu’administrateur?')) doLogout();
+  } else if(firebaseUser){
+    // Logged in user
+    openMyDeliveries();
+  } else {
+    // Not logged in: show admin login
+    openAdminLogin();
+  }
+}
+
+function updateBadges(){
+  const pend=deliveries.filter(d=>d.status==='pending').length;
+  g('pending-badge').textContent=pend; g('pending-badge').style.display=pend?'':'none';
+  const mobBadge=g('mob-pending-badge'); if(mobBadge){mobBadge.textContent=pend;mobBadge.style.display=pend?'flex':'none';}
+  const tod=today(), wk=Array.from({length:7},(_,i)=>dk(addDays(getMonday(new Date()),i)));
+  if(g('ss-pending')){
+    g('ss-pending').textContent=pend;
+    g('ss-today').textContent=deliveries.filter(d=>d.date===tod&&d.status==='approved').length;
+    g('ss-week').textContent=deliveries.filter(d=>wk.includes(d.date)&&d.status==='approved').length;
+    g('ss-conflicts').textContent=getConflicts().length;
+  }
+}
+
+function getConflicts(){
+  const map={};
+  deliveries.filter(d=>d.status==='pending').forEach(d=>{
+    const k=d.zone+'|'+d.date+'|'+(d.timeStart||d.time);
+    if(!map[k])map[k]=[];
+    map[k].push(d);
+  });
+  return Object.values(map).filter(a=>a.length>1);
+}
+
+// ── CLOCK ─────────────────────────────────────────────────
+function toggleTheme(){
+  const isLight = document.body.classList.toggle('light');
+  const knob = g('theme-knob');
+  if (knob) {
+    knob.style.left = isLight ? '21px' : '3px';
+    knob.style.background = isLight ? '#1C4A4A' : '#C9A96E';
+  }
+  try { localStorage.setItem('sd_theme', isLight ? 'light' : 'dark'); } catch(e){}
+}
+
+function tickClock(){
+  const n=new Date();
+  const clk=g('clock'); if(clk) clk.textContent=n.toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:false});
+  const clkd=g('clock-date'); if(clkd) clkd.textContent=n.toLocaleDateString('en-CA',{weekday:'long',month:'short',day:'numeric'}).toUpperCase();
+}
+
+// ── AUTH ──────────────────────────────────────────────────
+// ── Admin login (unchanged — hardcoded credentials) ───────────────────────
+function openAdminLogin(){
+  g('ali-user').value=''; g('ali-pass').value=''; g('ali-err').style.display='none';
+  g('modal-login').classList.add('open');
+  setTimeout(()=>g('ali-user').focus(),50);
+}
+function doAdminLogin(){
+  const u=g('ali-user').value.trim(), p=g('ali-pass').value.trim(), acc=ACCOUNTS[u];
+  if(!acc||acc.pass!==p){ g('ali-err').style.display='block'; return; }
+  currentUser={username:u,...acc};
+  closeModal('modal-login');
+  applyAdminUI();
+  showView('home');
+}
+function applyAdminUI(){
+  g('tb-role').style.display='';
+  g('tb-username').textContent='Superintendent';
+  g('btn-login').style.display='none';
+  g('btn-user-login').style.display='none';
+  g('btn-logout').style.display='';
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='');
+  g('nav-admin').style.display='';
+  // Mobile bottom nav admin items
+  const mna=g('mob-nav-admin'); if(mna) mna.style.display='';
+  const mny=g('mob-nav-analytics'); if(mny) mny.style.display='';
+  // Update account button label
+  const lbl=g('mob-account-lbl'); if(lbl) lbl.textContent='Admin ✓';
+}
+function doLogout(){
+  if(window._auth && firebaseUser){ window._signOut(); }
+  firebaseUser = null;
+  currentUser  = {role:'guest'};
+  g('tb-role').style.display='none';
+  g('tb-username').textContent='';
+  g('btn-login').style.display='';
+  g('btn-user-login').style.display='none';
+  g('btn-logout').style.display='none';
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+  g('nav-admin').style.display='none';
+  const mna=g('mob-nav-admin'); if(mna) mna.style.display='none';
+  const mny=g('mob-nav-analytics'); if(mny) mny.style.display='none';
+  const lbl=g('mob-account-lbl'); if(lbl) lbl.textContent='Admin';
+  showView('home');
+}
+
+// ── Firebase Auth state change handler ───────────────────────────────────────
+window._onAuthChange = function(fbUser){
+  if(fbUser && currentUser.role !== 'admin'){
+    // A Firebase user signed in (subcontractor)
+    firebaseUser = fbUser;
+    currentUser  = { role:'user', uid: fbUser.uid, name: fbUser.displayName || fbUser.email };
+    g('tb-username').textContent = fbUser.displayName || fbUser.email;
+    g('btn-user-login').style.display='';
+    g('btn-login').style.display='none';
+    g('btn-logout').style.display='';
+    g('tb-role').style.display='none';
+    // Re-render deliveries view if open
+    if(g('view-deliveries').classList.contains('active')) renderDeliveries();
+    if(g('view-home').classList.contains('active')) renderHome();
+  } else if(!fbUser && currentUser.role !== 'admin'){
+    // Signed out
+    firebaseUser = null;
+    currentUser  = {role:'guest'};
+    g('tb-username').textContent='';
+    g('btn-user-login').style.display='none';
+    g('btn-login').style.display='';
+    g('btn-logout').style.display='none';
+  }
+};
+
+// ── User auth modal (signup / login) ─────────────────────────────────────────
+let _authMode = 'login'; // 'login' or 'signup'
+function openUserAuthFromBanner(){
+  _authMode='login';
+  renderAuthModal();
+  g('modal-user-auth').classList.add('open');
+  setTimeout(()=>g('auth-email').focus(),50);
+}
+function openUserAuth(){
+  _authMode = firebaseUser ? 'account' : 'login';
+  renderAuthModal();
+  g('modal-user-auth').classList.add('open');
+  setTimeout(()=>g('auth-email').focus(),50);
+}
+function renderAuthModal(){
+  if(firebaseUser){
+    // Logged in — show account info
+    g('auth-modal-title').textContent = 'Mon compte';
+    g('auth-modal-sub').textContent = 'Connecté en tant que ' + (firebaseUser.displayName||firebaseUser.email);
+    g('auth-name-field').style.display='none';
+    g('auth-email').value = firebaseUser.email;
+    g('auth-email').disabled = true;
+    g('auth-pass').style.display='none';
+    g('auth-submit-btn').textContent = 'Se déconnecter';
+    g('auth-submit-btn').onclick = ()=>{ doLogout(); closeModal('modal-user-auth'); };
+    g('auth-toggle-btn').style.display='none';
+    g('auth-err').style.display='none';
+  } else if(_authMode==='login'){
+    g('auth-modal-title').textContent = 'Connexion sous-traitant';
+    g('auth-modal-sub').textContent = 'Connectez-vous pour soumettre et suivre vos livraisons.';
+    g('auth-name-field').style.display='none';
+    g('auth-email').value=''; g('auth-email').disabled=false;
+    g('auth-pass').value=''; g('auth-pass').style.display='';
+    g('auth-submit-btn').textContent='Se connecter';
+    g('auth-submit-btn').onclick = submitUserAuth;
+    g('auth-toggle-btn').style.display='';
+    g('auth-toggle-btn').textContent = "Pas de compte ? S’inscrire";
+    g('auth-err').style.display='none';
+  } else {
+    g('auth-modal-title').textContent = 'Créer un compte';
+    g('auth-modal-sub').textContent = 'Create an account to track all your deliveries.';
+    g('auth-name-field').style.display='';
+    g('auth-email').value=''; g('auth-email').disabled=false;
+    g('auth-pass').value=''; g('auth-pass').style.display='';
+    g('auth-submit-btn').textContent='Créer un compte';
+    g('auth-submit-btn').onclick = submitUserAuth;
+    g('auth-toggle-btn').style.display='';
+    g('auth-toggle-btn').textContent = 'Déjà un compte ? Se connecter';
+    g('auth-err').style.display='none';
+  }
+}
+function toggleAuthMode(){
+  _authMode = _authMode==='login' ? 'signup' : 'login';
+  renderAuthModal();
+}
+async function submitUserAuth(){
+  const email = g('auth-email').value.trim();
+  const pass  = g('auth-pass').value.trim();
+  const errEl = g('auth-err');
+  errEl.style.display='none';
+  if(!email||!pass){ errEl.textContent='Please enter email and password.'; errEl.style.display='block'; return; }
+  try{
+    if(_authMode==='signup'){
+      const name = g('auth-name').value.trim();
+      if(!name){ errEl.textContent='Please enter your company or name.'; errEl.style.display='block'; return; }
+      const cred = await window._createUser(email, pass);
+      await window._updateProfile(cred.user, {displayName: name});
+      closeModal('modal-user-auth');
+    } else {
+      await window._signIn(email, pass);
+      closeModal('modal-user-auth');
+    }
+  } catch(err){
+    const msg = err.code==='auth/email-already-in-use' ? 'Email already registered. Try signing in.'
+              : err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential' ? 'Invalid email or password.'
+              : err.code==='auth/weak-password' ? 'Password must be at least 6 characters.'
+              : err.code==='auth/invalid-email' ? 'Invalid email address.'
+              : err.message;
+    errEl.textContent = msg; errEl.style.display='block';
+  }
+}
+
+// ── HOME ──────────────────────────────────────────────────
+function renderHome(){
+  updateBadges();
+  g('proj-name').textContent=projectInfo.name;
+  g('proj-addr').textContent=projectInfo.addr;
+  const fields=[['Nom',projectInfo.name],['Adresse',projectInfo.addr],['Heures de livraison',projectInfo.hours],
+    ['Orientation sécurité',projectInfo.safety],['Réunion de coordination',projectInfo.coord],['Contact',projectInfo.contact]];
+  g('info-rows').innerHTML=fields.map(([k,v])=>`<div class="info-row"><span class="info-k">${k}</span><span class="info-v">${v||'—'}</span></div>`).join('');
+  g('sidebar-zones').innerHTML=zones.map(z=>`<div class="info-row">
+    <span style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:2px;background:${z.color};flex-shrink:0;"></span><span class="info-k">${z.name}</span></span>
+    <span class="info-v" style="font-size:11px;color:var(--text3);">${deliveries.filter(d=>d.zone===z.id&&d.status==='approved'&&d.date===today()).length} aujourd’hui</span>
+  </div>`).join('');
+  renderMapZones();
+  renderTodayDeliveries();
+}
+
+function renderTodayDeliveries(){
+  const el = g('sidebar-today'); if (!el) return;
+  const todayStr = today();
+  const todayDels = deliveries
+    .filter(d => d.date === todayStr && d.status !== 'cancelled' && d.status !== 'rejected')
+    .sort((a,b) => (a.timeStart||a.time).localeCompare(b.timeStart||b.time));
+  if (!todayDels.length) {
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:6px 0;">Aucune livraison prévue aujourd’hui.</div>';
+    return;
+  }
+  el.innerHTML = todayDels.map(d => {
+    const z = zones.find(z => z.id === d.zone);
+    const timeStr = (d.timeStart||d.time) + (d.timeEnd ? ' – ' + d.timeEnd : '');
+    const isApproved = d.status === 'approved';
+    const isPending  = d.status === 'pending';
+    const dotColor   = isApproved ? 'var(--green)' : isPending ? 'var(--amber)' : 'var(--text3)';
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;margin-top:4px;"></span>'
+      + '<div style="flex:1;min-width:0;">'
+      +   '<div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.company + '</div>'
+      +   '<div style="font-size:11px;color:var(--text2);margin-top:1px;">'
+      +     (z ? '<span style="display:inline-block;width:7px;height:7px;border-radius:1px;background:' + z.color + ';margin-right:4px;vertical-align:middle;"></span>' : '')
+      +     (z ? z.name + ' · ' : '') + timeStr
+      +   '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// Convert old pixel zones to % if needed (one-time migration)
+// ── Map stage helpers ───────────────────────────────────────────────────────
+// The map-stage div is sized to the image's natural aspect ratio, filling the
+// available width. Zones are % of map-stage = % of the image. Perfectly stable.
+
+function toggleZoneEdit(){
+  zonesLocked = !zonesLocked;
+  const btn = g('btn-edit-zones');
+  if (!zonesLocked) {
+    btn.textContent = 'Done Editing';
+    btn.style.background = 'var(--amber)';
+    btn.style.color = '#1a0f00';
+    btn.style.borderColor = 'var(--amber)';
+  } else {
+    btn.textContent = 'Edit Zones';
+    btn.style.background = '';
+    btn.style.color = 'var(--amber)';
+    btn.style.borderColor = 'rgba(232,160,42,0.4)';
+  }
+  // Re-render zones so cursor style updates
+  renderMapZones();
+}
+
+function getOrCreateStage(canvas){
+  let stage = canvas.querySelector('.map-stage');
+  if (!stage) {
+    stage = document.createElement('div');
+    stage.className = 'map-stage';
+    canvas.insertBefore(stage, canvas.firstChild);
+  }
+  return stage;
+}
+
+function renderMapZones(){
+  const canvas = g('map-canvas');
+  // Remove old zone rects (but not the stage or image)
+  canvas.querySelectorAll('.zone-rect').forEach(el => el.remove());
+  const legend = g('zone-legend');
+  legend.innerHTML = '';
+
+  if (!mapImg) return;
+
+  g('map-ph').style.display = 'none';
+  g('map-ctrls').style.display = isAdmin() ? '' : 'none';
+
+  const stage = getOrCreateStage(canvas);
+
+  // Set up image inside stage
+  let img = stage.querySelector('img.map-img');
+  if (!img) {
+    img = document.createElement('img');
+    img.className = 'map-img';
+    stage.appendChild(img);
+  }
+
+  const doRender = () => {
+    // Stage fills available width, height follows aspect ratio automatically
+    // (img is display:block, width:100%, height:auto inside stage)
+    stage.style.width  = '100%';
+    stage.style.minWidth = '600px'; // minimum so plan stays readable
+
+    // Legend
+    legend.style.display = '';
+    legend.innerHTML = zones.map(z =>
+      `<div class="legend-item"><span class="legend-dot" style="background:${z.color}"></span>${z.name}</div>`
+    ).join('');
+    canvas.appendChild(legend);
+
+    // Migrate old pixel-based zones to %
+    let needsSave = false;
+    const sw = stage.offsetWidth  || 800;
+    const sh = stage.offsetHeight || 600;
+    zones.forEach((z, i) => {
+      if (z.x > 2 || z.y > 2 || z.w > 2 || z.h > 2) {
+        const col = i % 2, row = Math.floor(i / 2);
+        z.xPct = 5 + col * 45;
+        z.yPct = 5 + row * 40;
+        z.wPct = 18;
+        z.hPct = 15;
+        z.x = 0; z.y = 0; z.w = 0; z.h = 0;
+        needsSave = true;
+      }
+    });
+    if (needsSave) fbSaveConfig('zones', zones).catch(() => {});
+
+    // Render zone rects — positioned as % of stage (= % of image)
+    zones.filter(z => z.visible).forEach(z => {
+      const rect = document.createElement('div');
+      rect.className = 'zone-rect';
+      // Use % positioning directly — no pixel math needed!
+      const editable = isAdmin() && !zonesLocked;
+      rect.style.cssText = [
+        `left:${z.xPct||5}%`,
+        `top:${z.yPct||5}%`,
+        `width:${z.wPct||18}%`,
+        `height:${z.hPct||15}%`,
+        `border-color:${z.color}`,
+        `background:${z.color}22`,
+        `cursor:${editable ? 'move' : 'pointer'}`,
+      ].join(';') + ';';
+      rect.innerHTML = `<span class="zone-lbl" style="background:${z.color};color:white;">${z.name}</span><div class="zone-resize" style="background:${z.color};display:${editable?'block':'none'};"></div>`;
+      if (isAdmin() && !zonesLocked) { makeDrag(rect, z, stage); makeResize(rect, z, stage); }
+      // Click anywhere on zone rect to open modal — use mousedown/mouseup distance
+      // to distinguish a click from a drag (threshold: 5px)
+      let _downX = 0, _downY = 0;
+      rect.addEventListener('mousedown', e => {
+        if (e.target.classList.contains('zone-resize')) return;
+        _downX = e.clientX; _downY = e.clientY;
+      });
+      rect.addEventListener('mouseup', e => {
+        if (e.target.classList.contains('zone-resize')) return;
+        const dist = Math.hypot(e.clientX - _downX, e.clientY - _downY);
+        if (dist < 5 && zonesLocked) {
+          e.stopPropagation();
+          openZoneModal(z.id);
+        }
+      });
+      canvas.appendChild(rect);
+      canvas.removeChild(rect);
+      stage.appendChild(rect);
+    });
+  };
+
+  if (img.src !== mapImg) {
+    img.onload = doRender;
+    img.src = mapImg;
+  } else {
+    doRender();
+  }
+}
+
+// No resize listener needed — % positioning is inherently responsive
+
+function makeDrag(el, z, stage){
+  el.addEventListener('mousedown', e => {
+    if (e.target.classList.contains('zone-resize')) return;
+    e.preventDefault();
+    const sr = stage.getBoundingClientRect();
+    const ox = e.clientX - sr.left - ((z.xPct||0)/100)*sr.width;
+    const oy = e.clientY - sr.top  - ((z.yPct||0)/100)*sr.height;
+    const mv = e => {
+      const wPct = z.wPct||18;
+      const hPct = z.hPct||15;
+      const xPct = Math.max(0, Math.min((e.clientX - sr.left - ox) / sr.width  * 100, 100 - wPct));
+      const yPct = Math.max(0, Math.min((e.clientY - sr.top  - oy) / sr.height * 100, 100 - hPct));
+      z.xPct = parseFloat(xPct.toFixed(4));
+      z.yPct = parseFloat(yPct.toFixed(4));
+      el.style.left = xPct + '%';
+      el.style.top  = yPct + '%';
+    };
+    const up = () => {
+      fbSaveConfig('zones', zones);
+      document.removeEventListener('mousemove', mv);
+      document.removeEventListener('mouseup', up);
+    };
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', up);
+  });
+}
+
+function makeResize(el, z, stage){
+  el.querySelector('.zone-resize').addEventListener('mousedown', e => {
+    e.preventDefault(); e.stopPropagation();
+    const sr = stage.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startWpct = z.wPct||18;
+    const startHpct = z.hPct||15;
+    const startW = startWpct/100 * sr.width;
+    const startH = startHpct/100 * sr.height;
+    const mv = e => {
+      const wPx = Math.max(20, startW + e.clientX - sx);
+      const hPx = Math.max(15, startH + e.clientY - sy);
+      z.wPct = parseFloat((wPx / sr.width  * 100).toFixed(4));
+      z.hPct = parseFloat((hPx / sr.height * 100).toFixed(4));
+      el.style.width  = z.wPct + '%';
+      el.style.height = z.hPct + '%';
+    };
+    const up = () => {
+      fbSaveConfig('zones', zones);
+      document.removeEventListener('mousemove', mv);
+      document.removeEventListener('mouseup', up);
+    };
+    document.addEventListener('mousemove', mv);
+    document.addEventListener('mouseup', up);
+  });
+}
+
+function uploadMap(e){
+  const file=e.target.files[0]; if(!file)return;
+  if(file.type==='application/pdf'){
+    const r=new FileReader();
+    r.onload=async ev=>{
+      try{
+        const typedArr=new Uint8Array(ev.target.result);
+        const pdf=await pdfjsLib.getDocument({data:typedArr}).promise;
+        const page=await pdf.getPage(1);
+        const viewport=page.getViewport({scale:2.0});
+        const cvs=document.createElement('canvas');
+        cvs.width=viewport.width; cvs.height=viewport.height;
+        await page.render({canvasContext:cvs.getContext('2d'),viewport}).promise;
+        mapImg=cvs.toDataURL('image/jpeg',0.88);
+        await fbSaveConfig('mapImg',mapImg);
+        renderHome();
+      }catch(err){alert('Could not render PDF: '+err.message);}
+    };
+    r.readAsArrayBuffer(file);
+  } else {
+    const r=new FileReader();
+    r.onload=ev=>{mapImg=ev.target.result;fbSaveConfig('mapImg',mapImg);renderHome();};
+    r.readAsDataURL(file);
+  }
+  e.target.value='';
+}
+function addZone(){
+  zones.push({id:'z'+Date.now(),name:'Nouvelle zone',color:ZONE_COLORS[zones.length%ZONE_COLORS.length],x:0,y:0,w:0,h:0,xPct:5,yPct:5,wPct:15,hPct:12,visible:true});
+  fbSaveConfig('zones',zones);renderHome();if(g('view-admin').classList.contains('active'))renderAdmin();
+}
+function openInfoModal(){
+  [['name','mi-name'],['addr','mi-addr'],['hours','mi-hours'],['contact','mi-contact'],['safety','mi-safety'],['coord','mi-coord'],['notes','mi-notes']]
+    .forEach(([k,id])=>{const el=g(id);if(el)el.value=projectInfo[k]||'';});
+  const appEl = g('mi-appname'); if(appEl) appEl.value = projectInfo.appname||'SiteDelivery';
+  g('modal-info').classList.add('open');
+}
+function saveInfo(){
+  [['name','mi-name'],['addr','mi-addr'],['hours','mi-hours'],['contact','mi-contact'],['safety','mi-safety'],['coord','mi-coord'],['notes','mi-notes']]
+    .forEach(([k,id])=>{const el=g(id);if(el)projectInfo[k]=el.value;});
+  const appEl = g('mi-appname');
+  if(appEl) projectInfo.appname = appEl.value.trim() || 'SiteDelivery';
+  // Update topbar text live
+  const nameEl = g('app-name');
+  if(nameEl) nameEl.textContent = projectInfo.appname;
+  fbSaveConfig('projectInfo',projectInfo);closeModal('modal-info');renderHome();
+}
+
+// ── DELIVERIES ────────────────────────────────────────────
+function renderDeliveries(){
+  _initMobDelTabs();
+  // Show/hide My Deliveries button and sign-in banner based on auth state
+  const myDelBtn = g('btn-my-deliveries');
+  if(myDelBtn) myDelBtn.style.display = firebaseUser ? '' : 'none';
+  const banner = g('signin-banner');
+  if(banner) banner.style.display = firebaseUser ? 'none' : 'flex';
+  const dateEl=g('b-date');
+  if(!dateEl.value||dateEl.value<today())dateEl.value=today();
+  dateEl.min=today();
+  dateEl.onchange=()=>{
+    onStartChange();
+    renderStartTimes();
+    // Jump calendar week to match selected date
+    const selectedDate = new Date(dateEl.value + 'T12:00:00');
+    if (!isNaN(selectedDate)) {
+      weekStart = getMonday(selectedDate);
+      renderWeekCalendar();
+    }
+  };
+  if(!selZone&&zones.length>0)selZone=zones[0].id;
+  renderZonePicker();
+  renderStartTimes();
+  renderWeekCalendar();
+  renderZoneFilters();
+}
+
+function renderZonePicker(){
+  g('zone-pick-grid').innerHTML=zones.map(z=>
+    `<button class="zpick ${selZone===z.id?'sel':''}" onclick="pickZone('${z.id}')">
+      <span class="zpick-dot" style="background:${z.color}"></span>${z.name}
+    </button>`).join('');
+}
+function pickZone(id){ selZone=id; renderZonePicker(); renderStartTimes(); }
+
+function renderStartTimes(){
+  const sel = g('b-time-start');
+  const prev = sel.value;
+  const dateStr = g('b-date') ? g('b-date').value : today();
+  const allowed = allowedSlotsForDate(dateStr);
+  sel.innerHTML = '<option value="">Sélectionner début…</option>';
+  // Check blackout for selected zone
+  if(selZone && isZoneBlackedOut(selZone, dateStr)){
+    const bos = getBlackoutsForZoneDate(selZone, dateStr);
+    const reason = bos[0]?.reason || 'Zone bloquée';
+    const o = document.createElement('option');
+    o.disabled = true;
+    o.textContent = '⛔ ' + reason + ' — zone bloquée';
+    o.style.color = '#D46060';
+    sel.appendChild(o);
+    g('b-time-end').innerHTML = '<option value="">Sélectionner fin…</option>';
+    return;
+  }
+  if (allowed.length === 0) {
+    const o = document.createElement('option');
+    o.disabled = true;
+    o.textContent = 'Aucune livraison ce jour';
+    sel.appendChild(o);
+  } else {
+    allowed.forEach(t => {
+      const taken = takenBy(selZone, dateStr, t);
+      const o = document.createElement('option');
+      if (taken.length > 0) {
+        o.value = '';
+        o.disabled = true;
+        o.textContent = t + '  —  Pris par ' + taken[0].company;
+        o.style.color = '#E05555';
+      } else {
+        o.value = t;
+        o.textContent = t;
+        if (t === prev) o.selected = true;
+      }
+      sel.appendChild(o);
+    });
+  }
+  g('b-time-end').innerHTML = '<option value="">Sélectionner fin…</option>';
+  if (prev) onStartChange();
+}
+function onStartChange(){
+  const sv = g('b-time-start').value;
+  const endSel = g('b-time-end');
+  endSel.innerHTML = '<option value="">Sélectionner fin…</option>';
+  if (!sv) return;
+  const dateStr = g('b-date') ? g('b-date').value : today();
+  const allowed = allowedSlotsForDate(dateStr);
+  const startIdx = TIME_SLOTS.indexOf(sv);
+
+  // Find the earliest approved delivery in this zone+date that starts AFTER sv
+  // End time must not reach or cross that delivery's start
+  const zone = selZone;
+  const blockers = deliveries
+    .filter(d => d.zone === zone && d.date === dateStr && d.status === 'approved')
+    .map(d => TIME_SLOTS.indexOf(d.timeStart || d.time))
+    .filter(idx => idx > startIdx)
+    .sort((a,b) => a - b);
+  // The earliest blocker index is the ceiling — end time must be <= that slot
+  const ceilIdx = blockers.length > 0 ? blockers[0] : Infinity;
+
+  allowed
+    .filter(t => {
+      const ti = TIME_SLOTS.indexOf(t);
+      return ti > startIdx && ti <= ceilIdx;
+    })
+    .forEach(t => {
+      const o = document.createElement('option');
+      o.value = t; o.textContent = t;
+      endSel.appendChild(o);
+    });
+}
+
+function renderZoneFilters(){
+  g('zone-filters').innerHTML=zones.map(z=>{
+    const on=activeZF.size===0||activeZF.has(z.id);
+    return `<button class="zf-btn" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
+  }).join('');
+}
+function toggleZF(id){ if(activeZF.has(id))activeZF.delete(id);else activeZF.add(id); renderZoneFilters();renderWeekCalendar(); }
+
+function slotIndex(t){return TIME_SLOTS.indexOf(t);}
+
+// Check if a zone is blacked out on a given date
+function getBlackoutsForZoneDate(zoneId, dateStr){
+  return blackoutDates.filter(b => {
+    if(b.zoneId !== zoneId) return false;
+    // dateStr between dateFrom and dateTo inclusive
+    return dateStr >= b.dateFrom && dateStr <= b.dateTo;
+  });
+}
+function isZoneBlackedOut(zoneId, dateStr){
+  return getBlackoutsForZoneDate(zoneId, dateStr).length > 0;
+}
+
+const DAY_KEYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+function allowedSlotsForDate(dateStr){
+  if (!dateStr) return TIME_SLOTS;
+  const d = new Date(dateStr + 'T12:00:00');
+  const dayKey = DAY_KEYS[d.getDay()];
+  const sch = siteSchedule[dayKey];
+  if (!sch || sch.closed) return [];
+  const openIdx  = TIME_SLOTS.indexOf(sch.open);
+  const closeIdx = TIME_SLOTS.indexOf(sch.close);
+  if (openIdx < 0 || closeIdx < 0) return TIME_SLOTS;
+  return TIME_SLOTS.slice(openIdx, closeIdx);
+}
+
+// Returns approved deliveries that overlap a given slot for a zone+date
+function takenBy(zone, dateStr, slotTime){
+  return deliveries.filter(d =>
+    d.zone === zone && d.date === dateStr && d.status === 'approved' &&
+    overlap(slotTime, TIME_SLOTS[slotIndex(slotTime)+1] || slotTime,
+            d.timeStart || d.time, d.timeEnd || d.time)
+  );
+}
+
+function renderWeekCalendar(){
+  const days=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
+  const months=[...new Set(days.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
+  g('cal-title').textContent=months.join(' / ');
+  const SLOT_H=34;
+  const totalH=TIME_SLOTS.length*SLOT_H;
+
+  // ── Header row ──
+  let headerHtml='<div style="width:52px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);"></div>';
+  days.forEach(d=>{
+    const ds=dk(d),isT=ds===tod;
+    headerHtml+='<div class="wg-dh '+(isT?'today':'')+'" style="flex:1;min-width:0;">'
+      +'<div class="wg-dn">'+d.toLocaleDateString('en-CA',{weekday:'short'})+'</div>'
+      +'<div class="wg-dd">'+d.getDate()+'</div></div>';
+  });
+
+  // ── Time label column ──
+  let timeHtml='';
+  TIME_SLOTS.forEach(t=>{
+    const half=t.endsWith(':30');
+    timeHtml+='<div class="wg-t'+(half?' half':'')+'">'+(half?'':t)+'</div>';
+  });
+
+  // ── Day columns ──
+  let dayColsHtml='';
+  days.forEach(d=>{
+    const ds=dk(d);
+    const dayDels=deliveries.filter(del=>
+      del.date===ds&&del.status!=='rejected'&&del.status!=='cancelled'&&
+      (activeZF.size===0||activeZF.has(del.zone))
+    );
+
+    // Grid lines
+    let gridLines='';
+    TIME_SLOTS.forEach(t=>{
+      const half=t.endsWith(':30');
+      gridLines+='<div class="wg-c '+(half?'half':'')+'" style="position:absolute;left:0;right:0;top:'+(slotIndex(t)*SLOT_H)+'px;height:'+SLOT_H+'px;" onclick="cellClick(\''+ds+'\',\''+t+'\')"></div>';
+    });
+
+    // Sort and assign side-by-side columns
+    const sorted=[...dayDels].sort((a,b)=>slotIndex(a.timeStart||a.time)-slotIndex(b.timeStart||b.time));
+    const colEnds=[];
+    const layout=sorted.map(del=>{
+      const si=slotIndex(del.timeStart||del.time);
+      const te=del.timeEnd;
+      const ei=te&&slotIndex(te)>si?slotIndex(te):si+1;
+      let col=colEnds.findIndex(e=>e<=si);
+      if(col===-1)col=colEnds.length;
+      colEnds[col]=ei;
+      return{del,col,si,ei};
+    });
+    const blockInfos=layout.map(item=>{
+      const concurrent=layout.filter(o=>o.si<item.ei&&o.ei>item.si);
+      return{...item,totalCols:Math.max(...concurrent.map(c=>c.col))+1};
+    });
+
+    // Render blocks
+    let blocks='';
+    blockInfos.forEach(({del,col,si,ei,totalCols})=>{
+      const z=zones.find(z=>z.id===del.zone),appr=del.status==='approved';
+      const top=si*SLOT_H+2;
+      const height=Math.max((ei-si)*SLOT_H-4,24);
+      const pct=100/totalCols;
+      const baseColor=appr?(z?z.color:'#4CAF7D'):'';
+      const sty=appr
+        ?'background:'+baseColor+'22;border:1px solid '+baseColor+'55;color:'+baseColor+';'
+        :'background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);';
+      const tsDisp=del.timeStart||del.time;
+      const teDisp=del.timeEnd?(' \u2013 '+del.timeEnd):'';
+      const conflictWarn = isZoneBlackedOut(del.zone, del.date)
+        ? '<div style="font-size:8px;font-weight:700;background:rgba(212,96,96,0.35);color:#ff8080;border-radius:2px;padding:1px 4px;margin-top:2px;display:inline-block;">\u26a0 Zone bloqu\u00e9e</div>'
+        : '';
+      blocks+='<div class="db '+(appr?'db-approved':'db-pending')+'" '
+        +'style="top:'+top+'px;height:'+height+'px;left:calc('+col*pct+'% + 2px);width:calc('+pct+'% - 4px);'+sty+'" '
+        +'onclick="openDetail(\''+del.id+'\',event)">'
+        +'<div class="db-co">'+del.company+'</div>'
+        +'<div class="db-sub">'+(z?z.name:'')+(z?' \xb7 ':'')+tsDisp+teDisp+'</div>'
+        +conflictWarn
+        +'</div>';
+    });
+
+    // Blackout stripes — one per blacked-out zone for this day
+    let blackoutStripes = '';
+    zones.forEach(z => {
+      const bos = getBlackoutsForZoneDate(z.id, ds);
+      if(bos.length > 0){
+        const reason = bos[0].reason || 'Zone bloquée';
+        blackoutStripes += '<div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:2;">'
+          + '<div style="position:absolute;left:0;right:0;top:0;bottom:0;background:' + z.color + '0D;"></div>'
+          + '<div style="position:absolute;top:4px;left:2px;right:2px;background:' + z.color + '33;border:1px solid ' + z.color + '77;border-radius:3px;padding:3px 6px;font-size:9px;font-weight:700;color:' + z.color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+          + '⛔ ' + z.name + ' — ' + reason
+          + '</div></div>';
+        // Flag any approved deliveries that now conflict — show warning badge
+        deliveries.filter(d => d.zone === z.id && d.date === ds && (d.status === 'approved' || d.status === 'pending')).forEach(d => {
+          d._blackoutConflict = true;
+        });
+      } else {
+        deliveries.filter(d => d.zone === z.id && d.date === ds).forEach(d => { d._blackoutConflict = false; });
+      }
+    });
+
+    dayColsHtml+='<div class="wg-day-col" style="position:relative;height:'+totalH+'px;flex:1;min-width:0;border-right:1px solid var(--border);">'+gridLines+blackoutStripes+blocks+'</div>';
+  });
+
+  // Assemble: header row + scrollable body row
+  g('week-grid').innerHTML=
+    '<div style="display:flex;flex-direction:row;position:sticky;top:0;z-index:10;background:var(--bg2);">'+headerHtml+'</div>'
+    +'<div style="display:flex;flex-direction:row;overflow-y:auto;flex:1;width:100%;">'
+      +'<div class="wg-time-col">'+timeHtml+'</div>'
+      +dayColsHtml
+    +'</div>';
+}
+function cellClick(date,time){
+  g('b-date').value=date; renderStartTimes();
+  const s=g('b-time-start');
+  for(let i=0;i<s.options.length;i++){if(s.options[i].value===time){s.selectedIndex=i;break;}}
+  onStartChange();
+}
+function changeWeek(dir){ weekStart=addDays(weekStart,dir*7); renderWeekCalendar(); }
+function goToToday(){ weekStart=getMonday(new Date()); renderWeekCalendar(); }
+
+// ── SUBMIT ────────────────────────────────────────────────
+function submitDelivery(){
+  try{
+    const company=g('b-company').value.trim(),contact=g('b-contact').value.trim(),
+          phone=g('b-phone').value.trim(),date=g('b-date').value.trim(),
+          material=g('b-material').value.trim(),ts=g('b-time-start').value,te=g('b-time-end').value;
+    ['b-company','b-contact','b-phone','b-material','b-date','b-time-start','b-time-end'].forEach(id=>{const el=g(id);if(el)el.style.borderColor='';});
+    const errs=[];
+    if(!company){errs.push('Compagnie / sous-traitant');g('b-company').style.borderColor='var(--red)';}
+    if(!contact){errs.push('Nom du contact');g('b-contact').style.borderColor='var(--red)';}
+    if(!phone){errs.push('Numéro de téléphone');g('b-phone').style.borderColor='var(--red)';}
+    if(!date){errs.push('Date de livraison');g('b-date').style.borderColor='var(--red)';}
+    if(!material){errs.push('Matériel / description');g('b-material').style.borderColor='var(--red)';}
+    if(!selZone)errs.push('Zone de dépôt — sélectionnez une zone');
+    if(!ts)errs.push('Heure de début');
+    if(!te)errs.push('Heure de fin');
+    const errEl=g('err-box');
+    if(errs.length){errEl.innerHTML='<strong>Champs manquants :</strong><br>'+errs.map(e=>'• '+e).join('<br>');errEl.style.display='block';errEl.scrollIntoView({behavior:'smooth',block:'nearest'});return;}
+    errEl.style.display='none';
+    const ov=deliveries.find(d=>d.zone===selZone&&d.date===date&&d.status==='approved'&&overlap(ts,te,d.timeStart||d.time,d.timeEnd||d.time));
+    if(ov){alert('Chevauche une livraison approuvée pour '+ov.company+' ('+(ov.timeStart||ov.time)+'–'+(ov.timeEnd||ov.time)+').');return;}
+    const d={id:'D'+Date.now(),company,contact,phone,material,date,time:ts,timeStart:ts,timeEnd:te,
+      truck:g('b-truck').value||'',notes:g('b-notes').value.trim(),zone:selZone,status:'pending',submittedAt:new Date().toISOString(),
+      userId: firebaseUser ? firebaseUser.uid : null,
+      userEmail: firebaseUser ? firebaseUser.email : null};
+    deliveries.unshift(d);
+    notif('Nouvelle demande : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===selZone)||{name:'?'}).name+')','pending');
+    saveDelivery(d);
+    g('booking-content').style.display='none';
+    g('booking-success').style.display='block';
+    renderWeekCalendar();updateBadges();
+  }catch(err){alert('Error: '+err.message);console.error(err);}
+}
+function resetBooking(){
+  g('booking-content').style.display='';g('booking-success').style.display='none';g('err-box').style.display='none';
+  ['b-company','b-contact','b-phone','b-material','b-notes'].forEach(id=>{const el=g(id);if(el){el.value='';el.style.borderColor='';}});
+  g('b-truck').value='';g('b-date').value=today();
+  g('b-time-start').value='';g('b-time-end').innerHTML='<option value="">Sélectionner fin…</option>';
+  selZone=zones.length>0?zones[0].id:null;renderZonePicker();renderStartTimes();
+}
+
+// ── DETAIL MODAL ──────────────────────────────────────────
+function openDetail(id,e){
+  if(e)e.stopPropagation();
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  const z=zones.find(z=>z.id===d.zone),sc=d.status==='approved'?'var(--green)':d.status==='pending'?'var(--amber)':'var(--red)';
+  const tdisp=(d.timeStart||d.time)+(d.timeEnd?' – '+d.timeEnd:'');
+  const adm=isAdmin();
+  let html=`<h2 style="margin-bottom:16px;">${d.company}</h2>
+    <div class="df-grid">
+      ${[['Contact',d.contact],['Phone',d.phone||'—'],['Material',d.material],['Truck',d.truck||'—'],
+         ['Zone',z?.name||d.zone],['Date',fmtDate(d.date)],['Time',tdisp],
+         ['Status','<span style="color:'+sc+';font-weight:700;">'+d.status==='approved'?'APPROUVÉE':d.status==='pending'?'EN ATTENTE':d.status==='cancelled'?'ANNULÉE':'REJETÉE'+'</span>']
+        ].map(([k,v])=>`<div><div class="df-lbl">${k}</div><div class="df-val">${v}</div></div>`).join('')}
+    </div>`;
+  if(d.notes)html+=`<div style="background:var(--bg3);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--text2);margin-bottom:14px;"><strong>Notes:</strong> ${d.notes}</div>`;
+  if(d.rejectionNote&&d.status!=='cancelled')html+=`<div style="background:var(--red-dim);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;">Reason: ${d.rejectionNote}</div>`;
+  if(adm){
+    if(d.status==='pending'){
+      html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <input id="det-note" placeholder="Motif de rejet (optionnel)…" style="flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 11px;color:var(--text);font-size:12px;outline:none;">
+        <button class="btn btn-gr" onclick="decideDetail('${d.id}','approved')">Approve</button>
+        <button class="btn btn-re" onclick="decideDetail('${d.id}','rejected')">Reject</button>
+        <button class="btn btn-bl" onclick="closeModal('modal-detail');openEdit('${d.id}')">Edit</button>
+      </div>`;
+    } else if(d.status==='approved'){
+      html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-bl"  onclick="closeModal('modal-detail');openEdit('${d.id}')">Modifier la livraison</button>
+        <button class="btn" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);" onclick="cancelDel('${d.id}',true)">Cancel Delivery</button>
+      </div>`;
+    }
+  }
+  html+=`<div class="m-actions"><button class="btn btn-gh" onclick="closeModal('modal-detail')">Fermer</button></div>`;
+  g('modal-detail-body').innerHTML=html;
+  g('modal-detail').classList.add('open');
+}
+function decideDetail(id,status){
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  if(status==='approved'){
+    const cf=deliveries.find(x=>x.id!==id&&x.zone===d.zone&&x.date===d.date&&x.status==='approved'&&overlap(d.timeStart||d.time,d.timeEnd||d.time,x.timeStart||x.time,x.timeEnd||x.time));
+    if(cf){alert('Pris par '+cf.company+'.');return;}
+  }
+  const note=g('det-note')?.value.trim()||'';
+  d.status=status;if(note)d.rejectionNote=note;
+  notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
+  saveDelivery(d);closeModal('modal-detail');renderAdmin();renderWeekCalendar();
+}
+
+// ── ADMIN ─────────────────────────────────────────────────
+function renderAdmin(){
+  updateBadges();
+  const pend=deliveries.filter(d=>d.status==='pending');
+  g('ap-count').textContent=pend.length+' request'+(pend.length!==1?'s':'');
+  g('pending-list').innerHTML=pend.length?pend.map(d=>drHTML(d,true)).join(''):'<div class="empty">No pending requests.</div>';
+  const cfs=getConflicts();
+  g('conflict-count').textContent=cfs.length?cfs.length+' conflict'+(cfs.length!==1?'s':''):'None';
+  g('conflict-list').innerHTML=cfs.length?cfs.map(grp=>{
+    const f=grp[0],z=zones.find(z=>z.id===f.zone);
+    return `<div class="cg"><div class="cg-hd">⚡ ${z?.name||''} · ${fmtDate(f.date)} · ${f.timeStart||f.time} — pick one</div>
+      ${grp.map(d=>`<div class="ci"><div class="ci-info"><strong>${d.company}</strong><br><span style="color:var(--text2);">${d.contact}${d.truck?' · '+d.truck:''}</span></div>
+      <button class="ci-pick" onclick="pickSlot('${d.id}')">Approve This</button></div>`).join('')}</div>`;
+  }).join(''):'<div class="empty">No conflicts.</div>';
+  const nonCan=deliveries.filter(d=>d.status!=='cancelled');
+  g('all-list').innerHTML=nonCan.length?nonCan.slice(0,30).map(d=>drHTML(d,false)).join(''):'<div class="empty">No deliveries yet.</div>';
+  const can=deliveries.filter(d=>d.status==='cancelled');
+  g('cancelled-count').textContent=can.length||'None';
+  g('cancelled-list').innerHTML=can.length?can.map(d=>drHTML(d,false)).join(''):'<div class="empty">No cancelled deliveries.</div>';
+  g('zone-mgr').innerHTML=zones.map(z=>`<div class="zm-row"><span class="zm-dot" style="background:${z.color}"></span>
+    <input class="zm-input" value="${z.name}" onchange="renameZone('${z.id}',this.value)">
+    <button class="zm-del" onclick="deleteZone('${z.id}')">×</button></div>`).join('');
+  renderScheduleMgr();
+  renderBlackoutPanel();
+  g('notif-log').innerHTML=notifications.length?notifications.slice(0,15).map(n=>
+    `<div class="ni"><span class="ni-dot" style="background:${n.type==='approved'?'var(--green)':n.type==='rejected'?'var(--red)':'var(--amber)'}"></span>
+    <span class="ni-msg">${n.msg}</span><span class="ni-t">${n.time}</span></div>`).join('')
+    :'<div class="empty">No notifications.</div>';
+}
+
+function drHTML(d,showPend){
+  const z=zones.find(z=>z.id===d.zone),td=(d.timeStart||d.time)+(d.timeEnd?' – '+d.timeEnd:'');
+  let acts='';
+  if(showPend&&d.status==='pending'){
+    acts=`<div class="dr-acts">
+      <input class="dr-note" id="note-${d.id}" placeholder="Rejection reason…">
+      <button class="act act-approve" onclick="decide('${d.id}','approved')">Approve</button>
+      <button class="act act-reject"  onclick="decide('${d.id}','rejected')">Reject</button>
+      <button class="act act-edit"    onclick="openEdit('${d.id}')">Edit</button>
+    </div>`;
+  } else if(d.status==='approved'){
+    acts=`<div class="dr-acts">
+      <button class="act act-edit"   onclick="openEdit('${d.id}')">Edit</button>
+      <button class="act act-cancel" onclick="cancelDel('${d.id}')">Annuler</button>
+    </div>`;
+  } else if(d.status==='cancelled'){
+    acts=`<div class="dr-acts">
+      <button class="act act-uncancel" onclick="uncancelDel('${d.id}')">↩ Uncancel</button>
+      <button class="act act-del"      onclick="deleteDel('${d.id}')">✕</button>
+    </div>`;
+  } else if(d.rejectionNote){
+    acts=`<div style="font-size:11px;color:var(--red);padding:4px 0;">Reason: ${d.rejectionNote}</div>`;
+  }
+  return `<div class="dr">
+    <div class="dr-top">
+      <div><div class="dr-co">${d.company}</div><div class="dr-meta">${d.contact}${d.phone?' · '+d.phone:''} · ${d.material}</div></div>
+      <span class="badge b-${d.status==='cancelled'?'cancelled':d.status}">${d.status}</span>
+    </div>
+    <div class="dr-badges">
+      ${z?`<span class="badge b-zone" style="background:${z.color}22;color:${z.color};border-color:${z.color}55;">${z.name}</span>`:''}
+      <span class="badge b-time">${td}</span>
+      <span class="badge b-time" style="font-family:inherit;">${fmtDate(d.date)}</span>
+      ${d.truck?`<span class="badge" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);">${d.truck}</span>`:''}
+    </div>
+    ${acts}
+  </div>`;
+}
+
+function decide(id,status){
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  if(status==='approved'){
+    const cf=deliveries.find(x=>x.id!==id&&x.zone===d.zone&&x.date===d.date&&x.status==='approved'&&overlap(d.timeStart||d.time,d.timeEnd||d.time,x.timeStart||x.time,x.timeEnd||x.time));
+    if(cf){alert('Pris par '+cf.company+'.');return;}
+  }
+  const note=g('note-'+id)?.value.trim()||'';
+  d.status=status;if(note)d.rejectionNote=note;
+  notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
+  saveDelivery(d);renderAdmin();renderWeekCalendar();
+}
+function pickSlot(id){
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  deliveries.filter(x=>x.zone===d.zone&&x.date===d.date&&(x.timeStart||x.time)===(d.timeStart||d.time)&&x.status==='pending'&&x.id!==id)
+    .forEach(x=>{x.status='rejected';x.rejectionNote='Un autre créneau a été sélectionné.';});
+  d.status='approved';
+  notif(d.company+' selected for '+(zones.find(z=>z.id===d.zone)||{name:'?'}).name+' · '+(d.timeStart||d.time)+' · '+fmtDate(d.date)+'.','approved');
+  // Save all affected deliveries
+  Promise.all(deliveries.filter(x=>x.zone===d.zone&&x.date===d.date).map(x=>saveDelivery(x)));
+  renderAdmin();renderWeekCalendar();
+}
+function cancelDel(id,fromModal){
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  d.status='cancelled';d.rejectionNote='Annulée par le surintendant.';
+  notif('Cancelled: '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','rejected');
+  saveDelivery(d);if(fromModal)closeModal('modal-detail');renderAdmin();renderWeekCalendar();updateBadges();
+}
+function uncancelDel(id){
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  const cf=deliveries.find(x=>x.id!==id&&x.zone===d.zone&&x.date===d.date&&x.status==='approved'&&overlap(d.timeStart||d.time,d.timeEnd||d.time,x.timeStart||x.time,x.timeEnd||x.time));
+  if(cf){alert('Slot now taken by '+cf.company+'.');return;}
+  d.status='approved';delete d.rejectionNote;
+  notif('Reinstated: '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','approved');
+  saveDelivery(d);renderAdmin();renderWeekCalendar();updateBadges();
+}
+function deleteDel(id){removeDelivery(id);renderAdmin();updateBadges();}
+function renameZone(id,name){const z=zones.find(z=>z.id===id);if(z)z.name=name;fbSaveConfig('zones',zones);renderHome();renderZonePicker();renderZoneFilters();}
+function deleteZone(id){if(!confirm('Supprimer cette zone ?'))return;zones=zones.filter(z=>z.id!==id);fbSaveConfig('zones',zones);renderAdmin();renderHome();renderZonePicker();}
+
+// ── EDIT DELIVERY ─────────────────────────────────────────
+function openEdit(id){
+  const d=deliveries.find(x=>x.id===id);if(!d)return;
+  g('ed-id').value=id;
+  g('ed-company').value=d.company||'';g('ed-contact').value=d.contact||'';g('ed-phone').value=d.phone||'';
+  g('ed-material').value=d.material||'';g('ed-date').value=d.date||'';
+  g('ed-notes').value=d.notes||'';g('ed-truck').value=d.truck||'';
+  const ss=g('ed-start');
+  ss.innerHTML='<option value="">Sélectionner…</option>';
+  TIME_SLOTS.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;if(t===(d.timeStart||d.time))o.selected=true;ss.appendChild(o);});
+  edStartChange();
+  setTimeout(()=>{const es=g('ed-end');for(let i=0;i<es.options.length;i++){if(es.options[i].value===d.timeEnd){es.selectedIndex=i;break;}}},20);
+  g('ed-zone-grid').innerHTML=zones.map(z=>`<button type="button" class="zpick ${d.zone===z.id?'sel':''}" id="ezp-${z.id}"
+    onclick="document.querySelectorAll('#ed-zone-grid .zpick').forEach(b=>b.classList.remove('sel'));this.classList.add('sel');">
+    <span class="zpick-dot" style="background:${z.color}"></span>${z.name}</button>`).join('');
+  g('modal-edit').classList.add('open');
+}
+function edStartChange(){
+  const ss=g('ed-start'),es=g('ed-end');
+  es.innerHTML='<option value="">Sélectionner…</option>';
+  const si=TIME_SLOTS.indexOf(ss.value);if(si<0)return;
+  TIME_SLOTS.slice(si+1).forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;es.appendChild(o);});
+}
+function saveEdit(){
+  const id=g('ed-id').value,d=deliveries.find(x=>x.id===id);if(!d)return;
+  const company=g('ed-company').value.trim(),contact=g('ed-contact').value.trim(),
+        phone=g('ed-phone').value.trim(),material=g('ed-material').value.trim(),
+        date=g('ed-date').value.trim(),ts=g('ed-start').value,te=g('ed-end').value,
+        truck=g('ed-truck').value,notes=g('ed-notes').value.trim();
+  const selZ=document.querySelector('#ed-zone-grid .zpick.sel');
+  const newZone=selZ?selZ.id.replace('ezp-',''):d.zone;
+  if(!company||!contact||!date||!material||!ts||!te||!selZ){alert('Please fill all required fields.');return;}
+  // Conflict check BEFORE mutating
+  if(d.status==='approved'){
+    const cf=deliveries.find(x=>x.id!==id&&x.zone===newZone&&x.date===date&&x.status==='approved'&&overlap(ts,te,x.timeStart||x.time,x.timeEnd||x.time));
+    if(cf){alert('Time conflict with '+cf.company+' ('+(cf.timeStart||cf.time)+'–'+(cf.timeEnd||cf.time)+'). Resolve first.');return;}
+  }
+  // Apply
+  d.company=company;d.contact=contact;d.phone=phone;d.material=material;
+  d.date=date;d.time=ts;d.timeStart=ts;d.timeEnd=te;d.truck=truck;d.notes=notes;d.zone=newZone;
+  notif('Edited: '+company+' — '+fmtDate(date)+' '+ts+'–'+te+'.',d.status==='approved'?'approved':'pending');
+  saveDelivery(d);closeModal('modal-edit');renderAdmin();renderWeekCalendar();updateBadges();
+}
+
+// ── EXPORT ────────────────────────────────────────────────
+function renderScheduleMgr(){
+  const el = g('schedule-mgr'); if (!el) return;
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  el.innerHTML = days.map(day => {
+    const sch = siteSchedule[day];
+    const timeOpts = TIME_SLOTS.map(t => `<option value="${t}" ${t===sch.open?'selected':''} >${t}</option>`).join('');
+    const timeOptsClose = TIME_SLOTS.map(t => `<option value="${t}" ${t===sch.close?'selected':''} >${t}</option>`).join('');
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+      <span style="font-size:12px;font-weight:700;color:var(--text);width:32px;flex-shrink:0;">${day}</span>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;">
+        <input type="checkbox" ${sch.closed?'':'checked'} onchange="setDayOpen('${day}',this.checked)" style="cursor:pointer;"> Ouvert
+      </label>
+      <div style="display:flex;align-items:center;gap:6px;${sch.closed?'opacity:0.3;pointer-events:none;':''}">
+        <select onchange="setDayHour('${day}','open',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;">${timeOpts}</select>
+        <span style="font-size:11px;color:var(--text3);">to</span>
+        <select onchange="setDayHour('${day}','close',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;">${timeOptsClose}</select>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setDayOpen(day, isOpen){
+  siteSchedule[day].closed = !isOpen;
+  fbSaveConfig('siteSchedule', siteSchedule);
+  renderScheduleMgr();
+}
+function setDayHour(day, which, val){
+  siteSchedule[day][which] = val;
+  fbSaveConfig('siteSchedule', siteSchedule);
+}
+
+function renderBlackoutPanel(){
+  // Populate zone select
+  const zsel = g('bo-zone');
+  if(zsel){
+    zsel.innerHTML = zones.map(z => `<option value="${z.id}">${z.name}</option>`).join('');
+  }
+  // Render existing blackouts list
+  const list = g('blackout-list');
+  if(!list) return;
+  if(!blackoutDates.length){
+    list.innerHTML = '<div class="empty">Aucun blocage actif.</div>';
+    return;
+  }
+  list.innerHTML = blackoutDates.map(b => {
+    const z = zones.find(z => z.id === b.zoneId);
+    const dateRange = b.dateFrom === b.dateTo
+      ? fmtDate(b.dateFrom)
+      : fmtDate(b.dateFrom) + ' → ' + fmtDate(b.dateTo);
+    // Check for conflicts
+    const conflicts = deliveries.filter(d =>
+      d.zone === b.zoneId &&
+      d.date >= b.dateFrom && d.date <= b.dateTo &&
+      (d.status === 'approved' || d.status === 'pending')
+    );
+    const conflictBadge = conflicts.length
+      ? `<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--red-dim);color:var(--red);border:1px solid var(--red-bd);margin-left:6px;">⚠ ${conflicts.length} livraison${conflicts.length>1?'s':''} à reschedule</span>`
+      : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+      <span style="width:10px;height:10px;border-radius:2px;background:${z?z.color:'#888'};flex-shrink:0;display:inline-block;"></span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">${z?z.name:'Zone inconnue'} — ${b.reason}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px;">${dateRange}${conflictBadge}</div>
+        ${conflicts.length ? `<div style="font-size:11px;color:var(--red);margin-top:4px;">${conflicts.map(d=>'• '+d.company+' ('+fmtDate(d.date)+' '+( d.timeStart||d.time)+')').join('<br>')}</div>` : ''}
+      </div>
+      <button onclick="removeBlackout('${b.id}')" style="padding:4px 10px;border-radius:var(--r);border:1px solid var(--red-bd);background:var(--red-dim);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;">Supprimer</button>
+    </div>`;
+  }).join('');
+}
+
+function boReasonChange(){
+  const sel = g('bo-reason-sel');
+  const wrap = g('bo-reason-custom-wrap');
+  if(!sel||!wrap) return;
+  wrap.style.display = sel.value === 'Autre' ? '' : 'none';
+}
+
+function addBlackout(){
+  const zoneId = g('bo-zone')?.value;
+  const dateFrom = g('bo-date-from')?.value;
+  const dateTo = g('bo-date-to')?.value || dateFrom;
+  const reasonSel = g('bo-reason-sel')?.value;
+  const reasonCustom = g('bo-reason-custom')?.value?.trim();
+  const reason = reasonSel === 'Autre' ? (reasonCustom || 'Autre') : reasonSel;
+
+  if(!zoneId || !dateFrom){
+    alert('Veuillez sélectionner une zone et une date de début.');
+    return;
+  }
+  if(dateTo < dateFrom){
+    alert('La date de fin doit être après la date de début.');
+    return;
+  }
+
+  const entry = { id: 'bo' + Date.now(), zoneId, dateFrom, dateTo, reason };
+  blackoutDates.push(entry);
+  fbSaveConfig('blackoutDates', blackoutDates).catch(()=>{});
+
+  // Reset form
+  if(g('bo-date-from')) g('bo-date-from').value = '';
+  if(g('bo-date-to'))   g('bo-date-to').value   = '';
+  if(g('bo-reason-custom')) g('bo-reason-custom').value = '';
+  if(g('bo-reason-custom-wrap')) g('bo-reason-custom-wrap').style.display = 'none';
+  if(g('bo-reason-sel')) g('bo-reason-sel').value = 'Coulée de béton';
+
+  renderBlackoutPanel();
+  renderWeekCalendar();
+  renderStartTimes();
+}
+
+function removeBlackout(id){
+  blackoutDates = blackoutDates.filter(b => b.id !== id);
+  fbSaveConfig('blackoutDates', blackoutDates).catch(()=>{});
+  renderBlackoutPanel();
+  renderWeekCalendar();
+  renderStartTimes();
+}
+
+function renderAnalytics(){
+  const period = g('an-period') ? g('an-period').value : 'all';
+
+  // Filter deliveries by period
+  const now = new Date();
+  const weekAgo  = dk(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7));
+  const monthAgo = dk(new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()));
+
+  function inPeriod(d){
+    if(period === 'week')  return d.date >= weekAgo;
+    if(period === 'month') return d.date >= monthAgo;
+    return true;
+  }
+
+  const filtered  = deliveries.filter(inPeriod);
+  const approved  = filtered.filter(d => d.status === 'approved');
+  const pending   = filtered.filter(d => d.status === 'pending');
+  const rejected  = filtered.filter(d => d.status === 'rejected');
+  const cancelled = filtered.filter(d => d.status === 'cancelled');
+  const total     = filtered.length;
+
+  // ── KPI strip ──────────────────────────────────────────────────────────────
+  const kpiEl = g('an-kpis');
+  if(kpiEl){
+    const kpis = [
+      { label:'Total',          val: total,            color:'var(--text)' },
+      { label:'Approuvées',     val: approved.length,  color:'var(--green)' },
+      { label:'En attente',     val: pending.length,   color:'var(--amber)' },
+      { label:'Annulées/Rej.', val: cancelled.length + rejected.length, color:'var(--red)' },
+    ];
+    kpiEl.innerHTML = kpis.map(k =>
+      `<div style="background:var(--bg2);padding:16px 20px;">
+        <div class="stat-lbl">${k.label}</div>
+        <div class="stat-val" style="color:${k.color};">${k.val}</div>
+      </div>`
+    ).join('');
+  }
+
+  // ── By zone ────────────────────────────────────────────────────────────────
+  const zoneEl = g('an-by-zone');
+  if(zoneEl){
+    const maxZ = Math.max(...zones.map(z => approved.filter(d => d.zone === z.id).length), 1);
+    zoneEl.innerHTML = zones.map(z => {
+      const cnt  = approved.filter(d => d.zone === z.id).length;
+      const pct  = Math.round((cnt / maxZ) * 100);
+      const pend = pending.filter(d => d.zone === z.id).length;
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="width:10px;height:10px;border-radius:2px;background:${z.color};flex-shrink:0;"></span>
+        <span style="font-size:13px;color:var(--text);min-width:64px;">${z.name}</span>
+        <div style="flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${z.color};border-radius:4px;transition:width .3s;"></div>
+        </div>
+        <span style="font-size:12px;color:var(--text2);min-width:24px;text-align:right;">${cnt}</span>
+        ${pend ? `<span style="font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);">${pend} att.</span>` : ''}
+      </div>`;
+    }).join('') || '<div class="empty">Aucune donnée.</div>';
+  }
+
+  // ── By status ──────────────────────────────────────────────────────────────
+  const statusEl = g('an-by-status');
+  if(statusEl && total > 0){
+    const statuses = [
+      { label:'Approuvées',  cnt: approved.length,  color:'var(--green)' },
+      { label:'En attente',  cnt: pending.length,   color:'var(--amber)' },
+      { label:'Rejetées',    cnt: rejected.length,  color:'var(--red)' },
+      { label:'Annulées',    cnt: cancelled.length, color:'var(--text3)' },
+    ];
+    statusEl.innerHTML = statuses.map(s => {
+      const pct = Math.round((s.cnt / total) * 100);
+      return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;color:var(--text);min-width:80px;">${s.label}</span>
+        <div style="flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;">
+          <div style="width:${pct}%;height:100%;background:${s.color};border-radius:4px;"></div>
+        </div>
+        <span style="font-size:12px;color:var(--text2);min-width:32px;text-align:right;">${s.cnt} (${pct}%)</span>
+      </div>`;
+    }).join('');
+  } else if(statusEl){
+    statusEl.innerHTML = '<div class="empty">Aucune donnée.</div>';
+  }
+
+  // ── Top subcontractors ──────────────────────────────────────────────────────
+  const subEl = g('an-top-subs');
+  if(subEl){
+    const counts = {};
+    approved.forEach(d => { counts[d.company] = (counts[d.company]||0) + 1; });
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0,8);
+    if(!sorted.length){
+      subEl.innerHTML = '<div class="empty">Aucune donnée.</div>';
+    } else {
+      const maxS = sorted[0][1];
+      subEl.innerHTML = sorted.map(([co, cnt], i) =>
+        `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);">
+          <span style="font-size:11px;color:var(--text3);min-width:16px;text-align:right;">${i+1}</span>
+          <span style="font-size:13px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${co}</span>
+          <div style="width:80px;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;">
+            <div style="width:${Math.round((cnt/maxS)*100)}%;height:100%;background:var(--accent);border-radius:4px;"></div>
+          </div>
+          <span style="font-size:12px;color:var(--text2);min-width:20px;text-align:right;">${cnt}</span>
+        </div>`
+      ).join('');
+    }
+  }
+
+  // ── Busiest days of week ────────────────────────────────────────────────────
+  const dayEl = g('an-busiest-days');
+  if(dayEl){
+    const dayNames = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+    const dayCounts = [0,0,0,0,0,0,0];
+    approved.forEach(d => {
+      const day = new Date(d.date + 'T12:00:00').getDay();
+      dayCounts[day]++;
+    });
+    const maxD = Math.max(...dayCounts, 1);
+    // Reorder Mon→Sun (1-6, 0)
+    const order = [1,2,3,4,5,6,0];
+    dayEl.innerHTML = order.map(i =>
+      `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);">
+        <span style="font-size:13px;color:var(--text);min-width:28px;">${dayNames[i]}</span>
+        <div style="flex:1;height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;">
+          <div style="width:${Math.round((dayCounts[i]/maxD)*100)}%;height:100%;background:var(--blue);border-radius:4px;"></div>
+        </div>
+        <span style="font-size:12px;color:var(--text2);min-width:20px;text-align:right;">${dayCounts[i]}</span>
+      </div>`
+    ).join('');
+  }
+
+  // ── Weekly trend (last 8 weeks) ─────────────────────────────────────────────
+  const trendEl = g('an-trend');
+  if(trendEl){
+    // Build last 8 weeks
+    const weeks = [];
+    for(let w = 7; w >= 0; w--){
+      const wStart = new Date();
+      wStart.setDate(wStart.getDate() - (wStart.getDay() === 0 ? 6 : wStart.getDay()-1) - w*7);
+      wStart.setHours(0,0,0,0);
+      const wEnd = new Date(wStart); wEnd.setDate(wEnd.getDate()+6);
+      const wStartStr = dk(wStart);
+      const wEndStr   = dk(wEnd);
+      const cnt = deliveries.filter(d =>
+        d.status === 'approved' && d.date >= wStartStr && d.date <= wEndStr
+      ).length;
+      const label = wStart.toLocaleDateString('fr-CA', {month:'short', day:'numeric'});
+      weeks.push({label, cnt, wStartStr});
+    }
+    const maxW = Math.max(...weeks.map(w => w.cnt), 1);
+    const BAR_H = 80;
+    trendEl.innerHTML = `<div style="display:flex;align-items:flex-end;gap:8px;height:${BAR_H+40}px;padding-top:8px;">
+      ${weeks.map(w => {
+        const barH = Math.max(4, Math.round((w.cnt/maxW)*BAR_H));
+        const isCurrent = w.wStartStr === dk(getMonday(new Date()));
+        return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+          <span style="font-size:11px;color:var(--text2);font-weight:${isCurrent?700:400};">${w.cnt}</span>
+          <div style="width:100%;height:${barH}px;background:${isCurrent?'var(--accent)':'var(--blue)'};border-radius:3px 3px 0 0;opacity:${isCurrent?1:0.7};" title="${w.label}: ${w.cnt} livraisons"></div>
+          <span style="font-size:10px;color:var(--text3);white-space:nowrap;">${w.label}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }
+}
+
+function exportCSV(){
+  let csv='Date,Start,End,Zone,Company,Contact,Phone,Material,Truck,Status,Notes\n';
+  deliveries.forEach(d=>{const z=zones.find(z=>z.id===d.zone);
+    csv+=`"${d.date}","${d.timeStart||d.time}","${d.timeEnd||''}","${z?z.name:d.zone}","${d.company}","${d.contact}","${d.phone||''}","${d.material}","${d.truck||''}","${d.status}","${d.notes||''}"\n`;});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='deliveries.csv';a.click();
+}
+
+// ── MODALS ────────────────────────────────────────────────
+function openMyDeliveries(){
+  if(!firebaseUser){ openUserAuth(); return; }
+  const myDels = deliveries
+    .filter(d => d.userId === firebaseUser.uid)
+    .sort((a,b) => new Date(b.submittedAt||0) - new Date(a.submittedAt||0));
+  const list = g('my-del-list');
+  if(!myDels.length){
+    list.innerHTML='<div style="text-align:center;padding:30px 0;font-size:13px;color:var(--text3);">Aucune livraison pour le moment.</div>';
+  } else {
+    list.innerHTML = myDels.map(d => {
+      const z = zones.find(z=>z.id===d.zone);
+      const sc = d.status==='approved'?'var(--green)':d.status==='pending'?'var(--amber)':d.status==='cancelled'?'var(--text3)':'var(--red)';
+      const timeStr = (d.timeStart||d.time)+(d.timeEnd?' – '+d.timeEnd:'');
+      const canEdit = d.status==='pending';
+      return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
+        +  '<div>'
+        +    '<div style="font-size:14px;font-weight:600;color:var(--text);">'+d.company+'</div>'
+        +    '<div style="font-size:11px;color:var(--text2);margin-top:2px;">'+fmtDate(d.date)+' · '+timeStr+(z?' · '+z.name:'')+'</div>'
+        +    '<div style="font-size:11px;color:var(--text2);">'+d.material+'</div>'
+        +  '</div>'
+        +  '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+sc+'22;color:'+sc+';border:1px solid '+sc+'55;white-space:nowrap;text-transform:uppercase;">'+d.status+'</span>'
+        +'</div>'
+        +(canEdit ? '<div class="_user-del-actions" data-id="'+d.id+'" style="display:flex;gap:6px;"></div>' : '')
+          +((!canEdit&&d.status!=='cancelled') ? '<div style="font-size:11px;color:var(--text3);">'+(d.status==='approved' ? 'Approuvée — contactez le surintendant pour modifier.' : 'Rejeté.'+(d.rejectionNote?' Raison : '+d.rejectionNote:''))+'</div>' : '')
+        +'</div>';
+    }).join('');
+  }
+  g('modal-my-deliveries').classList.add('open');
+  // Wire up edit/cancel buttons safely via DOM
+  document.querySelectorAll('._user-del-actions').forEach(div => {
+    const id = div.dataset.id;
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Modifier';
+    editBtn.style.cssText = 'padding:5px 12px;border-radius:var(--r);border:1px solid var(--blue-bd);background:var(--blue-dim);color:var(--blue);font-size:11px;font-weight:700;cursor:pointer;';
+    editBtn.addEventListener('click', () => userEditDelivery(id));
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Annuler';
+    cancelBtn.style.cssText = 'padding:5px 12px;border-radius:var(--r);border:1px solid var(--red-bd);background:var(--red-dim);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;';
+    cancelBtn.addEventListener('click', () => userCancelDelivery(id));
+    div.appendChild(editBtn);
+    div.appendChild(cancelBtn);
+  });
+}
+
+function userCancelDelivery(id){
+  const d = deliveries.find(x=>x.id===id);
+  if(!d||d.userId!==firebaseUser?.uid||d.status!=='pending') return;
+  d.status='cancelled';
+  d.rejectionNote='Annulée par le sous-traitant.';
+  saveDelivery(d);
+  notif(d.company+' cancelled their delivery ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').','rejected');
+  openMyDeliveries(); // refresh modal
+  renderWeekCalendar();
+  updateBadges();
+}
+
+function userEditDelivery(id){
+  closeModal('modal-my-deliveries');
+  openEdit(id); // reuse admin edit modal — fields editable for pending only
+}
+
+
+// Resize listener: restore desktop layout if window grows past mobile breakpoint
+window.addEventListener('resize', ()=>{
+  if(window.innerWidth > 768){
+    const form=document.querySelector('.booking-panel');
+    const cal=document.querySelector('.cal-main');
+    if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
+    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
+
+  }
+});
+
+
+function closeModal(id){g(id).classList.remove('open');}
+
+function openZoneModal(zoneId){
+  const z = zones.find(x => x.id === zoneId); if (!z) return;
+  const todayStr = today();
+  const weekDates = Array.from({length:7}, (_,i) => dk(addDays(getMonday(new Date()), i)));
+
+  const zoneDels  = deliveries.filter(d => d.zone === zoneId);
+  const todayDels = zoneDels.filter(d => d.date === todayStr && d.status !== 'rejected' && d.status !== 'cancelled');
+  const pendingCnt= zoneDels.filter(d => d.status === 'pending').length;
+  const weekCnt   = zoneDels.filter(d => weekDates.includes(d.date) && d.status === 'approved').length;
+
+  g('zm-dot').style.background  = z.color;
+  g('zm-name').textContent       = z.name;
+  g('zm-date').textContent       = new Date().toLocaleDateString('en-CA', {weekday:'long', month:'long', day:'numeric'});
+  g('zm-header').style.borderBottom = '1px solid ' + z.color + '44';
+  g('zm-stat-today').textContent   = todayDels.filter(d => d.status === 'approved').length;
+  g('zm-stat-pending').textContent = pendingCnt;
+  g('zm-stat-week').textContent    = weekCnt;
+
+  const list = g('zm-list');
+  if (!todayDels.length) {
+    list.innerHTML = '<div style="text-align:center;padding:20px 0;font-size:12px;color:var(--text3);">No deliveries scheduled for today.</div>';
+  } else {
+    const sorted = [...todayDels].sort((a,b) => (a.timeStart||a.time).localeCompare(b.timeStart||b.time));
+    list.innerHTML = '';
+    sorted.forEach(d => {
+      const statusColor = d.status==='approved' ? 'var(--green)' : d.status==='pending' ? 'var(--amber)' : 'var(--red)';
+      const statusBg    = d.status==='approved' ? 'var(--green-dim)' : d.status==='pending' ? 'var(--amber-dim)' : 'var(--red-dim)';
+      const statusBd    = d.status==='approved' ? 'var(--green-bd)'  : d.status==='pending' ? 'var(--amber-bd)'  : 'var(--red-bd)';
+      const timeStr     = (d.timeStart||d.time) + (d.timeEnd ? ' – ' + d.timeEnd : '');
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);';
+      row.innerHTML =
+        '<div style="font-family:var(--mono);font-size:11px;color:var(--text2);flex-shrink:0;min-width:90px;">' + timeStr + '</div>'
+        + '<div style="flex:1;min-width:0;">'
+        +   '<div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.company + '</div>'
+        +   '<div style="font-size:11px;color:var(--text2);">' + d.contact + (d.truck ? ' · ' + d.truck : '') + '</div>'
+        + '</div>'
+        + '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:' + statusBg + ';color:' + statusColor + ';border:1px solid ' + statusBd + ';white-space:nowrap;text-transform:uppercase;letter-spacing:0.04em;">' + d.status + '</span>';
+      if (isAdmin() && d.status === 'pending') {
+        const approveBtn = document.createElement('button');
+        approveBtn.textContent = 'Approve';
+        approveBtn.style.cssText = 'padding:4px 10px;border-radius:4px;border:none;background:var(--green);color:#0a1f14;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;';
+        approveBtn.addEventListener('click', () => decideFromZoneModal(d.id, 'approved'));
+        row.appendChild(approveBtn);
+      }
+      list.appendChild(row);
+    });
+  }
+
+  g('modal-zone').dataset.zoneId = zoneId;
+  g('modal-zone').classList.add('open');
+
+}
+
+
+function decideFromZoneModal(id, status) {
+  const d = deliveries.find(x => x.id === id); if (!d) return;
+  if (status === 'approved') {
+    const cf = deliveries.find(x => x.id !== id && x.zone === d.zone && x.date === d.date && x.status === 'approved' && overlap(d.timeStart||d.time, d.timeEnd||d.time, x.timeStart||x.time, x.timeEnd||x.time));
+    if (cf) { alert('Pris par ' + cf.company + '.'); return; }
+  }
+  d.status = status;
+  notif(d.company + ' ' + status + ' (' + fmtDate(d.date) + ' ' + (d.timeStart||d.time) + ').', status);
+  saveDelivery(d);
+  // Refresh the modal in place
+  openZoneModal(d.zone);
+  updateBadges();
+}
+
+function bookForZone() {
+  const zoneId = g('modal-zone').dataset.zoneId;
+  closeModal('modal-zone');
+  // Pre-select this zone and switch to deliveries view
+  selZone = zoneId;
+  showView('deliveries');
+}
+document.querySelectorAll('.modal-backdrop').forEach(el=>{
+  el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});
+});
+
+// ── INIT ──────────────────────────────────────────────────
+async function initApp(){
+  // Restore saved theme
+  try {
+    if (localStorage.getItem('sd_theme') === 'light') {
+      document.body.classList.add('light');
+      setTimeout(() => {
+        const knob = g('theme-knob');
+        if (knob) { knob.style.left='21px'; knob.style.background='#1C4A4A'; }
+      }, 50);
+    }
+  } catch(e){}
+  tickClock(); setInterval(tickClock,1000);
+  weekStart = getMonday(new Date());
+  document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+  g('nav-admin').style.display='none';
+  g('btn-logout').style.display='none';
+  g('tb-role').style.display='none';
+
+  // Show loading state
+  g('week-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;grid-column:1/-1;">Connecting to database…</div>';
+
+  if(window._db){
+    // Load config docs in parallel
+    const [z, pi, no, mi, sch, bd] = await Promise.all([
+      fbLoadConfig('zones',        zones),
+      fbLoadConfig('projectInfo',  projectInfo),
+      fbLoadConfig('notifications', []),
+      fbLoadConfig('mapImg',       null),
+      fbLoadConfig('siteSchedule', siteSchedule),
+      fbLoadConfig('blackoutDates', []),
+    ]);
+    zones         = z;
+    projectInfo   = pi;
+    notifications = no;
+    mapImg        = mi;
+    mapPdf        = null;
+    siteSchedule  = sch;
+    blackoutDates = bd; // PDF is always converted to image on upload, stored as mapImg
+    subscribeDeliveries(); // real-time listener handles deliveries
+  }
+
+  showView('home');
+}
+
+// Called by Firebase module once SDK is ready (see <script type="module"> above)
+window._initApp = initApp;
+
+// Fallback: if DOMContentLoaded fires before Firebase module (shouldn't happen but safe)
+if(window._firebaseReady){ initApp(); }
+</script>
+</body>
+</html>
