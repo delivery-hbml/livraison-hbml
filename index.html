@@ -1091,6 +1091,7 @@ function doAdminLogin(){
   const u=g('ali-user').value.trim(), p=g('ali-pass').value.trim(), acc=ACCOUNTS[u];
   if(!acc||acc.pass!==p){ g('ali-err').style.display='block'; return; }
   currentUser={username:u,...acc};
+  try{ localStorage.setItem('sd_admin_session', u); }catch(e){}
   closeModal('modal-login');
   applyAdminUI();
   showView('home');
@@ -1113,6 +1114,7 @@ function doLogout(){
   if(window._auth && firebaseUser){ window._signOut(); }
   firebaseUser = null;
   currentUser  = {role:'guest'};
+  try{ localStorage.removeItem('sd_admin_session'); }catch(e){}
   g('tb-role').style.display='none';
   g('tb-username').textContent='';
   g('btn-login').style.display='';
@@ -2524,6 +2526,15 @@ async function initApp(){
     // Apply saved app name
     const _an=g('app-name'); if(_an) _an.textContent=projectInfo.appname||'SiteDelivery';
   }
+
+  // Restore admin session if previously logged in
+  try{
+    const savedAdmin = localStorage.getItem('sd_admin_session');
+    if(savedAdmin && ACCOUNTS[savedAdmin]){
+      currentUser = {username:savedAdmin, ...ACCOUNTS[savedAdmin]};
+      applyAdminUI();
+    }
+  }catch(e){}
 
   showView('home');
 }
