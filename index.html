@@ -606,7 +606,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
             <div class="pb" id="all-list"></div>
           </div>
           <div class="panel">
-            <div class="ph"><span class="pt">Livraisons annulées</span><span class="pc" id="cancelled-count"></span></div>
+            <div class="ph"><span class="pt">Livraisons annulées / rejetées</span><span class="pc" id="cancelled-count"></span></div>
             <div class="pb" id="cancelled-list"></div>
           </div>
           <div class="panel">
@@ -1890,9 +1890,9 @@ function renderAdmin(){
       ${grp.map(d=>`<div class="ci"><div class="ci-info"><strong>${d.company}</strong><br><span style="color:var(--text2);">${d.contact}${d.truck?' · '+d.truck:''}</span></div>
       <button class="ci-pick" onclick="pickSlot('${d.id}')">Approve This</button></div>`).join('')}</div>`;
   }).join(''):'<div class="empty">No conflicts.</div>';
-  const nonCan=deliveries.filter(d=>d.status!=='cancelled');
+  const nonCan=deliveries.filter(d=>d.status!=='cancelled'&&d.status!=='rejected');
   g('all-list').innerHTML=nonCan.length?nonCan.slice(0,30).map(d=>drHTML(d,false)).join(''):'<div class="empty">No deliveries yet.</div>';
-  const can=deliveries.filter(d=>d.status==='cancelled');
+  const can=deliveries.filter(d=>d.status==='cancelled'||d.status==='rejected');
   g('cancelled-count').textContent=can.length||'None';
   g('cancelled-list').innerHTML=can.length?can.map(d=>drHTML(d,false)).join(''):'<div class="empty">No cancelled deliveries.</div>';
   g('zone-mgr').innerHTML=zones.map(z=>`<div class="zm-row"><span class="zm-dot" style="background:${z.color}"></span>
@@ -1911,7 +1911,7 @@ function drHTML(d,showPend){
   let acts='';
   if(showPend&&d.status==='pending'){
     acts=`<div class="dr-acts">
-      <input class="dr-note" id="note-${d.id}" placeholder="Rejection reason…">
+      <input class="dr-note" id="note-${d.id}" placeholder="Motif de rejet…">
       <button class="act act-approve" onclick="decide('${d.id}','approved')">Approve</button>
       <button class="act act-reject"  onclick="decide('${d.id}','rejected')">Reject</button>
       <button class="act act-edit"    onclick="openEdit('${d.id}')">Edit</button>
@@ -1923,16 +1923,25 @@ function drHTML(d,showPend){
     </div>`;
   } else if(d.status==='cancelled'){
     acts=`<div class="dr-acts">
-      <button class="act act-uncancel" onclick="uncancelDel('${d.id}')">↩ Uncancel</button>
+      <button class="act act-uncancel" onclick="uncancelDel('${d.id}')">↩ Rétablir</button>
       <button class="act act-del"      onclick="deleteDel('${d.id}')">✕</button>
     </div>`;
-  } else if(d.rejectionNote){
-    acts=`<div style="font-size:11px;color:var(--red);padding:4px 0;">Reason: ${d.rejectionNote}</div>`;
+  } else if(d.status==='rejected'){
+    acts=`<div class="dr-acts">
+      <div style="font-size:11px;color:var(--red);padding:2px 0;">${d.rejectionNote?'Raison : '+d.rejectionNote:''}</div>
+      <button class="act act-uncancel" onclick="uncancelDel('${d.id}')">↩ Rétablir</button>
+      <button class="act act-del"      onclick="deleteDel('${d.id}')">✕</button>
+    </div>`;
   }
   return `<div class="dr">
     <div class="dr-top">
       <div><div class="dr-co">${d.company}</div><div class="dr-meta">${d.contact}${d.phone?' · '+d.phone:''} · ${d.material}</div></div>
-      <span class="badge b-${d.status==='cancelled'?'cancelled':d.status}">${d.status}</span>
+      <span class="badge b-${d.status==='cancelled'?'cancelled':d.status}">${
+        d.status==='approved'?'APPROUVÉE':
+        d.status==='pending'?'EN ATTENTE':
+        d.status==='rejected'?'REJETÉE':
+        d.status==='cancelled'?'ANNULÉE':d.status.toUpperCase()
+      }</span>
     </div>
     <div class="dr-badges">
       ${z?`<span class="badge b-zone" style="background:${z.color}22;color:${z.color};border-color:${z.color}55;">${z.name}</span>`:''}
