@@ -145,11 +145,14 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .db-pending{background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);}
 
 /* ADMIN */
-.admin-wrap{padding:24px;max-width:1060px;margin:0 auto;}
+.admin-wrap{padding:24px;max-width:1400px;margin:0 auto;}
 .admin-wrap h1{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;margin-bottom:4px;}
 .admin-sub{font-size:13px;color:var(--text2);margin-bottom:22px;}
-.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
 .panel{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:16px;}
+.panel.collapsed .pb{display:none;}
+.panel-toggle{background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;padding:0 4px;line-height:1;transition:transform .2s;}
+.panel.collapsed .panel-toggle{transform:rotate(-90deg);}
 .panel:last-child{margin-bottom:0;}
 .ph{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .pt{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;}
@@ -541,93 +544,142 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   <div class="view" id="view-admin">
     <div class="admin-wrap">
       <h1>Panneau admin</h1>
-      <p class="admin-sub">Approve deliveries, resolve conflicts, manage zones.</p>
-      <div class="admin-grid">
-        <div>
-          <!-- Hidden — orders are auto-approved -->
-          <div style="display:none;" id="pending-list"></div>
-          <div style="display:none;" id="ap-count"></div>
-          <div style="display:none;" id="conflict-list"></div>
-          <div style="display:none;" id="conflict-count"></div>
-        </div>
-        <div>
-          <div class="panel">
-            <div class="ph"><span class="pt">Gestion des zones</span></div>
-            <div class="pb"><div id="zone-mgr"></div><button class="add-zone-btn" onclick="addZone()">+ Ajouter zone</button></div>
+      <p class="admin-sub">Gérez les zones, les sous-traitants, les horaires et les livraisons.</p>
+
+      <!-- ROW 1: Management panels -->
+      <div class="admin-grid" style="margin-bottom:0;">
+
+        <!-- Gestion des zones -->
+        <div class="panel" id="panel-zones">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-zones')">
+            <span class="pt">Gestion des zones</span>
+            <button class="panel-toggle" tabindex="-1">&#9662;</button>
           </div>
-          <div class="panel">
-            <div class="ph">
-              <span class="pt">Sous-traitants</span>
-              <span class="pc">Compagnies disponibles dans le formulaire de livraison</span>
-            </div>
-            <div class="pb">
-              <div style="display:flex;gap:8px;margin-bottom:12px;">
-                <input type="text" id="sub-input" placeholder="ex. Les Constructions Leblanc" onkeydown="if(event.key==='Enter')addSubcontractor()"
-                  style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
-                <button class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
-              </div>
-              <div id="sub-list"></div>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="ph">
-              <span class="pt">Dates de blocage</span>
-              <span class="pc">Bloquer une zone pour une date ou plage de dates</span>
-            </div>
-            <div class="pb">
-              <!-- Add blackout form -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                <div class="mf" style="margin:0;">
-                  <label style="font-size:11px;">Zone</label>
-                  <select id="bo-zone" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;"></select>
-                </div>
-                <div class="mf" style="margin:0;">
-                  <label style="font-size:11px;">Raison</label>
-                  <select id="bo-reason-sel" onchange="boReasonChange()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
-                    <option value="Coulée de béton">Coulée de béton</option>
-                    <option value="Inspection">Inspection</option>
-                    <option value="Fermeture du site">Fermeture du site</option>
-                    <option value="Autre">Autre…</option>
-                  </select>
-                </div>
-                <div class="mf" style="margin:0;" id="bo-reason-custom-wrap" style="display:none;">
-                  <label style="font-size:11px;">Préciser la raison</label>
-                  <input type="text" id="bo-reason-custom" placeholder="ex. Levage de structure" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
-                </div>
-                <div class="mf" style="margin:0;">
-                  <label style="font-size:11px;">Date de début</label>
-                  <input type="date" id="bo-date-from" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
-                </div>
-                <div class="mf" style="margin:0;">
-                  <label style="font-size:11px;">Date de fin</label>
-                  <input type="date" id="bo-date-to" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
-                </div>
-              </div>
-              <button class="add-zone-btn" onclick="addBlackout()" style="margin-bottom:16px;">+ Ajouter le blocage</button>
-              <div id="blackout-list"></div>
-            </div>
-          </div>
-          <div class="panel">
-            <div class="ph"><span class="pt">Horaires de livraison</span><span class="pc" style="font-size:11px;color:var(--text3);">Heures d'ouverture par jour</span></div>
-            <div class="pb" id="schedule-mgr"></div>
-          </div>
-          <div class="panel">
-            <div class="ph">
-              <span class="pt">Toutes les livraisons</span>
-              <button onclick="exportCSV()" style="padding:3px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;">Exporter CSV</button>
-            </div>
-            <div class="pb" id="all-list"></div>
-          </div>
-          <div class="panel">
-            <div class="ph"><span class="pt">Livraisons annulées / rejetées</span><span class="pc" id="cancelled-count"></span></div>
-            <div class="pb" id="cancelled-list"></div>
-          </div>
-          <div class="panel">
-            <div class="ph"><span class="pt">Journal des notifications</span></div>
-            <div class="pb" id="notif-log"></div>
+          <div class="pb">
+            <div id="zone-mgr"></div>
+            <button class="add-zone-btn" onclick="addZone()">+ Ajouter zone</button>
           </div>
         </div>
-      </div>
+
+        <!-- Sous-traitants -->
+        <div class="panel" id="panel-subs">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-subs')">
+            <span class="pt">Sous-traitants</span>
+            <span class="pc">Compagnies du formulaire</span>
+            <button class="panel-toggle" tabindex="-1">&#9662;</button>
+          </div>
+          <div class="pb">
+            <div style="display:flex;gap:8px;margin-bottom:12px;">
+              <input type="text" id="sub-input" placeholder="ex. Les Constructions Leblanc"
+                onkeydown="if(event.key==='Enter')addSubcontractor()"
+                style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
+              <button class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
+            </div>
+            <div id="sub-list"></div>
+          </div>
+        </div>
+
+        <!-- Horaires de livraison -->
+        <div class="panel" id="panel-schedule">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-schedule')">
+            <span class="pt">Horaires de livraison</span>
+            <span class="pc">Heures d'ouverture par jour</span>
+            <button class="panel-toggle" tabindex="-1">&#9662;</button>
+          </div>
+          <div class="pb" id="schedule-mgr"></div>
+        </div>
+
+      </div><!-- /row1 -->
+
+      <!-- ROW 2: Dates de blocage (full width) -->
+      <div style="margin-bottom:0;">
+        <div class="panel" id="panel-blackout">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-blackout')">
+            <span class="pt">Dates de blocage</span>
+            <span class="pc">Bloquer une zone pour une date ou plage de dates</span>
+            <button class="panel-toggle" tabindex="-1">&#9662;</button>
+          </div>
+          <div class="pb">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;align-items:end;">
+              <div class="mf" style="margin:0;">
+                <label style="font-size:11px;">Zone</label>
+                <select id="bo-zone" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;"></select>
+              </div>
+              <div class="mf" style="margin:0;">
+                <label style="font-size:11px;">Raison</label>
+                <select id="bo-reason-sel" onchange="boReasonChange()" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+                  <option value="Coulée de béton">Coulée de béton</option>
+                  <option value="Inspection">Inspection</option>
+                  <option value="Fermeture du site">Fermeture du site</option>
+                  <option value="Autre">Autre…</option>
+                </select>
+              </div>
+              <div class="mf" style="margin:0;">
+                <label style="font-size:11px;">Date de début</label>
+                <input type="date" id="bo-date-from" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+              </div>
+              <div class="mf" style="margin:0;">
+                <label style="font-size:11px;">Date de fin</label>
+                <input type="date" id="bo-date-to" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+              </div>
+            </div>
+            <div class="mf" id="bo-reason-custom-wrap" style="display:none;margin-bottom:12px;">
+              <label style="font-size:11px;">Préciser la raison</label>
+              <input type="text" id="bo-reason-custom" placeholder="ex. Levage de structure"
+                style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 10px;color:var(--text);font-size:13px;outline:none;">
+            </div>
+            <button class="add-zone-btn" onclick="addBlackout()" style="margin-bottom:16px;">+ Ajouter le blocage</button>
+            <div id="blackout-list"></div>
+          </div>
+        </div>
+      </div><!-- /row2 -->
+
+      <!-- ROW 3-5: Deliveries + log (full width, collapsed by default) -->
+      <div>
+
+        <!-- Toutes les livraisons -->
+        <div class="panel" id="panel-all-del">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-all-del')">
+            <span class="pt">Toutes les livraisons</span>
+            <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+              <button onclick="event.stopPropagation();exportCSV()" style="padding:3px 10px;border-radius:4px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;cursor:pointer;">Exporter CSV</button>
+              <button class="panel-toggle" tabindex="-1">&#9662;</button>
+            </div>
+          </div>
+          <div class="pb" id="all-list"></div>
+        </div>
+
+        <!-- Livraisons annulées / rejetées -->
+        <div class="panel collapsed" id="panel-cancelled">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-cancelled')">
+            <span class="pt">Livraisons annulées / rejetées</span>
+            <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+              <span class="pc" id="cancelled-count"></span>
+              <button class="panel-toggle" tabindex="-1">&#9662;</button>
+            </div>
+          </div>
+          <div class="pb" id="cancelled-list"></div>
+        </div>
+
+        <!-- Journal des notifications -->
+        <div class="panel collapsed" id="panel-notif">
+          <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-notif')">
+            <span class="pt">Journal des notifications</span>
+            <button class="panel-toggle" tabindex="-1">&#9662;</button>
+          </div>
+          <div class="pb" id="notif-log"></div>
+        </div>
+
+        <!-- Hidden pending/conflict elements for compatibility -->
+        <div style="display:none;" id="pending-list"></div>
+        <div style="display:none;" id="ap-count"></div>
+        <div style="display:none;" id="conflict-list"></div>
+        <div style="display:none;" id="conflict-count"></div>
+        <div style="display:none;" id="lbl-pending-approvals"></div>
+        <div style="display:none;" id="lbl-conflicts"></div>
+
+      </div><!-- /row3-5 -->
+
     </div>
   </div>
 </div>
@@ -2459,6 +2511,11 @@ function renderAnalytics(){
       }).join('')}
     </div>`;
   }
+}
+
+function togglePanel(id){
+  const panel = g(id);
+  if(panel) panel.classList.toggle('collapsed');
 }
 
 function exportCSV(){
