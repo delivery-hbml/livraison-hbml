@@ -20,11 +20,11 @@
   --r:6px; --r2:10px; --mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}html,body{height:100%;}
 button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 /* TOPBAR */
-.topbar{background:var(--bg2);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:200;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:200;flex-shrink:0;}
 .topbar-logo{display:flex;align-items:center;gap:9px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:.05em;color:var(--text);}
 .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;}
 .logo-icon svg{width:16px;height:16px;fill:white;}
@@ -41,18 +41,20 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .tb-btn.primary:hover{background:var(--accent2);}
 
 /* VIEWS */
-.view{display:none;min-height:calc(100vh - 52px);}
+.view{display:none;}
+.view.active{display:block;}
+#view-home.active{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 .view.active{display:block;}
 
 /* STAT STRIP */
-.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0;}
 .stat-item{background:var(--bg2);padding:12px 20px;}
 .stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;}
 .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;}
 .c-amber{color:var(--amber);} .c-green{color:var(--green);} .c-blue{color:var(--blue);} .c-red{color:var(--red);}
 
 /* DASHBOARD */
-.dash-layout{display:grid;grid-template-columns:300px 1fr;height:calc(100vh - 52px - 50px);overflow:hidden;}
+.dash-layout{display:grid;grid-template-columns:300px 1fr;flex:1;min-height:0;overflow:hidden;}
 .dash-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:20px;overflow-y:auto;height:100%;}
 .proj-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:2px;}
 .proj-addr{font-size:12px;color:var(--text3);margin-bottom:16px;}
@@ -72,7 +74,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 /* MAP */
 .map-area{position:relative;background:var(--bg3);overflow:hidden;height:100%;}
-.map-canvas{position:relative;width:100%;height:100%;min-height:calc(100vh - 52px - 50px);background:var(--bg3);display:flex;align-items:flex-start;justify-content:flex-start;}
+.map-canvas{position:relative;width:100%;height:100%;background:var(--bg3);display:flex;align-items:flex-start;justify-content:flex-start;}
 .map-stage{position:relative;flex-shrink:0;}
 .map-stage img.map-img{display:block;width:100%;height:auto;opacity:.85;pointer-events:none;user-select:none;}
 .map-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--text3);}
@@ -257,7 +259,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .mob-bottom-nav{display:flex!important;}
 
   /* Push content above bottom nav */
-  #app > .view.active{padding-bottom:56px;}
+  #view-home.active{padding-bottom:0;}
 
   /* Stat strip 2x2 */
   .stat-strip{grid-template-columns:1fr 1fr;}
@@ -380,14 +382,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <span id="app-name">SiteDelivery</span>
     </div>
     <div class="sep"></div>
-    <div id="sync-indicator" style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3);padding:0 4px;">
-      <span id="sync-dot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);display:inline-block;"></span>
-      <span id="sync-label">Connecting…</span>
+    <div id="sync-indicator" style="display:flex;align-items:center;padding:0 4px;">
+      <span id="sync-dot" style="width:6px;height:6px;border-radius:50%;background:var(--text3);display:inline-block;" title="Statut de connexion"></span>
     </div>
     <div class="sep"></div>
     <button class="nav-btn active" id="nav-home" onclick="showView('home')">Tableau de bord</button>
     <button class="nav-btn" id="nav-deliveries" onclick="showView('deliveries')">
-      Livraisons <span class="nav-badge" id="pending-badge" style="display:none"></span>
+      Calendrier <span class="nav-badge" id="pending-badge" style="display:none"></span>
     </button>
     <button class="nav-btn admin-only" id="nav-admin" onclick="showView('admin')">Panneau admin</button>
     <button class="nav-btn admin-only" id="nav-analytics" onclick="showView('analytics')">Analytique</button>
@@ -409,7 +410,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     </button>
     <button class="mob-nav-item" id="mob-nav-deliveries" onclick="showView('deliveries')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-      <span>Livraisons</span>
+      <span>Calendrier</span>
       <span class="mob-badge" id="mob-pending-badge" style="display:none;"></span>
     </button>
     <button class="mob-nav-item admin-only" id="mob-nav-admin" onclick="showView('admin')" style="display:none;">
@@ -502,7 +503,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
             <button onclick="openUserAuthFromBanner()" style="padding:4px 12px;border-radius:4px;border:none;background:var(--blue);color:white;font-size:11px;font-weight:700;cursor:pointer;">Se connecter / S’inscrire</button>
           </div>
           <div class="fg"><label>Date de livraison <span class="req">*</span></label><input type="date" id="b-date"></div>
-          <div class="fg"><label>Compagnie / Sous-traitant <span class="req">*</span></label><input type="text" id="b-company" placeholder="ex. Les Constructions Leblanc"></div>
+          <div class="fg"><label>Compagnie / Sous-traitant <span class="req">*</span></label><select id="b-company" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;"></select></div>
           <div class="fg"><label>Nom du contact <span class="req">*</span></label><input type="text" id="b-contact" placeholder="ex. Marie Dubois"></div>
           <div class="fg"><label>Téléphone <span class="req">*</span></label><input type="tel" id="b-phone" placeholder="514-555-0100"></div>
           <div class="fg"><label>Matériel / Description <span class="req">*</span></label><input type="text" id="b-material" placeholder="ex. Poutrelles d’acier, 12 pcs"></div>
@@ -553,6 +554,20 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
           <div class="panel">
             <div class="ph"><span class="pt">Gestion des zones</span></div>
             <div class="pb"><div id="zone-mgr"></div><button class="add-zone-btn" onclick="addZone()">+ Ajouter zone</button></div>
+          </div>
+          <div class="panel">
+            <div class="ph">
+              <span class="pt">Sous-traitants</span>
+              <span class="pc">Compagnies disponibles dans le formulaire de livraison</span>
+            </div>
+            <div class="pb">
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <input type="text" id="sub-input" placeholder="ex. Les Constructions Leblanc" onkeydown="if(event.key==='Enter')addSubcontractor()"
+                  style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
+                <button class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
+              </div>
+              <div id="sub-list"></div>
+            </div>
           </div>
           <div class="panel">
             <div class="ph">
@@ -690,7 +705,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <div class="mf"><label>Heure de fin <span class="req">*</span></label>
         <select id="qb-end" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;"></select>
       </div>
-      <div class="mf" style="grid-column:1/-1;"><label>Compagnie / Sous-traitant <span class="req">*</span></label><input type="text" id="qb-company" placeholder="ex. Les Constructions Leblanc"></div>
+      <div class="mf" style="grid-column:1/-1;"><label>Compagnie / Sous-traitant <span class="req">*</span></label><select id="qb-company" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;"></select></div>
       <div class="mf"><label>Nom du contact <span class="req">*</span></label><input type="text" id="qb-contact" placeholder="ex. Marie Dubois"></div>
       <div class="mf"><label>Téléphone</label><input type="tel" id="qb-phone" placeholder="514-555-0100"></div>
       <div class="mf" style="grid-column:1/-1;"><label>Matériel / Description <span class="req">*</span></label><input type="text" id="qb-material" placeholder="ex. Poutrelles d'acier, 12 pcs"></div>
@@ -899,6 +914,7 @@ let projectInfo   = {
 };
 let mapImg        = null;
 let mapPdf        = null;
+let subcontractors = []; // list of company names for dropdown
 let blackoutDates  = []; // [{id, zoneId, dateFrom, dateTo, reason}]
 let siteSchedule  = {
   Mon: { open: '06:00', close: '18:00', closed: false },
@@ -1586,6 +1602,16 @@ function renderDeliveries(){
   if(myDelBtn) myDelBtn.style.display = firebaseUser ? '' : 'none';
   const notice = g('booking-limit-notice');
   if(notice) notice.style.display = isAdmin() ? 'none' : '';
+  // Populate company dropdown
+  const coSel = g('b-company');
+  if(coSel){
+    const prev = coSel.value;
+    coSel.innerHTML = '<option value="">Sélectionner la compagnie…</option>'
+      + subcontractors.map(c=>'<option value="'+c+'"'+(c===prev?' selected':'')+'>'+c+'</option>').join('');
+    if(!subcontractors.length){
+      coSel.innerHTML += '<option value="" disabled>— Aucune compagnie (voir Admin)</option>';
+    }
+  }
   const banner = g('signin-banner');
   if(banner) banner.style.display = firebaseUser ? 'none' : 'flex';
   const dateEl=g('b-date');
@@ -1982,6 +2008,7 @@ function renderAdmin(){
     <input class="zm-input" value="${z.name}" onchange="renameZone('${z.id}',this.value)">
     <button class="zm-del" onclick="deleteZone('${z.id}')">×</button></div>`).join('');
   renderScheduleMgr();
+  renderSubList();
   renderBlackoutPanel();
   g('notif-log').innerHTML=notifications.length?notifications.slice(0,15).map(n=>
     `<div class="ni"><span class="ni-dot" style="background:${n.type==='approved'?'var(--green)':n.type==='rejected'?'var(--red)':'var(--amber)'}"></span>
@@ -2149,6 +2176,41 @@ function setDayOpen(day, isOpen){
 function setDayHour(day, which, val){
   siteSchedule[day][which] = val;
   fbSaveConfig('siteSchedule', siteSchedule);
+}
+
+function renderSubList(){
+  const el=g('sub-list'); if(!el) return;
+  if(!subcontractors.length){
+    el.innerHTML='<div class="empty">Aucun sous-traitant ajouté.</div>'; return;
+  }
+  el.innerHTML=subcontractors.map((c,i)=>
+    `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span style="font-size:13px;color:var(--text);">${c}</span>
+      <button onclick="removeSubcontractor(${i})" style="padding:3px 10px;border-radius:var(--r);border:1px solid var(--red-bd);background:var(--red-dim);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;">✕ Retirer</button>
+    </div>`
+  ).join('');
+}
+function addSubcontractor(){
+  const inp=g('sub-input'); if(!inp) return;
+  const val=inp.value.trim();
+  if(!val) return;
+  if(subcontractors.includes(val)){ alert('Cette compagnie existe déjà.'); return; }
+  subcontractors.push(val);
+  fbSaveConfig('subcontractors', subcontractors).catch(()=>{});
+  inp.value='';
+  renderSubList();
+  // Refresh company dropdowns
+  const coSel=g('b-company');
+  if(coSel) coSel.innerHTML='<option value="">Sélectionner la compagnie…</option>'
+    +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+}
+function removeSubcontractor(idx){
+  subcontractors.splice(idx,1);
+  fbSaveConfig('subcontractors', subcontractors).catch(()=>{});
+  renderSubList();
+  const coSel=g('b-company');
+  if(coSel) coSel.innerHTML='<option value="">Sélectionner la compagnie…</option>'
+    +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
 }
 
 function renderBlackoutPanel(){
@@ -2488,8 +2550,12 @@ function quickBook(date, time){
   const capDate = dateDisp.charAt(0).toUpperCase()+dateDisp.slice(1);
   g('qb-title').textContent = 'Livraison — '+capDate;
   g('qb-date').value = date;
+  // Populate company dropdown
+  const coQb=g('qb-company');
+  if(coQb) coQb.innerHTML='<option value="">Sélectionner la compagnie…</option>'
+    +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
   const zsel=g('qb-zone');
-  zsel.innerHTML=zones.map(z=>'<option value="'+z.id+'">'+z.name+'</option>').join('');
+  zsel.innerHTML=zones.map(z=>'<option value="'+z.id+'">'+ z.name+'</option>').join('');
   if(selZone) zsel.value=selZone;
   const allowed=allowedSlotsForDate(date);
   const startSel=g('qb-start');
@@ -2523,6 +2589,12 @@ function submitQuickBook(){
   const phone=g('qb-phone').value.trim(), material=g('qb-material').value.trim();
   const truck=g('qb-truck').value, notes=g('qb-notes').value.trim();
   const errEl=g('qb-err');
+  // Also update main form dropdown
+  const coSel2=g('b-company');
+  if(coSel2){
+    coSel2.innerHTML='<option value="">Sélectionner la compagnie…</option>'
+      +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+  }
   const errs=[];
   if(!company)  errs.push('Compagnie');
   if(!contact)  errs.push('Contact');
@@ -2644,21 +2716,23 @@ async function initApp(){
 
   if(window._db){
     // Load config docs in parallel
-    const [z, pi, no, mi, sch, bd] = await Promise.all([
-      fbLoadConfig('zones',        zones),
-      fbLoadConfig('projectInfo',  projectInfo),
-      fbLoadConfig('notifications', []),
-      fbLoadConfig('mapImg',       null),
-      fbLoadConfig('siteSchedule', siteSchedule),
-      fbLoadConfig('blackoutDates', []),
+    const [z, pi, no, mi, sch, bd, sc] = await Promise.all([
+      fbLoadConfig('zones',          zones),
+      fbLoadConfig('projectInfo',    projectInfo),
+      fbLoadConfig('notifications',  []),
+      fbLoadConfig('mapImg',         null),
+      fbLoadConfig('siteSchedule',   siteSchedule),
+      fbLoadConfig('blackoutDates',  []),
+      fbLoadConfig('subcontractors', []),
     ]);
-    zones         = z;
-    projectInfo   = pi;
-    notifications = no;
-    mapImg        = mi;
-    mapPdf        = null;
-    siteSchedule  = sch;
-    blackoutDates = bd; // PDF is always converted to image on upload, stored as mapImg
+    zones          = z;
+    projectInfo    = pi;
+    notifications  = no;
+    mapImg         = mi;
+    mapPdf         = null;
+    siteSchedule   = sch;
+    blackoutDates  = bd;
+    subcontractors = sc; // PDF is always converted to image on upload, stored as mapImg
     subscribeDeliveries(); // real-time listener handles deliveries
     // Apply saved app name
     const _an=g('app-name'); if(_an) _an.textContent=projectInfo.appname||'SiteDelivery';
