@@ -20,7 +20,7 @@
   --r:6px; --r2:10px; --mono:'JetBrains Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);font-size:14px;}html,body{height:100%;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);font-size:15px;}html,body{height:100%;}
 button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 /* TOPBAR */
@@ -29,13 +29,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .logo-icon{width:28px;height:28px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;}
 .logo-icon svg{width:16px;height:16px;fill:white;}
 .sep{width:1px;height:24px;background:var(--border2);}
-.nav-btn{padding:5px 13px;border-radius:5px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .14s;display:flex;align-items:center;gap:5px;}
+.nav-btn{padding:5px 13px;border-radius:5px;border:none;background:transparent;font-size:14px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .14s;display:flex;align-items:center;gap:5px;}
 .nav-btn:hover{background:var(--surface);color:var(--text);}
 .nav-btn.active{background:var(--accent-dim);color:var(--accent);}
 .nav-badge{background:var(--red);color:white;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
 .role-pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-bd);}
-.tb-btn{padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;transition:all .14s;}
+.tb-btn{padding:5px 13px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .14s;}
 .tb-btn:hover{background:var(--surface);color:var(--text);}
 .tb-btn.primary{background:var(--accent);color:white;border-color:var(--accent);}
 .tb-btn.primary:hover{background:var(--accent2);}
@@ -49,7 +49,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 /* STAT STRIP */
 .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);flex-shrink:0;}
 .stat-item{background:var(--bg2);padding:12px 20px;}
-.stat-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;}
+.stat-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);margin-bottom:4px;}
 .stat-val{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;}
 .c-amber{color:var(--amber);} .c-green{color:var(--green);} .c-blue{color:var(--blue);} .c-red{color:var(--red);}
 
@@ -57,18 +57,18 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .dash-layout{display:grid;grid-template-columns:300px 1fr;flex:1;min-height:0;overflow:hidden;align-items:stretch;grid-template-rows:1fr;}
 .dash-sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:0;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
 .proj-name{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:2px;}
-.proj-addr{font-size:12px;color:var(--text3);margin-bottom:16px;}
+.proj-addr{font-size:13px;color:var(--text3);margin-bottom:16px;}
 .clk{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:600;line-height:1;margin-bottom:2px;}
 .clk-date{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:18px;}
 .quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
 .quick-btn{padding:10px 8px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;text-align:center;transition:all .14s;display:flex;flex-direction:column;align-items:center;gap:4px;}
 .quick-btn:hover{border-color:var(--accent-bd);background:var(--accent-dim);color:var(--accent);}
 .quick-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;}
-.sec-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;margin-top:18px;}
+.sec-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;margin-top:18px;}
 .info-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);}
 .info-row:last-child{border-bottom:none;}
-.info-k{font-size:12px;color:var(--text2);}
-.info-v{font-size:12px;color:var(--text);text-align:right;max-width:55%;}
+.info-k{font-size:13px;color:var(--text2);}
+.info-v{font-size:13px;color:var(--text);text-align:right;max-width:55%;}
 .edit-info-btn{display:block;width:100%;padding:7px;margin-top:10px;background:transparent;border:1px dashed var(--border2);border-radius:var(--r);color:var(--text3);font-size:12px;cursor:pointer;transition:all .14s;}
 .edit-info-btn:hover{border-color:var(--accent-bd);color:var(--accent);}
 
@@ -83,14 +83,14 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .map-placeholder svg{width:52px;height:52px;stroke:currentColor;fill:none;stroke-width:1;}
 .upload-map-btn{padding:9px 20px;background:var(--accent);color:white;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;}
 .zone-rect{position:absolute;border:2px solid;border-radius:4px;cursor:move;display:flex;align-items:center;justify-content:center;}
-..zone-lbl{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;padding:3px 9px;border-radius:3px;white-space:nowrap;text-transform:uppercase;cursor:pointer;}
+..zone-lbl{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:3px 9px;border-radius:3px;white-space:nowrap;text-transform:uppercase;cursor:pointer;}
 .zone-resize{position:absolute;bottom:-4px;right:-4px;width:12px;height:12px;border-radius:2px;cursor:se-resize;}
 .map-ctrls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:8px;z-index:10;}
 .map-ctrl{padding:7px 14px;background:rgba(17,18,16,.88);border:1px solid var(--border2);border-radius:var(--r);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:all .14s;}
 .map-ctrl:hover{background:var(--surface);color:var(--text);}
 .map-ctrl.ac{background:var(--accent);color:white;border-color:var(--accent);}
 .zone-legend{position:absolute;top:8px;left:8px;right:8px;background:rgba(17,18,16,.88);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 12px;display:flex;flex-wrap:wrap;gap:6px 12px;z-index:5;}
-.legend-item{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;}
 .legend-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 
 /* DELIVERIES */
@@ -158,7 +158,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .panel:last-child{margin-bottom:0;}
 .ph{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
 .pt{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;}
-.pc{font-size:12px;color:var(--text2);}
+.pc{font-size:13px;color:var(--text2);}
 .pb{padding:14px 18px;}
 .empty{padding:24px 0;text-align:center;color:var(--text3);font-size:12px;}
 
@@ -166,10 +166,10 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .dr{padding:12px 0;border-bottom:1px solid var(--border);}
 .dr:last-child{border-bottom:none;}
 .dr-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
-.dr-co{font-size:14px;font-weight:600;}
-.dr-meta{font-size:11px;color:var(--text2);margin-top:1px;line-height:1.4;}
+.dr-co{font-size:15px;font-weight:600;}
+.dr-meta{font-size:12px;color:var(--text2);margin-top:1px;line-height:1.4;}
 .dr-badges{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
-.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;}
 .b-pending{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);}
 .b-approved{background:var(--green-dim);color:var(--green);border:1px solid var(--green-bd);}
 .b-rejected,.b-cancelled{background:var(--red-dim);color:var(--red);border:1px solid var(--red-bd);}
@@ -484,6 +484,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
               <button class="map-ctrl" onclick="document.getElementById('map-file-inp').click()">Remplacer le plan</button>
               <button class="map-ctrl ac" onclick="addZone()">+ Ajouter zone</button>
               <button class="map-ctrl" id="btn-edit-zones" onclick="toggleZoneEdit()" style="border-color:rgba(232,160,42,0.4);color:var(--amber);">Modifier zones</button>
+              <button class="map-ctrl" id="btn-edit-icons" onclick="toggleIconEdit()" style="border-color:rgba(93,202,165,0.4);color:var(--blue);">Modifier icônes</button>
             </div>
             <div class="zone-legend" id="zone-legend" style="display:none;"></div>
           </div>
@@ -568,7 +569,42 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
         </div>
 
         <!-- Sous-traitants -->
-        <div class="panel" id="panel-subs">
+                  <div class="panel" id="panel-markers">
+            <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-markers')">
+              <span class="pt">Marqueurs d'icônes</span>
+              <span class="pc">Icônes libres sur le plan (sans zone)</span>
+              <button class="panel-toggle" tabindex="-1">&#9662;</button>
+            </div>
+            <div class="panel-body pb">
+              <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px;margin-bottom:10px;align-items:end;">
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Icône</label>
+                  <select id="im-icon" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 8px;color:var(--text);font-size:12px;outline:none;"></select>
+                </div>
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Étiquette (optionnel)</label>
+                  <input type="text" id="im-label" placeholder="ex. Sortie nord" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 8px;color:var(--text);font-size:12px;outline:none;">
+                </div>
+                <div class="mf" style="margin:0;">
+                  <label style="font-size:11px;">Couleur</label>
+                  <select id="im-color" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:7px 8px;color:var(--text);font-size:12px;outline:none;">
+                    <option value="#C9A96E">Or (défaut)</option>
+                    <option value="#4A8FD4">Bleu</option>
+                    <option value="#4CAF7D">Vert</option>
+                    <option value="#E8622A">Orange</option>
+                    <option value="#A855F7">Violet</option>
+                    <option value="#D46060">Rouge</option>
+                    <option value="#5DCAA5">Turquoise</option>
+                    <option value="#888888">Gris</option>
+                  </select>
+                </div>
+                <button class="add-zone-btn" onclick="addIconMarker()" style="white-space:nowrap;">+ Placer</button>
+              </div>
+              <div style="font-size:11px;color:var(--text3);margin-bottom:10px;">Le marqueur apparaît au centre du plan. Faites-le glisser pour repositionner. Clic droit pour supprimer.</div>
+              <div id="im-list"></div>
+            </div>
+          </div>
+          <div class="panel" id="panel-subs">
           <div class="ph" style="cursor:pointer;" onclick="togglePanel('panel-subs')">
             <span class="pt">Sous-traitants</span>
             <span class="pc">Compagnies du formulaire</span>
@@ -973,6 +1009,7 @@ let projectInfo   = {
 let mapImg        = null;
 let mapPdf        = null;
 let subcontractors = []; // list of company names for dropdown
+let iconMarkers    = []; // standalone map icons
 let blackoutDates  = []; // [{id, zoneId, dateFrom, dateTo, reason}]
 let siteSchedule  = {
   Mon: { open: '06:00', close: '18:00', closed: false },
@@ -987,7 +1024,8 @@ let notifications = [];
 let weekStart     = getMonday(new Date());
 let activeZF      = new Set();
 let selZone       = null;
-let zonesLocked   = true; // zones are locked by default; admin can unlock to reposition
+let zonesLocked   = true;
+let iconsLocked   = true; // zones are locked by default; admin can unlock to reposition
 let _unsubDeliveries = null; // Firestore real-time listener handle
 
 // ── PERSISTENCE (Firestore) ───────────────────────────────
@@ -1095,7 +1133,7 @@ function showView(v){
   if(v==='home'){
     renderHome();
     // Extra deferred render to ensure canvas has fully painted
-    setTimeout(()=>{ if(mapImg) renderMapZones(); }, 150);
+    setTimeout(()=>{ if(mapImg){ renderMapZones(); renderIconMarkers(); } }, 150);
   }
   if(v==='deliveries') renderDeliveries();
   if(v==='admin')      renderAdmin();
@@ -1375,9 +1413,9 @@ function renderHome(){
     <span style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:2px;background:${z.color};flex-shrink:0;"></span><span class="info-k">${z.name}</span></span>
     <span class="info-v" style="font-size:11px;color:var(--text3);">${deliveries.filter(d=>d.zone===z.id&&d.status==='approved'&&d.date===today()).length} aujourd’hui</span>
   </div>`).join('');
-  renderMapZones();
+  renderMapZones(); renderIconMarkers();
   // Re-render after layout settles (fixes first-load sizing)
-  setTimeout(()=>{ if(mapImg) renderMapZones(); }, 120);
+  setTimeout(()=>{ if(mapImg){ renderMapZones(); renderIconMarkers(); } }, 120);
   renderTodayDeliveries();
 }
 
@@ -1417,20 +1455,46 @@ function renderTodayDeliveries(){
 
 function toggleZoneEdit(){
   zonesLocked = !zonesLocked;
+  if(!zonesLocked) iconsLocked = true; // lock icons when editing zones
   const btn = g('btn-edit-zones');
-  if (!zonesLocked) {
-    btn.textContent = 'Done Editing';
+  if(!zonesLocked){
+    btn.textContent = 'Terminé';
     btn.style.background = 'var(--amber)';
     btn.style.color = '#1a0f00';
     btn.style.borderColor = 'var(--amber)';
   } else {
-    btn.textContent = 'Edit Zones';
+    btn.textContent = 'Modifier zones';
     btn.style.background = '';
     btn.style.color = 'var(--amber)';
     btn.style.borderColor = 'rgba(232,160,42,0.4)';
   }
-  // Re-render zones so cursor style updates
   renderMapZones();
+  renderIconMarkers();
+}
+
+function toggleIconEdit(){
+  iconsLocked = !iconsLocked;
+  if(!iconsLocked) zonesLocked = true; // lock zones when editing icons
+  const ibtn = g('btn-edit-icons');
+  const zbtn = g('btn-edit-zones');
+  if(!iconsLocked){
+    ibtn.textContent = 'Terminé';
+    ibtn.style.background = 'var(--blue)';
+    ibtn.style.color = '#001a14';
+    ibtn.style.borderColor = 'var(--blue)';
+    // Also reset zones button
+    zbtn.textContent = 'Modifier zones';
+    zbtn.style.background = '';
+    zbtn.style.color = 'var(--amber)';
+    zbtn.style.borderColor = 'rgba(232,160,42,0.4)';
+  } else {
+    ibtn.textContent = 'Modifier icônes';
+    ibtn.style.background = '';
+    ibtn.style.color = 'var(--blue)';
+    ibtn.style.borderColor = 'rgba(93,202,165,0.4)';
+  }
+  renderMapZones();
+  renderIconMarkers();
 }
 
 function getOrCreateStage(canvas){
@@ -1561,6 +1625,59 @@ function renderMapZones(){
   }
 }
 
+function renderIconMarkers(){
+  const stage = document.querySelector('.map-stage'); if(!stage) return;
+  stage.querySelectorAll('.icon-marker').forEach(el=>el.remove());
+  const editable = isAdmin() && !iconsLocked;
+  iconMarkers.forEach(m=>{
+    const el=document.createElement('div');
+    el.className='icon-marker';
+    el.dataset.id=m.id;
+    const sz = m.size||40;
+    el.style.cssText=`position:absolute;left:${m.xPct}%;top:${m.yPct}%;transform:translate(-50%,-50%);z-index:8;cursor:${editable?'move':'default'};user-select:none;`;
+    const bg=m.color||'#C9A96E';
+    const iconPx = Math.round(sz * 0.4);
+    const fsPx   = Math.round(sz * 0.28);
+    el.innerHTML=`<div class="im-body" style="background:${bg};border-radius:${Math.round(sz*0.18)}px;padding:${Math.round(sz*0.12)}px ${Math.round(sz*0.2)}px;display:flex;align-items:center;gap:${Math.round(sz*0.1)}px;border:${editable?'2px dashed rgba(255,255,255,0.6)':'none'};">
+      ${zoneIconSVG(m.iconKey,iconPx,'white')}
+      ${m.label?`<span style="font-size:${fsPx}px;font-weight:700;color:white;white-space:nowrap;">${m.label}</span>`:''}
+    </div>
+    ${editable?`<div class="im-resize" style="position:absolute;bottom:-6px;right:-6px;width:14px;height:14px;background:white;border:2px solid ${bg};border-radius:3px;cursor:se-resize;z-index:9;"></div>`:''}`;
+
+    if(editable){
+      // Drag to move
+      el.querySelector('.im-body').addEventListener('mousedown',e=>{
+        e.preventDefault(); e.stopPropagation();
+        const sr=stage.getBoundingClientRect();
+        const ox=e.clientX-sr.left-m.xPct/100*sr.width;
+        const oy=e.clientY-sr.top-m.yPct/100*sr.height;
+        const mv=e=>{
+          m.xPct=parseFloat(Math.max(0,Math.min(100,(e.clientX-sr.left-ox)/sr.width*100)).toFixed(3));
+          m.yPct=parseFloat(Math.max(0,Math.min(100,(e.clientY-sr.top-oy)/sr.height*100)).toFixed(3));
+          el.style.left=m.xPct+'%'; el.style.top=m.yPct+'%';
+        };
+        const up=()=>{ fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{}); document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+      });
+      // Resize handle
+      const rh=el.querySelector('.im-resize');
+      if(rh) rh.addEventListener('mousedown',e=>{
+        e.preventDefault(); e.stopPropagation();
+        const startSz=m.size||40;
+        const sx=e.clientX, sy=e.clientY;
+        const mv=e=>{
+          const delta=Math.max(e.clientX-sx, e.clientY-sy);
+          m.size=Math.max(24,Math.min(120,Math.round(startSz+delta)));
+          renderIconMarkers();
+        };
+        const up=()=>{ fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{}); document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
+        document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
+      });
+    }
+    stage.appendChild(el);
+  });
+}
+
 // Resize observer: re-render map zones when canvas size changes (debounced)
 if(window.ResizeObserver){
   const _mapCanvas = document.getElementById('map-canvas');
@@ -1654,7 +1771,7 @@ function uploadMap(e){
   e.target.value='';
 }
 function addZone(){
-  zones.push({id:'z'+Date.now(),name:'Nouvelle zone',color:ZONE_COLORS[zones.length%ZONE_COLORS.length],x:0,y:0,w:0,h:0,xPct:5,yPct:5,wPct:15,hPct:12,visible:true});
+  zones.push({id:'z'+Date.now(),name:'Nouvelle zone',color:ZONE_COLORS[zones.length%ZONE_COLORS.length],x:0,y:0,w:0,h:0,xPct:5,yPct:5,wPct:15,hPct:12,visible:true,icon:'none'});
   fbSaveConfig('zones',zones);renderHome();if(g('view-admin').classList.contains('active'))renderAdmin();
 }
 function updateAutoApproveUI(){
@@ -1825,6 +1942,43 @@ function renderZoneFilters(){
   }).join('');
 }
 function toggleZF(id){ if(activeZF.has(id))activeZF.delete(id);else activeZF.add(id); renderZoneFilters();renderWeekCalendar(); }
+
+
+// ── ICON LIBRARY ─────────────────────────────────────────────────────────────
+const ZONE_ICONS = {
+  none:       { label:'Aucune',            svg:'' },
+  truck:      { label:'Entrée camion',     svg:'<path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>' },
+  entrance:   { label:'Entrée principale', svg:'<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>' },
+  gate:       { label:'Portail / Barrière',svg:'<line x1="3" y1="5" x2="21" y2="5"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="19" x2="21" y2="19"/>' },
+  pedestrian: { label:'Accès piéton',      svg:'<circle cx="12" cy="4" r="2"/><path d="M9 22V12l-2-5h10l-2 5v10"/><path d="M9 12l-2 5"/><path d="M15 12l2 5"/>' },
+  lift:       { label:'Monte-charge',      svg:'<rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="6" x2="12" y2="18"/><polyline points="9 9 12 6 15 9"/><polyline points="9 15 12 18 15 15"/>' },
+  crane:      { label:'Grue / Levage',     svg:'<line x1="12" y1="22" x2="12" y2="8"/><path d="M12 8h8"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="12" y1="8" x2="12" y2="3"/><path d="M8 3h8"/>' },
+  pallet:     { label:'Palette / Cargaison',svg:'<rect x="2" y="13" width="20" height="3" rx="1"/><rect x="4" y="9" width="4" height="4"/><rect x="10" y="9" width="4" height="4"/><rect x="16" y="9" width="4" height="4"/><line x1="6" y1="16" x2="6" y2="20"/><line x1="18" y1="16" x2="18" y2="20"/>' },
+  storage:    { label:'Aire de stockage',  svg:'<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/>' },
+  concrete:   { label:'Bétonnière',        svg:'<ellipse cx="12" cy="8" rx="6" ry="4"/><path d="M6 8c0 4 2 8 6 10 4-2 6-6 6-10"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="8" y1="22" x2="16" y2="22"/>' },
+  warning:    { label:'Zone dangereuse',   svg:'<path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>' },
+  helmet:     { label:'Casque / Sécu.',    svg:'<path d="M12 2C6.5 2 2 6.5 2 10v2h20v-2C22 6.5 17.5 2 12 2z"/><rect x="2" y="12" width="20" height="3" rx="1"/><line x1="8" y1="15" x2="8" y2="19"/><line x1="16" y1="15" x2="16" y2="19"/><line x1="8" y1="19" x2="16" y2="19"/>' },
+  parking:    { label:'Stationnement',     svg:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/>' },
+  wash:       { label:'Lavage',            svg:'<path d="M12 2C6 2 2 7 2 12s4 10 10 10 10-4.5 10-10S18 2 12 2z"/><path d="M12 6v6l4 2"/>' },
+  bin:        { label:'Benne / Rebuts',    svg:'<path d="M3 6h18l-2 13H5L3 6z"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/>' },
+  stairs:     { label:'Escalier',          svg:'<polyline points="4 20 4 14 10 14 10 8 16 8 16 2 20 2"/><line x1="4" y1="20" x2="20" y2="20"/>' },
+  office:     { label:'Bureau chantier',   svg:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/><line x1="8" y1="17" x2="16" y2="17"/>' },
+  toilet:     { label:'Sanitaires',        svg:'<path d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/><path d="M17 22h3a2 2 0 002-2v-7a2 2 0 00-2-2h-3"/><path d="M12 2C9.8 2 8 3.8 8 6v10h8V6c0-2.2-1.8-4-4-4z"/>' },
+  fuel:       { label:'Carburant',         svg:'<path d="M3 22V8a2 2 0 012-2h6a2 2 0 012 2v14"/><path d="M13 10h2l3 3v4h-5"/><line x1="3" y1="22" x2="13" y2="22"/><line x1="6" y1="6" x2="6" y2="2"/><line x1="10" y1="6" x2="10" y2="2"/>' },
+  pin:        { label:'Repère général',    svg:'<path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>' },
+  arrow:      { label:'Direction',         svg:'<line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/>' },
+  star:       { label:'Personnalisée',     svg:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>' },
+  download:   { label:'Zone de dépose',    svg:'<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>' },
+};
+
+function zoneIconSVG(iconKey, size=14, color='white'){
+  const ic = ZONE_ICONS[iconKey];
+  if(!ic||!ic.svg) return '';
+  return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;vertical-align:middle;">'+ic.svg+'</svg>';
+}
+
+// ── STANDALONE ICON MARKERS (no zone, just placed on map) ────────────────────
+// Stored as: [{id, iconKey, label, xPct, yPct, color}]
 
 function slotIndex(t){return TIME_SLOTS.indexOf(t);}
 
@@ -2103,6 +2257,7 @@ function renderAdmin(){
     <button class="zm-del" onclick="deleteZone('${z.id}')">×</button></div>`).join('');
   renderScheduleMgr();
   renderSubList();
+  renderImList();
   renderBlackoutPanel();
   g('notif-log').innerHTML=notifications.length?notifications.slice(0,15).map(n=>
     `<div class="ni"><span class="ni-dot" style="background:${n.type==='approved'?'var(--green)':n.type==='rejected'?'var(--red)':'var(--amber)'}"></span>
@@ -2193,6 +2348,38 @@ function uncancelDel(id){
   saveDelivery(d);renderAdmin();renderWeekCalendar();updateBadges();
 }
 function deleteDel(id){removeDelivery(id);renderAdmin();updateBadges();}
+function populateImIconSelect(){
+  const sel=g('im-icon'); if(!sel||sel.options.length>1) return;
+  sel.innerHTML=Object.entries(ZONE_ICONS).filter(([k])=>k!=='none')
+    .map(([k,v])=>`<option value="${k}">${v.label}</option>`).join('');
+}
+function renderImList(){
+  populateImIconSelect();
+  const el=g('im-list'); if(!el) return;
+  if(!iconMarkers.length){el.innerHTML='<div class="empty">Aucun marqueur placé.</div>';return;}
+  el.innerHTML=iconMarkers.map(m=>`<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);">
+    <div style="width:24px;height:24px;border-radius:4px;background:${m.color||'#C9A96E'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">${zoneIconSVG(m.iconKey,14,'white')}</div>
+    <span style="flex:1;font-size:13px;color:var(--text);">${ZONE_ICONS[m.iconKey]?.label||m.iconKey}${m.label?' — '+m.label:''}</span>
+    <button onclick="removeIconMarker('${m.id}')" style="padding:3px 9px;border-radius:var(--r);border:1px solid var(--red-bd);background:var(--red-dim);color:var(--red);font-size:11px;font-weight:700;cursor:pointer;">✕</button>
+  </div>`).join('');
+}
+function addIconMarker(){
+  const iconKey=g('im-icon')?.value||'pin';
+  const label=(g('im-label')?.value||'').trim();
+  const color=g('im-color')?.value||'#C9A96E';
+  const m={id:'im'+Date.now(),iconKey,label,color,xPct:50,yPct:50};
+  iconMarkers.push(m);
+  fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{});
+  if(g('im-label')) g('im-label').value='';
+  renderImList();
+  renderIconMarkers();
+}
+function removeIconMarker(id){
+  iconMarkers=iconMarkers.filter(m=>m.id!==id);
+  fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{});
+  renderImList();
+  renderIconMarkers();
+}
 function renameZone(id,name){const z=zones.find(z=>z.id===id);if(z)z.name=name;fbSaveConfig('zones',zones);renderHome();renderZonePicker();renderZoneFilters();}
 function deleteZone(id){if(!confirm('Supprimer cette zone ?'))return;zones=zones.filter(z=>z.id!==id);fbSaveConfig('zones',zones);renderAdmin();renderHome();renderZonePicker();}
 
@@ -2815,7 +3002,7 @@ async function initApp(){
 
   if(window._db){
     // Load config docs in parallel
-    const [z, pi, no, mi, sch, bd, sc] = await Promise.all([
+    const [z, pi, no, mi, sch, bd, sc, im] = await Promise.all([
       fbLoadConfig('zones',          zones),
       fbLoadConfig('projectInfo',    projectInfo),
       fbLoadConfig('notifications',  []),
@@ -2823,6 +3010,7 @@ async function initApp(){
       fbLoadConfig('siteSchedule',   siteSchedule),
       fbLoadConfig('blackoutDates',  []),
       fbLoadConfig('subcontractors', []),
+      fbLoadConfig('iconMarkers',    []),
     ]);
     zones          = z;
     projectInfo    = pi;
@@ -2831,7 +3019,8 @@ async function initApp(){
     mapPdf         = null;
     siteSchedule   = sch;
     blackoutDates  = bd;
-    subcontractors = sc; // PDF is always converted to image on upload, stored as mapImg
+    subcontractors = sc;
+    iconMarkers    = im; // PDF is always converted to image on upload, stored as mapImg
     subscribeDeliveries(); // real-time listener handles deliveries
     // Apply saved app name
     const _an=g('app-name'); if(_an) _an.textContent=projectInfo.appname||'SiteDelivery';
