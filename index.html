@@ -364,8 +364,8 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 
 /* MOBILE WORKFLOW V1 */
-.mob-fab-book,.mob-week-chips,.mob-admin-tabs{display:none;}
-.mob-week-chip,.mob-admin-tab,.mob-fab-book{
+.mob-fab-book,.mob-week-chips,.mob-admin-tabs,.mob-cal-view-switch{display:none;}
+.mob-week-chip,.mob-admin-tab,.mob-fab-book,.mob-cal-view-btn{
   font-family:'Barlow',sans-serif;
 }
 @media(max-width:768px){
@@ -393,6 +393,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .cal-toolbar{padding:12px 12px 8px;gap:8px;flex-wrap:wrap;}
   .cal-title{width:100%;font-size:24px;line-height:1.1;}
   .cal-nav,.today-btn{padding:10px 14px;font-size:13px;}
+  .mob-cal-view-switch{display:inline-flex;gap:6px;padding:4px;border:1px solid var(--border2);border-radius:999px;background:var(--bg3);margin-left:auto;}
+  .mob-cal-view-btn{min-height:38px;padding:8px 12px;border:none;border-radius:999px;background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;}
+  .mob-cal-view-btn.active{background:var(--accent-dim);color:var(--accent);}
   .zf-btn{padding:8px 14px;font-size:12px;}
   .week-grid{padding-bottom:8px;}
   .wg-day-col{min-width:110px;}
@@ -914,6 +917,10 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
           <button class="cal-nav" onclick="changeWeek(-1)">&#8592;</button>
           <button class="cal-nav" onclick="changeWeek(1)">&#8594;</button>
           <button class="today-btn" onclick="goToToday()">Aujourd'hui</button>
+          <div class="mob-cal-view-switch" id="mob-cal-view-switch">
+            <button class="mob-cal-view-btn active" id="mob-cal-view-day" onclick="setMobCalendarMode('day')">Jour</button>
+            <button class="mob-cal-view-btn" id="mob-cal-view-week" onclick="setMobCalendarMode('week')">Semaine</button>
+          </div>
           <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;" id="zone-filters"></div>
         </div>
         <div class="mob-week-chips" id="mob-week-chips"></div>
@@ -1809,6 +1816,8 @@ function showView(v){
 // ── MOBILE HELPERS ────────────────────────────────────────────────────────────
 let _mobDelTab = 'form';
 let _mobAdminTab = 'review';
+let _mobCalendarMode = 'day';
+let _mobSelectedDate = today();
 
 function updateMobileFab(){
   const fab = g('mob-fab-book');
@@ -1838,15 +1847,67 @@ function renderMobWeekChips(){
   const days = Array.from({length:7},(_,i)=>addDays(weekStart,i));
   const labels = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
   wrap.innerHTML = days.map((d,i)=>{
-    const isToday = dk(d)===today();
-    return `<button class="mob-week-chip ${i===0?'active':''} ${isToday?'today':''}" data-day-index="${i}" onclick="mobJumpToDay(${i})"><span>${labels[(d.getDay()+6)%7]}</span><strong>${d.getDate()}</strong></button>`;
+    const ds = dk(d);
+    const isToday = ds===today();
+    const isActive = ds===_mobSelectedDate;
+    return `<button class="mob-week-chip ${isActive?'active':''} ${isToday?'today':''}" data-day-index="${i}" onclick="mobJumpToDay(${i})"><span>${labels[(d.getDay()+6)%7]}</span><strong>${d.getDate()}</strong></button>`;
   }).join('');
 }
 function mobJumpToDay(idx){
-  const cols = Array.from(document.querySelectorAll('#week-grid .wg-day-col'));
+  _mobSelectedDate = dk(addDays(weekStart, idx));
   const chips = Array.from(document.querySelectorAll('#mob-week-chips .mob-week-chip'));
   chips.forEach((chip,i)=>chip.classList.toggle('active', i===idx));
+  if(_mobCalendarMode === 'day'){
+    renderWeekCalendar();
+    return;
+  }
+  const cols = Array.from(document.querySelectorAll('#week-grid .wg-day-col'));
   if(cols[idx]) cols[idx].scrollIntoView({behavior:'smooth', inline:'start', block:'nearest'});
+}
+function syncMobCalendarControls(){
+  const wrap = g('mob-cal-view-switch');
+  if(!wrap) return;
+  const mobile = window.innerWidth <= 768;
+  wrap.style.display = mobile ? 'inline-flex' : 'none';
+  if(g('mob-cal-view-day')) g('mob-cal-view-day').classList.toggle('active', _mobCalendarMode === 'day');
+  if(g('mob-cal-view-week')) g('mob-cal-view-week').classList.toggle('active', _mobCalendarMode === 'week');
+}
+function ensureMobSelectedDateInWeek(){
+  const start = dk(weekStart);
+  const end = dk(addDays(weekStart, 6));
+  if(!_mobSelectedDate || _mobSelectedDate < start || _mobSelectedDate > end){
+    _mobSelectedDate = start;
+  }
+}
+function setMobCalendarMode(mode){
+  _mobCalendarMode = mode === 'week' ? 'week' : 'day';
+  if(window.innerWidth <= 768){
+    ensureMobSelectedDateInWeek();
+  }
+  syncMobCalendarControls();
+  renderWeekCalendar();
+}
+function mobilePrefillBookingFromCalendar(date, time){
+  const zoneSource = activeZF.size === 1 ? Array.from(activeZF)[0] : (selZone || zones[0]?.id || null);
+  if(g('b-date')) g('b-date').value = date;
+  if(zoneSource) selZone = zoneSource;
+  renderZonePicker();
+  renderStartTimes();
+  const startSel = g('b-time-start');
+  if(startSel){
+    startSel.value = time;
+    onStartChange();
+  }
+  const panel = document.querySelector('.booking-panel');
+  mobSwitchTab('form');
+  if(panel) panel.scrollTo({top:0, behavior:'smooth'});
+  setTimeout(()=>{ if(g('b-company')) g('b-company').focus(); }, 180);
+}
+function calendarCellAction(date, time, event){
+  if(window.innerWidth <= 768){
+    if(event) event.preventDefault();
+    mobilePrefillBookingFromCalendar(date, time);
+  }
 }
 function setMobAdminTab(tab){
   _mobAdminTab = tab;
@@ -1911,6 +1972,7 @@ function _initMobDelTabs(){
   const tf=g('mob-tab-form'); if(tf) tf.classList.add('active');
   const tc=g('mob-tab-cal');  if(tc) tc.classList.remove('active');
   _mobDelTab='form';
+  syncMobCalendarControls();
 }
 
 let _mobMapVisible = true;
@@ -3117,6 +3179,15 @@ function commitDraggedReschedule(){
 }
 
 function renderWeekCalendar(){
+  syncMobCalendarControls();
+  if(window.innerWidth <= 768 && _mobCalendarMode === 'day'){
+    renderDayCalendar();
+  } else {
+    renderGridWeekCalendar();
+  }
+}
+
+function renderGridWeekCalendar(){
   const days=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
   const months=[...new Set(days.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
   g('cal-title').textContent=months.join(' / ');
@@ -3124,7 +3195,6 @@ function renderWeekCalendar(){
   const SLOT_H=34;
   const totalH=TIME_SLOTS.length*SLOT_H;
 
-  // ── Header row ──
   let headerHtml='<div style="width:52px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);"></div>';
   days.forEach(d=>{
     const ds=dk(d),isT=ds===tod;
@@ -3133,99 +3203,15 @@ function renderWeekCalendar(){
       +'<div class="wg-dd">'+d.getDate()+'</div></div>';
   });
 
-  // ── Time label column ──
   let timeHtml='';
   TIME_SLOTS.forEach(t=>{
     const half=t.endsWith(':30');
     timeHtml+='<div class="wg-t'+(half?' half':'')+'">'+(half?'':t)+'</div>';
   });
 
-  // ── Day columns ──
   let dayColsHtml='';
-  days.forEach(d=>{
-    const ds=dk(d);
-    const dayDels=deliveries.filter(del=>
-      del.date===ds&&del.status!=='rejected'&&del.status!=='cancelled'&&
-      (activeZF.size===0||activeZF.has(del.zone))
-    );
+  days.forEach(d=>{ dayColsHtml += renderCalendarDayColumn(dk(d), totalH, SLOT_H, false); });
 
-    // Grid lines
-    let gridLines='';
-    TIME_SLOTS.forEach(t=>{
-      const half=t.endsWith(':30');
-      gridLines+='<div class="wg-c '+(half?'half':'')+'" style="position:absolute;left:0;right:0;top:'+(slotIndex(t)*SLOT_H)+'px;height:'+SLOT_H+'px;" ondblclick="quickBook(\''+ds+'\',\''+t+'\')"></div>';
-    });
-
-    // Sort and assign side-by-side columns
-    const sorted=[...dayDels].sort((a,b)=>slotIndex(a.timeStart||a.time)-slotIndex(b.timeStart||b.time));
-    const colEnds=[];
-    const layout=sorted.map(del=>{
-      const si=slotIndex(del.timeStart||del.time);
-      const te=del.timeEnd;
-      const ei=te&&slotIndex(te)>si?slotIndex(te):si+1;
-      let col=colEnds.findIndex(e=>e<=si);
-      if(col===-1)col=colEnds.length;
-      colEnds[col]=ei;
-      return{del,col,si,ei};
-    });
-    const blockInfos=layout.map(item=>{
-      const concurrent=layout.filter(o=>o.si<item.ei&&o.ei>item.si);
-      return{...item,totalCols:Math.max(...concurrent.map(c=>c.col))+1};
-    });
-
-    // Render blocks
-    let blocks='';
-    blockInfos.forEach(({del,col,si,ei,totalCols})=>{
-      const z=zones.find(z=>z.id===del.zone),appr=del.status==='approved';
-      const top=si*SLOT_H+2;
-      const height=Math.max((ei-si)*SLOT_H-4,24);
-      const pct=100/totalCols;
-      const baseColor=appr?(z?z.color:'#4CAF7D'):'';
-      const sty=appr
-        ?'background:'+baseColor+'22;border:1px solid '+baseColor+'55;color:'+baseColor+';'
-        :'background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);';
-      const tsDisp=del.timeStart||del.time;
-      const teDisp=del.timeEnd?(' \u2013 '+del.timeEnd):'';
-      const conflictWarn = isZoneBlackedOut(del.zone, del.date)
-        ? '<div style="font-size:8px;font-weight:700;background:rgba(212,96,96,0.35);color:#ff8080;border-radius:2px;padding:1px 4px;margin-top:2px;display:inline-block;">\u26a0 Zone bloqu\u00e9e</div>'
-        : '';
-      const dragCue = isAdmin() ? 'cursor:grab;' : '';
-      const dragTitle = isAdmin() ? ' title="Glissez pour reprogrammer"' : '';
-      blocks+='<div class="db '+(appr?'db-approved':'db-pending')+'" data-delivery-id="'+del.id+'" '
-        +'style="top:'+top+'px;height:'+height+'px;left:calc('+col*pct+'% + 2px);width:calc('+pct+'% - 4px);'+sty+dragCue+'" '
-        +'onmousedown="startCalendarDrag(event,\''+del.id+'\',this)" '
-        +dragTitle+' '
-        +'onclick="openDetail(\''+del.id+'\',event)">'
-        +'<div class="db-co">'+del.company+'</div>'
-        +'<div class="db-sub">'+(z?z.name:'')+(z?' \xb7 ':'')+tsDisp+teDisp+'</div>'
-        +conflictWarn
-        +'</div>';
-    });
-
-    // Blackout stripes — one per blacked-out zone for this day
-    let blackoutStripes = '';
-    zones.forEach(z => {
-      const bos = getBlackoutsForZoneDate(z.id, ds);
-      if(bos.length > 0){
-        const reason = bos[0].reason || 'Zone bloquée';
-        blackoutStripes += '<div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:2;">'
-          + '<div style="position:absolute;left:0;right:0;top:0;bottom:0;background:' + z.color + '0D;"></div>'
-          + '<div style="position:absolute;top:4px;left:2px;right:2px;background:' + z.color + '33;border:1px solid ' + z.color + '77;border-radius:3px;padding:3px 6px;font-size:9px;font-weight:700;color:' + z.color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
-          + '⛔ ' + z.name + ' — ' + reason
-          + '</div></div>';
-        // Flag any approved deliveries that now conflict — show warning badge
-        deliveries.filter(d => d.zone === z.id && d.date === ds && (d.status === 'approved' || d.status === 'pending')).forEach(d => {
-          d._blackoutConflict = true;
-        });
-      } else {
-        deliveries.filter(d => d.zone === z.id && d.date === ds).forEach(d => { d._blackoutConflict = false; });
-      }
-    });
-
-    dayColsHtml+='<div class="wg-day-col" data-date="'+ds+'" style="position:relative;height:'+totalH+'px;flex:1;min-width:0;border-right:1px solid var(--border);">'+gridLines+blackoutStripes+blocks+'</div>';
-  });
-
-  // Assemble: header row + scrollable body row
   g('week-grid').innerHTML=
     '<div style="display:flex;flex-direction:row;position:sticky;top:0;z-index:10;background:var(--bg2);">'+headerHtml+'</div>'
     +'<div style="display:flex;flex-direction:row;overflow-y:auto;flex:1;width:100%;">'
@@ -3233,14 +3219,139 @@ function renderWeekCalendar(){
       +dayColsHtml
     +'</div>';
 }
+
+function renderDayCalendar(){
+  ensureMobSelectedDateInWeek();
+  renderMobWeekChips();
+  const d = new Date(_mobSelectedDate+'T12:00:00');
+  const title = d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+  g('cal-title').textContent = title.charAt(0).toUpperCase()+title.slice(1);
+  const SLOT_H = 40;
+  const totalH = TIME_SLOTS.length * SLOT_H;
+
+  let headerHtml = '<div style="width:58px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);"></div>';
+  headerHtml += '<div class="wg-dh '+(_mobSelectedDate===today()?'today':'')+'" style="flex:1;min-width:0;">'
+    +'<div class="wg-dn">'+d.toLocaleDateString('en-CA',{weekday:'short'})+'</div>'
+    +'<div class="wg-dd">'+d.getDate()+'</div></div>';
+
+  let timeHtml='';
+  TIME_SLOTS.forEach(t=>{
+    const half=t.endsWith(':30');
+    timeHtml+='<div class="wg-t'+(half?' half':'')+'">'+(half?'':t)+'</div>';
+  });
+
+  const dayColHtml = renderCalendarDayColumn(_mobSelectedDate, totalH, SLOT_H, true);
+
+  g('week-grid').innerHTML=
+    '<div style="display:flex;flex-direction:row;position:sticky;top:0;z-index:10;background:var(--bg2);">'+headerHtml+'</div>'
+    +'<div style="display:flex;flex-direction:row;overflow-y:auto;flex:1;width:100%;">'
+      +'<div class="wg-time-col" style="width:58px;">'+timeHtml+'</div>'
+      +dayColHtml
+    +'</div>';
+}
+
+function renderCalendarDayColumn(ds, totalH, SLOT_H, isDayMode){
+  const dayDels=deliveries.filter(del=>
+    del.date===ds&&del.status!=='rejected'&&del.status!=='cancelled'&&
+    (activeZF.size===0||activeZF.has(del.zone))
+  );
+
+  let gridLines='';
+  TIME_SLOTS.forEach(t=>{
+    const half=t.endsWith(':30');
+    const action = window.innerWidth <= 768
+      ? ' onclick="calendarCellAction(\''+ds+'\',\''+t+'\', event)"'
+      : ' ondblclick="quickBook(\''+ds+'\',\''+t+'\')"';
+    gridLines+='<div class="wg-c '+(half?'half':'')+'" style="position:absolute;left:0;right:0;top:'+(slotIndex(t)*SLOT_H)+'px;height:'+SLOT_H+'px;"'+action+'></div>';
+  });
+
+  const sorted=[...dayDels].sort((a,b)=>slotIndex(a.timeStart||a.time)-slotIndex(b.timeStart||b.time));
+  const colEnds=[];
+  const layout=sorted.map(del=>{
+    const si=slotIndex(del.timeStart||del.time);
+    const te=del.timeEnd;
+    const ei=te&&slotIndex(te)>si?slotIndex(te):si+1;
+    let col=colEnds.findIndex(e=>e<=si);
+    if(col===-1)col=colEnds.length;
+    colEnds[col]=ei;
+    return{del,col,si,ei};
+  });
+  const blockInfos=layout.map(item=>{
+    const concurrent=layout.filter(o=>o.si<item.ei&&o.ei>item.si);
+    return{...item,totalCols:Math.max(...concurrent.map(c=>c.col))+1};
+  });
+
+  let blocks='';
+  blockInfos.forEach(({del,col,si,ei,totalCols})=>{
+    const z=zones.find(z=>z.id===del.zone),appr=del.status==='approved';
+    const top=si*SLOT_H+2;
+    const height=Math.max((ei-si)*SLOT_H-4, isDayMode ? 44 : 24);
+    const pct=100/totalCols;
+    const baseColor=appr?(z?z.color:'#4CAF7D'):'';
+    const sty=appr
+      ?'background:'+baseColor+'22;border:1px solid '+baseColor+'55;color:'+baseColor+';'
+      :'background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);';
+    const tsDisp=del.timeStart||del.time;
+    const teDisp=del.timeEnd?(' – '+del.timeEnd):'';
+    const conflictWarn = isZoneBlackedOut(del.zone, del.date)
+      ? '<div style="font-size:8px;font-weight:700;background:rgba(212,96,96,0.35);color:#ff8080;border-radius:2px;padding:1px 4px;margin-top:2px;display:inline-block;">⚠ Zone bloquée</div>'
+      : '';
+    const dragCue = isAdmin() ? 'cursor:grab;' : '';
+    const dragTitle = isAdmin() ? ' title="Glissez pour reprogrammer"' : '';
+    blocks+='<div class="db '+(appr?'db-approved':'db-pending')+'" data-delivery-id="'+del.id+'" '
+      +'style="top:'+top+'px;height:'+height+'px;left:calc('+col*pct+'% + 2px);width:calc('+pct+'% - 4px);'+sty+dragCue+'" '
+      +'onmousedown="startCalendarDrag(event,\''+del.id+'\',this)"'+dragTitle+' '
+      +'onclick="openDetail(\''+del.id+'\',event)">'
+      +'<div class="db-co">'+del.company+'</div>'
+      +'<div class="db-sub">'+(z?z.name:'')+(z?' · ':'')+tsDisp+teDisp+'</div>'
+      +conflictWarn
+      +'</div>';
+  });
+
+  let blackoutStripes = '';
+  zones.forEach(z => {
+    const bos = getBlackoutsForZoneDate(z.id, ds);
+    if(bos.length > 0){
+      const reason = bos[0].reason || 'Zone bloquée';
+      blackoutStripes += '<div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:2;">'
+        + '<div style="position:absolute;left:0;right:0;top:0;bottom:0;background:' + z.color + '0D;"></div>'
+        + '<div style="position:absolute;top:4px;left:2px;right:2px;background:' + z.color + '33;border:1px solid ' + z.color + '77;border-radius:3px;padding:3px 6px;font-size:9px;font-weight:700;color:' + z.color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+        + '⛔ ' + z.name + ' — ' + reason
+        + '</div></div>';
+      deliveries.filter(d => d.zone === z.id && d.date === ds && (d.status === 'approved' || d.status === 'pending')).forEach(d => {
+        d._blackoutConflict = true;
+      });
+    } else {
+      deliveries.filter(d => d.zone === z.id && d.date === ds).forEach(d => { d._blackoutConflict = false; });
+    }
+  });
+
+  const minWidth = isDayMode ? 'min-width:calc(100vw - 70px);' : 'min-width:0;';
+  return '<div class="wg-day-col" data-date="'+ds+'" style="position:relative;height:'+totalH+'px;flex:1;'+minWidth+'border-right:1px solid var(--border);">'+gridLines+blackoutStripes+blocks+'</div>';
+}
 function cellClick(date,time){
   g('b-date').value=date; renderStartTimes();
   const s=g('b-time-start');
   for(let i=0;i<s.options.length;i++){if(s.options[i].value===time){s.selectedIndex=i;break;}}
   onStartChange();
 }
-function changeWeek(dir){ weekStart=addDays(weekStart,dir*7); renderWeekCalendar(); }
-function goToToday(){ weekStart=getMonday(new Date()); renderWeekCalendar(); }
+function changeWeek(dir){
+  if(window.innerWidth <= 768 && _mobCalendarMode === 'day'){
+    const next = addDays(new Date(_mobSelectedDate+'T12:00:00'), dir);
+    _mobSelectedDate = dk(next);
+    weekStart = getMonday(next);
+  } else {
+    weekStart = addDays(weekStart,dir*7);
+    if(window.innerWidth <= 768){ ensureMobSelectedDateInWeek(); }
+  }
+  renderWeekCalendar();
+}
+function goToToday(){
+  const now = new Date();
+  weekStart = getMonday(now);
+  _mobSelectedDate = today();
+  renderWeekCalendar();
+}
 
 // ── SUBMIT ────────────────────────────────────────────────
 function submitDelivery(){
