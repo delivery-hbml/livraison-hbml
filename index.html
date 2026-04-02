@@ -306,23 +306,27 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   /* Bottom nav */
   .mob-bottom-nav{display:flex!important;}
 
-  /* Push content above bottom nav */
-  #view-home.active{padding-bottom:0;}
+  /* Home page: allow scrolling on mobile */
+  #view-home.active{
+    padding-bottom:78px;
+    overflow:auto;
+    -webkit-overflow-scrolling:touch;
+    grid-template-rows:auto auto auto;
+    align-content:start;
+  }
 
   /* Stat strip 2x2 */
   .stat-strip{grid-template-columns:1fr 1fr;}
 
-  /* Dashboard: sidebar fills screen, map hidden */
-  .dash-layout{display:flex;flex-direction:column;height:auto;overflow:visible;}
-  .dash-sidebar{height:auto;overflow:visible;border-right:none;}
-  #map-wrapper{order:2;}
-  .dash-sidebar{order:1;}
-  .dash-sidebar .sec-lbl:first-of-type{order:3;}
-  #map-wrapper{display:flex;height:45vw;min-height:180px;max-height:280px;flex-direction:column;}
+  /* Dashboard: stack content and remove map on mobile */
+  .dash-layout{display:flex;flex-direction:column;height:auto;overflow:visible;min-height:auto;}
+  .dash-sidebar{height:auto;overflow:visible;border-right:none;min-height:auto;}
+  .sidebar-scroll{overflow:visible;}
+  #map-wrapper{display:none!important;}
   #map-wrapper.mob-hidden{display:none!important;}
 
-  /* Mobile map button */
-  .mob-map-btn{display:flex!important;}
+  /* Hide mobile map button too */
+  .mob-map-btn{display:none!important;}
 
   /* Deliveries: tab bar visible, panels switch */
   .mob-del-tabs{display:flex!important;}
@@ -357,6 +361,74 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .mob-panel-hidden{display:none!important;}
 }
 
+
+
+/* MOBILE WORKFLOW V1 */
+.mob-fab-book,.mob-week-chips,.mob-admin-tabs{display:none;}
+.mob-week-chip,.mob-admin-tab,.mob-fab-book{
+  font-family:'Barlow',sans-serif;
+}
+@media(max-width:768px){
+  body{font-size:16px;}
+  .topbar{height:52px;padding:0 10px;}
+  .topbar-logo{font-size:19px;}
+  .mob-bottom-nav{height:62px;}
+  .mob-nav-item{font-size:10px;padding:8px 4px;}
+  .mob-nav-item svg{width:22px;height:22px;}
+  .quick-grid{grid-template-columns:1fr;gap:10px;}
+  .quick-btn{min-height:64px;padding:14px 12px;font-size:12px;}
+  .submit-btn,.btn,.today-btn,.cal-nav,.zf-btn,.add-zone-btn,.edit-info-btn,.act,.zpick,.mob-map-btn,.mob-del-tab,.admin-toolbar-btn,.notice-btn,.tb-btn,.map-ctrl{
+    min-height:48px;
+  }
+  .submit-btn{font-size:17px;padding:14px 16px;}
+  .fg input,.fg select,.fg textarea,.mf input,.mf select,.mf textarea,.dr-note,
+  #b-company,#b-truck,#qb-company,#qb-zone,#qb-start,#qb-end,#qb-truck,#ed-start,#ed-end,#mi-appname,#mi-name,#mi-addr,#mi-hours,#mi-contact,#mi-safety,#mi-coord,#bo-zone,#bo-reason-sel,#sn-severity{
+    min-height:48px!important;padding:12px 14px!important;font-size:16px!important;
+  }
+  .fg textarea,.mf textarea{min-height:100px!important;}
+  .fg label,.mf label,.df-lbl,.sec-lbl,.stat-lbl{font-size:12px;}
+  .zpick-grid{grid-template-columns:1fr;}
+  .zpick{padding:12px 14px;font-size:14px;min-height:52px;}
+  .booking-panel{padding:16px 16px 100px;}
+  .cal-toolbar{padding:12px 12px 8px;gap:8px;flex-wrap:wrap;}
+  .cal-title{width:100%;font-size:24px;line-height:1.1;}
+  .cal-nav,.today-btn{padding:10px 14px;font-size:13px;}
+  .zf-btn{padding:8px 14px;font-size:12px;}
+  .week-grid{padding-bottom:8px;}
+  .wg-day-col{min-width:110px;}
+  .wg-dn{font-size:11px;}
+  .wg-dd{font-size:24px;}
+  .wg-t{font-size:10px;padding-right:8px;}
+  .db{padding:5px 7px;border-radius:6px;}
+  .db-co{font-size:11px;}
+  .db-sub{font-size:10px;}
+  .mob-week-chips{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;background:var(--bg2);border-bottom:1px solid var(--border);}
+  .mob-week-chips::-webkit-scrollbar{display:none;}
+  .mob-week-chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:56px;min-height:50px;padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;}
+  .mob-week-chip strong{font-family:'Barlow Condensed',sans-serif;font-size:18px;line-height:1;color:var(--text);}
+  .mob-week-chip.active{background:var(--accent-dim);border-color:var(--accent-bd);color:var(--accent);}
+  .mob-week-chip.active strong,.mob-week-chip.today strong{color:var(--accent);}
+  .mob-fab-book{display:flex;position:fixed;right:16px;bottom:78px;z-index:350;align-items:center;justify-content:center;gap:8px;padding:14px 18px;border:none;border-radius:999px;background:var(--accent);color:white;font-size:14px;font-weight:700;box-shadow:0 10px 26px rgba(0,0,0,.32);cursor:pointer;}
+  .mob-fab-book svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;}
+  .admin-wrap{padding:16px 14px 96px;}
+  .admin-toolbar{display:grid;grid-template-columns:1fr;gap:8px;}
+  .admin-toolbar-btn{width:100%;text-align:left;}
+  .admin-kpis{grid-template-columns:1fr 1fr;gap:10px;}
+  .panel .ph{padding:14px 14px;}
+  .panel .pb{padding:14px;}
+  .dr{padding:14px 0;}
+  .dr-co{font-size:16px;}
+  .dr-meta{font-size:13px;line-height:1.5;}
+  .dr-badges{gap:6px;}
+  .badge{font-size:11px;padding:4px 10px;}
+  .dr-acts{flex-direction:column;align-items:stretch;}
+  .dr-note{min-width:100%;}
+  .act{width:100%;padding:10px 12px;font-size:12px;}
+  .mob-admin-tabs{display:flex;gap:8px;overflow-x:auto;padding:0 0 12px;margin:0 0 12px;}
+  .mob-admin-tabs::-webkit-scrollbar{display:none;}
+  .mob-admin-tab{flex:0 0 auto;padding:10px 14px;border-radius:999px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;}
+  .mob-admin-tab.active{background:var(--accent-dim);border-color:var(--accent-bd);color:var(--accent);}
+}
 
 /* RESCHEDULE MODAL */
 .modal{overflow-x:hidden;}
@@ -433,6 +505,167 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 @media(max-width:1200px){.admin-kpis{grid-template-columns:repeat(3,minmax(0,1fr));}.admin-grid-tight{grid-template-columns:1fr;}}
 @media(max-width:1100px){.notice-admin-grid{grid-template-columns:1fr 1fr;}.notice-admin-grid .notice-full{grid-column:1/-1;}.notice-admin-grid .notice-form-btn{grid-column:1/-1;}}
 @media(max-width:768px){.notice-banner{margin:10px 12px 0;padding:12px;gap:10px;flex-direction:column;}.notice-title{font-size:22px;}.notice-actions{width:100%;justify-content:flex-end;}.notice-admin-grid{grid-template-columns:1fr;}.notice-row{flex-direction:column;}.notice-row-actions{justify-content:flex-start;}.admin-kpis{grid-template-columns:1fr 1fr;}.admin-section{flex-direction:column;align-items:flex-start;}.admin-toolbar{margin-top:14px;}.admin-toolbar-btn{width:100%;text-align:left;}.admin-grid,.admin-grid-tight{grid-template-columns:1fr;}}
+
+
+/* MOBILE CALENDAR + QUICK BOOK REFINEMENTS */
+@media(max-width:768px){
+  .mob-del-tabs{
+    position:static;
+    top:auto;
+    z-index:auto;
+  }
+  .booking-panel{
+    padding:14px 14px 104px;
+  }
+  .booking-panel h2{
+    font-size:24px;
+    margin-bottom:14px;
+  }
+  .cal-main{
+    min-height:0;
+    overflow:visible;
+  }
+  .cal-toolbar{
+    position:static;
+    top:auto;
+    z-index:auto;
+    background:var(--bg2);
+    padding:10px 12px;
+    box-shadow:0 1px 0 var(--border);
+  }
+  .cal-title{
+    font-size:22px;
+  }
+  .week-grid{
+    overflow-x:auto;
+    overflow-y:visible;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+  }
+  .wg-day-col{min-width:124px;}
+  .wg-time-col{width:58px;}
+  .db{
+    min-height:40px;
+    padding:6px 8px;
+  }
+  .db-co{font-size:12px;}
+  .db-sub{font-size:10px;line-height:1.25;}
+
+  /* Quick-book modal: full mobile drawer style */
+  #modal-quick-book.modal-backdrop{
+    align-items:flex-end;
+    justify-content:center;
+    padding:0;
+  }
+  #modal-quick-book .modal{
+    width:100vw !important;
+    max-width:100vw !important;
+    max-height:min(88dvh, 88vh);
+    margin:0;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+    border-radius:18px 18px 0 0;
+    border-left:none;
+    border-right:none;
+    border-bottom:none;
+    overflow-x:hidden;
+    overflow-y:auto;
+    box-shadow:0 -14px 34px rgba(0,0,0,.34);
+  }
+  #modal-quick-book .mgrid{
+    grid-template-columns:1fr !important;
+    gap:10px;
+  }
+  #modal-quick-book .mf,
+  #modal-quick-book .mf[style]{
+    grid-column:auto !important;
+  }
+  #modal-quick-book .modal > div:first-child{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--bg2);
+    padding-bottom:10px;
+    margin-bottom:12px !important;
+  }
+  #modal-quick-book .modal h2{
+    font-size:26px;
+    line-height:1.05;
+    padding-right:10px;
+  }
+  #modal-quick-book .btn.btn-gh[onclick*="closeModal('modal-quick-book')"]{
+    min-width:44px;
+    min-height:44px;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:12px;
+  }
+  #modal-quick-book input,
+  #modal-quick-book select,
+  #modal-quick-book textarea{
+    min-height:52px !important;
+    font-size:16px !important;
+    padding:12px 14px !important;
+  }
+  #modal-quick-book textarea{
+    min-height:92px !important;
+  }
+  #modal-quick-book .m-actions{
+    position:sticky;
+    bottom:0;
+    z-index:2;
+    background:linear-gradient(180deg, rgba(15,50,64,0) 0%, rgba(15,50,64,.96) 22%, rgba(15,50,64,.99) 100%);
+    margin:12px -16px calc(-18px - env(safe-area-inset-bottom));
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    gap:10px;
+  }
+  #modal-quick-book .m-actions .btn{
+    flex:1;
+    min-height:50px;
+    font-size:15px;
+    padding:12px 14px;
+  }
+
+  /* Mobile deliveries layout: use one natural page scroll instead of a sticky/nested-scroll header */
+  #view-deliveries.active{
+    display:block;
+    min-height:0;
+    overflow:auto;
+    padding-bottom:92px;
+    -webkit-overflow-scrolling:touch;
+  }
+  #view-deliveries .del-layout{
+    display:block;
+    min-height:auto;
+    height:auto;
+  }
+  #view-deliveries .booking-panel{
+    overflow:visible;
+    -webkit-overflow-scrolling:touch;
+    padding-bottom:104px;
+  }
+  #view-deliveries .cal-main{
+    overflow:visible;
+    min-height:auto;
+    padding-bottom:22px;
+  }
+  #view-deliveries .week-grid{
+    min-height:auto;
+    overflow-x:auto;
+    overflow-y:visible;
+    -webkit-overflow-scrolling:touch;
+  }
+  #view-deliveries .week-grid > div:last-child{
+    min-height:auto;
+    overflow:visible;
+    -webkit-overflow-scrolling:touch;
+  }
+  #view-deliveries .cal-toolbar,
+  #view-deliveries .mob-week-chips{
+    flex-shrink:0;
+  }
+}
 
 </style>
   <!-- PDF.js for rendering PDF site plans -->
@@ -631,8 +864,8 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   <!-- DELIVERIES -->
   <div class="view" id="view-deliveries">
     <div class="mob-del-tabs">
-        <button class="mob-del-tab active" id="mob-tab-form" onclick="mobSwitchTab('form')">Formulaire</button>
         <button class="mob-del-tab" id="mob-tab-cal" onclick="mobSwitchTab('cal')">Calendrier</button>
+        <button class="mob-del-tab active" id="mob-tab-form" onclick="mobSwitchTab('form')">Formulaire</button>
       </div>
       <div class="del-layout" id="del-layout-wrap">
       <div class="booking-panel">
@@ -683,6 +916,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
           <button class="today-btn" onclick="goToToday()">Aujourd'hui</button>
           <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;" id="zone-filters"></div>
         </div>
+        <div class="mob-week-chips" id="mob-week-chips"></div>
         <div class="week-grid" id="week-grid"></div>
       </div>
     </div>
@@ -693,6 +927,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     <div class="admin-wrap">
       <h1>Panneau admin</h1>
       <p class="admin-sub">Gérez le chantier, les disponibilités et les livraisons depuis un seul endroit.</p>
+
+      <div class="mob-admin-tabs" id="mob-admin-tabs">
+        <button class="mob-admin-tab active" data-admin-tab="review" onclick="setMobAdminTab('review')">À revoir</button>
+        <button class="mob-admin-tab" data-admin-tab="config" onclick="setMobAdminTab('config')">Réglages</button>
+        <button class="mob-admin-tab" data-admin-tab="notices" onclick="setMobAdminTab('notices')">Avis</button>
+        <button class="mob-admin-tab" data-admin-tab="history" onclick="setMobAdminTab('history')">Historique</button>
+      </div>
 
       <div class="admin-toolbar">
         <button class="admin-toolbar-btn primary" onclick="openInfoModal()">Modifier les infos du projet</button>
@@ -1007,6 +1248,11 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 
 </div>
+
+  <button class="mob-fab-book" id="mob-fab-book" onclick="mobOpenBooking()">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+    Nouvelle livraison
+  </button>
 
 <!-- QUICK BOOK MODAL -->
 <div class="modal-backdrop" id="modal-quick-book">
@@ -1556,10 +1802,80 @@ function showView(v){
   if(v==='deliveries') renderDeliveries();
   if(v==='admin')      renderAdmin();
   if(v==='analytics')  renderAnalytics();
+  updateMobileFab();
+  syncMobAdminTab();
 }
 
 // ── MOBILE HELPERS ────────────────────────────────────────────────────────────
 let _mobDelTab = 'form';
+let _mobAdminTab = 'review';
+
+function updateMobileFab(){
+  const fab = g('mob-fab-book');
+  if(!fab) return;
+  if(window.innerWidth > 768){ fab.style.display = 'none'; return; }
+  const activeView = document.querySelector('.view.active')?.id;
+  const show = activeView === 'view-home' || activeView === 'view-deliveries';
+  fab.style.display = show ? 'flex' : 'none';
+}
+function mobOpenBooking(){
+  showView('deliveries');
+  if(window.innerWidth <= 768){
+    mobSwitchTab('cal');
+    const calWrap = document.querySelector('#view-deliveries .week-grid');
+    if(calWrap) calWrap.scrollTo({top:0, behavior:'smooth'});
+  } else {
+    mobSwitchTab('form');
+    const panel = document.querySelector('.booking-panel');
+    if(panel) panel.scrollTo({top:0, behavior:'smooth'});
+    setTimeout(()=>{ g('b-company')?.focus(); }, 180);
+  }
+}
+function renderMobWeekChips(){
+  const wrap = g('mob-week-chips');
+  if(!wrap) return;
+  if(window.innerWidth > 768){ wrap.innerHTML=''; return; }
+  const days = Array.from({length:7},(_,i)=>addDays(weekStart,i));
+  const labels = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  wrap.innerHTML = days.map((d,i)=>{
+    const isToday = dk(d)===today();
+    return `<button class="mob-week-chip ${i===0?'active':''} ${isToday?'today':''}" data-day-index="${i}" onclick="mobJumpToDay(${i})"><span>${labels[(d.getDay()+6)%7]}</span><strong>${d.getDate()}</strong></button>`;
+  }).join('');
+}
+function mobJumpToDay(idx){
+  const cols = Array.from(document.querySelectorAll('#week-grid .wg-day-col'));
+  const chips = Array.from(document.querySelectorAll('#mob-week-chips .mob-week-chip'));
+  chips.forEach((chip,i)=>chip.classList.toggle('active', i===idx));
+  if(cols[idx]) cols[idx].scrollIntoView({behavior:'smooth', inline:'start', block:'nearest'});
+}
+function setMobAdminTab(tab){
+  _mobAdminTab = tab;
+  const tabs = Array.from(document.querySelectorAll('#mob-admin-tabs .mob-admin-tab'));
+  tabs.forEach(btn => btn.classList.toggle('active', btn.dataset.adminTab === tab));
+  if(window.innerWidth > 768){
+    document.querySelectorAll('#view-admin .panel').forEach(p=>p.style.display='');
+    return;
+  }
+  const groups = {
+    review:['panel-all-del','panel-cancelled'],
+    config:['panel-zones','panel-subs','panel-markers','panel-schedule'],
+    notices:['panel-notices','panel-blackout'],
+    history:['panel-notif']
+  };
+  const visible = new Set(groups[tab] || []);
+  document.querySelectorAll('#view-admin .panel').forEach(panel=>{
+    panel.style.display = visible.has(panel.id) ? '' : 'none';
+    if(visible.has(panel.id)) panel.classList.remove('collapsed');
+  });
+}
+function syncMobAdminTab(){
+  if(window.innerWidth > 768){
+    document.querySelectorAll('#view-admin .panel').forEach(panel=>panel.style.display='');
+    return;
+  }
+  setMobAdminTab(_mobAdminTab);
+}
+
 function mobSwitchTab(tab){
   _mobDelTab = tab;
   const form = document.querySelector('.booking-panel');
@@ -1716,6 +2032,9 @@ function doLogout(){
   const mny=g('mob-nav-analytics'); if(mny) mny.style.display='none';
   const lbl=g('mob-account-lbl'); if(lbl) lbl.textContent='Admin';
   showView('home');
+  updateMobileFab();
+  syncMobAdminTab();
+  renderMobWeekChips();
 }
 
 // ── Firebase Auth state change handler ───────────────────────────────────────
@@ -2383,6 +2702,7 @@ function renderDeliveries(){
   renderStartTimes();
   renderWeekCalendar();
   renderZoneFilters();
+  updateMobileFab();
 }
 
 function renderZonePicker(){
@@ -2800,6 +3120,7 @@ function renderWeekCalendar(){
   const days=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
   const months=[...new Set(days.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
   g('cal-title').textContent=months.join(' / ');
+  renderMobWeekChips();
   const SLOT_H=34;
   const totalH=TIME_SLOTS.length*SLOT_H;
 
@@ -3076,6 +3397,7 @@ function renderAdmin(){
     `<div class="ni"><span class="ni-dot" style="background:${n.type==='approved'?'var(--green)':n.type==='rejected'?'var(--red)':'var(--amber)'}"></span>
     <span class="ni-msg">${n.msg}</span><span class="ni-t">${n.time}</span></div>`).join('')
     :'<div class="empty">No notifications.</div>';
+  syncMobAdminTab();
 }
 
 function drHTML(d,showPend){
@@ -3664,12 +3986,46 @@ window.addEventListener('resize', ()=>{
     const cal=document.querySelector('.cal-main');
     if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
     if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
-
   }
+  updateMobileFab();
+  syncMobAdminTab();
+  renderMobWeekChips();
 });
 
 
+
+function mobilePrefillBookingFromCalendar(date, time){
+  showView('deliveries');
+  let targetZone = selZone;
+  if((!targetZone || !zones.find(z=>z.id===targetZone)) && activeZF.size===1){
+    targetZone = Array.from(activeZF)[0];
+  }
+  if(!targetZone && zones.length) targetZone = zones[0].id;
+  selZone = targetZone;
+  renderZonePicker();
+  g('b-date').value = date;
+  renderStartTimes();
+  const startSel = g('b-time-start');
+  if(startSel){
+    for(let i=0;i<startSel.options.length;i++){
+      if(startSel.options[i].value === time){
+        startSel.selectedIndex = i;
+        break;
+      }
+    }
+  }
+  onStartChange();
+  const panel = document.querySelector('.booking-panel');
+  if(window.innerWidth <= 768) mobSwitchTab('form');
+  if(panel) panel.scrollTo({top:0, behavior:'smooth'});
+  setTimeout(()=>g('b-company')?.focus(), 180);
+}
+
 function quickBook(date, time){
+  if(window.innerWidth <= 768){
+    mobilePrefillBookingFromCalendar(date, time);
+    return;
+  }
   const dateObj = new Date(date+'T12:00:00');
   const dateDisp = dateObj.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'});
   const capDate = dateDisp.charAt(0).toUpperCase()+dateDisp.slice(1);
