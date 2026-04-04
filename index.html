@@ -76,6 +76,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .quick-btn{padding:10px 8px;border-radius:var(--r);border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;text-align:center;transition:all .14s;display:flex;flex-direction:column;align-items:center;gap:4px;}
 .quick-btn:hover{border-color:var(--accent-bd);background:var(--accent-dim);color:var(--accent);}
 .quick-btn svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5;}
+.quick-btn.quick-btn-primary{background:var(--accent);border-color:var(--accent);color:white;}
+.quick-btn.quick-btn-primary:hover{background:var(--accent2);border-color:var(--accent2);color:white;}
+.quick-btn.quick-btn-primary svg{stroke:white;}
 .sec-lbl{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;margin-top:18px;}
 .info-row{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px solid var(--border);}
 .info-row:last-child{border-bottom:none;}
@@ -138,7 +141,16 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .today-btn{padding:6px 16px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .14s;}
 .today-btn:hover{background:var(--surface);color:var(--text);}
 .zf-btn{padding:5px 13px;border-radius:20px;border:1px solid var(--border2);background:transparent;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .14s;}
-.week-grid{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;}
+.zf-btn.zf-active{box-shadow:inset 0 0 0 1px currentColor;}
+.zf-btn.zf-aux{background:rgba(255,255,255,.03);}
+#qb-optional-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:10px 12px;border-radius:12px;border:1px dashed var(--border2);background:rgba(255,255,255,.02);color:var(--text2);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;}
+#qb-optional-toggle .qb-toggle-caret{transition:transform .16s ease;}
+#qb-optional-toggle.expanded .qb-toggle-caret{transform:rotate(180deg);}
+#qb-optional-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;grid-column:1/-1;}
+#qb-optional-wrap.collapsed{display:none;}
+#qb-remembered-hint{display:none;font-size:11px;color:var(--text3);margin-top:-2px;}
+
+.week-grid{flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;touch-action:pan-y;}
 .wg-time-col{width:60px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2);}
 .wg-day-col{flex:1;position:relative;min-width:0;overflow:visible;}
 .wg-corner{border-right:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:10;}
@@ -155,6 +167,10 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .db:hover{filter:brightness(1.2);}
 .db-co{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .db-sub{font-size:10px;opacity:.8;}
+.db.compact-free{padding-right:56px;}
+.db-free-badge{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 8px;border-radius:999px;border:1px solid rgba(93,202,165,0.40);background:rgba(93,202,165,0.14);color:var(--blue);font-size:10px;font-weight:700;line-height:1;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.db-free-badge.compact{position:absolute;top:5px;right:5px;margin-top:0;padding:2px 6px;min-height:18px;height:18px;font-size:9px;line-height:1;max-width:60px;justify-content:center;}
+.db-free-badge:hover{background:rgba(93,202,165,0.22);}
 .db-approved{background:var(--green-dim);border:1px solid var(--green-bd);color:var(--green);}
 .db-pending{background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);}
 
@@ -268,6 +284,11 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .modal-backdrop.open{display:flex;}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:28px 30px;width:460px;max-width:95vw;max-height:90vh;overflow-y:auto;}
 .modal h2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;margin-bottom:18px;}
+.sheet-head{margin:-4px 0 14px;}
+.sheet-grab{width:44px;height:5px;border-radius:999px;background:rgba(240,235,224,.12);margin:0 auto 14px;}
+.sheet-head-row{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.sheet-head-row h2{margin:0;flex:1;min-width:0;}
+.sheet-x{min-width:42px;min-height:42px;padding:0 10px !important;display:flex;align-items:center;justify-content:center;border-radius:12px;}
 .mgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 .mf{display:flex;flex-direction:column;gap:5px;}
 .mf label{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;}
@@ -331,8 +352,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   /* Deliveries: tab bar visible, panels switch */
   .mob-del-tabs{display:flex!important;}
   .del-layout{grid-template-columns:1fr;min-height:0;}
-  .booking-panel{border-right:none;border-bottom:1px solid var(--border);}
+  .booking-panel{display:none!important;}
   .cal-main{min-height:400px;}
+  .mob-plan-panel{display:none;min-height:320px;}
 
   /* Calendar: horizontal scroll */
   .week-grid{overflow-x:auto;}
@@ -351,11 +373,28 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .mob-nav-item.active{color:var(--accent);}
 .mob-nav-item.active svg{stroke:var(--accent);}
 .mob-badge{position:absolute;top:4px;right:8px;min-width:14px;height:14px;border-radius:7px;background:var(--red);color:white;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+.mob-cal-mode-switch{display:none;align-items:center;gap:4px;padding:4px;background:rgba(255,255,255,.03);border:1px solid var(--border2);border-radius:999px;}
+.mob-cal-mode-btn{border:none;background:transparent;color:var(--text3);font-size:11px;font-weight:700;letter-spacing:.02em;padding:7px 12px;border-radius:999px;cursor:pointer;min-height:34px;}
+.mob-cal-mode-btn.active{background:var(--accent-dim);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-bd);}
 .mob-del-tabs{display:none;background:var(--bg2);border-bottom:1px solid var(--border);}
 .mob-del-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--text3);font-size:13px;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;}
 .mob-del-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 .mob-map-btn{display:none;align-items:center;gap:6px;width:100%;margin:12px 0 0;padding:10px;background:rgba(28,74,74,0.3);border:1px solid rgba(93,202,165,0.25);border-radius:var(--r);color:var(--blue);font-size:12px;font-weight:700;cursor:pointer;justify-content:center;}
 .mob-map-btn:active{opacity:.8;}
+.mob-plan-panel{display:none;background:var(--bg2);border-top:1px solid var(--border);padding:16px;overflow-y:auto;}
+.mob-plan-head h2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;margin-bottom:4px;}
+.mob-plan-head p{font-size:12px;color:var(--text2);line-height:1.45;margin-bottom:14px;}
+.mob-plan-card{position:relative;background:rgba(255,255,255,.02);border:1px solid var(--border2);border-radius:14px;padding:12px;min-height:220px;overflow:hidden;}
+.mob-plan-empty{display:flex;align-items:center;justify-content:center;min-height:196px;text-align:center;font-size:13px;color:var(--text3);}
+.mob-plan-stage{position:relative;display:none;width:100%;}
+.mob-plan-stage img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border);background:rgba(0,0,0,.08);}
+.mob-plan-zone{position:absolute;border:2px solid;border-radius:8px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;padding:4px;pointer-events:none;}
+.mob-plan-zone span{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:3px 7px;border-radius:999px;font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;line-height:1.05;letter-spacing:.02em;text-transform:uppercase;color:#fff;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.18);}
+.mob-plan-legend{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;}
+.mob-plan-legend-item{display:flex;align-items:center;gap:8px;padding:9px 10px;border:1px solid var(--border2);border-radius:10px;background:rgba(255,255,255,.03);font-size:12px;font-weight:600;color:var(--text2);min-width:0;}
+.mob-plan-legend-item span:last-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mob-plan-legend-dot{width:10px;height:10px;border-radius:3px;flex:0 0 10px;}
+
 /* Mobile panel visibility — class-based so desktop always wins */
 @media(max-width:768px){
   .mob-panel-hidden{display:none!important;}
@@ -364,8 +403,8 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 
 /* MOBILE WORKFLOW V1 */
-.mob-fab-book,.mob-week-chips,.mob-admin-tabs,.mob-cal-view-switch{display:none;}
-.mob-week-chip,.mob-admin-tab,.mob-fab-book,.mob-cal-view-btn{
+.mob-fab-book,.mob-week-chips,.mob-admin-tabs{display:none;}
+.mob-week-chip,.mob-admin-tab,.mob-fab-book{
   font-family:'Barlow',sans-serif;
 }
 @media(max-width:768px){
@@ -377,6 +416,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .mob-nav-item svg{width:22px;height:22px;}
   .quick-grid{grid-template-columns:1fr;gap:10px;}
   .quick-btn{min-height:64px;padding:14px 12px;font-size:12px;}
+.mob-fab-book{display:none!important;}
   .submit-btn,.btn,.today-btn,.cal-nav,.zf-btn,.add-zone-btn,.edit-info-btn,.act,.zpick,.mob-map-btn,.mob-del-tab,.admin-toolbar-btn,.notice-btn,.tb-btn,.map-ctrl{
     min-height:48px;
   }
@@ -390,14 +430,29 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .zpick-grid{grid-template-columns:1fr;}
   .zpick{padding:12px 14px;font-size:14px;min-height:52px;}
   .booking-panel{padding:16px 16px 100px;}
+  .mob-plan-panel{padding:14px 14px 104px;}
+  .mob-plan-head h2{font-size:22px;}
+  .mob-plan-card{padding:10px;border-radius:16px;}
+  .mob-plan-empty{min-height:180px;font-size:13px;}
+  .mob-plan-legend{display:grid;}
+  .mob-plan-zone span{font-size:9px;padding:3px 6px;}
   .cal-toolbar{padding:12px 12px 8px;gap:8px;flex-wrap:wrap;}
   .cal-title{width:100%;font-size:24px;line-height:1.1;}
   .cal-nav,.today-btn{padding:10px 14px;font-size:13px;}
-  .mob-cal-view-switch{display:inline-flex;gap:6px;padding:4px;border:1px solid var(--border2);border-radius:999px;background:var(--bg3);margin-left:auto;}
-  .mob-cal-view-btn{min-height:38px;padding:8px 12px;border:none;border-radius:999px;background:transparent;color:var(--text2);font-size:12px;font-weight:700;cursor:pointer;}
-  .mob-cal-view-btn.active{background:var(--accent-dim);color:var(--accent);}
   .zf-btn{padding:8px 14px;font-size:12px;}
+  #zone-filters{width:100%;margin-left:0!important;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  #zone-filters.mobile-collapsed .zf-btn:not(.zf-active):not(.zf-aux){display:none;}
+  #zone-filters.mobile-collapsed .zf-btn.zf-active{max-width:calc(100vw - 180px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #zone-filters.mobile-expanded .zf-btn{flex:0 0 auto;}
+  #zone-filters .zf-btn.zf-aux{padding:8px 12px;}
+  #modal-quick-book #qb-optional-wrap{grid-template-columns:1fr !important;gap:10px;}
+  #modal-quick-book #qb-optional-toggle{min-height:48px;font-size:12px;}
+  #modal-quick-book #qb-remembered-hint{display:block;}
+
   .week-grid{padding-bottom:8px;}
+  .week-grid[data-mobile-view="day"]{overflow-x:hidden;}
+  .week-grid[data-mobile-view="day"] .wg-day-col{min-width:0;}
+  .week-grid[data-mobile-view="day"] .wg-time-col{width:54px;flex:0 0 54px;}
   .wg-day-col{min-width:110px;}
   .wg-dn{font-size:11px;}
   .wg-dd{font-size:24px;}
@@ -407,6 +462,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .db-sub{font-size:10px;}
   .mob-week-chips{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;background:var(--bg2);border-bottom:1px solid var(--border);}
   .mob-week-chips::-webkit-scrollbar{display:none;}
+  .mob-cal-mode-switch{display:inline-flex;}
   .mob-week-chip{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:56px;min-height:50px;padding:8px 10px;border-radius:10px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:11px;font-weight:700;cursor:pointer;}
   .mob-week-chip strong{font-family:'Barlow Condensed',sans-serif;font-size:18px;line-height:1;color:var(--text);}
   .mob-week-chip.active{background:var(--accent-dim);border-color:var(--accent-bd);color:var(--accent);}
@@ -553,6 +609,98 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   }
   .db-co{font-size:12px;}
   .db-sub{font-size:10px;line-height:1.25;}
+  .db.compact-free{padding-right:52px;}
+  .db-free-badge{min-height:26px;font-size:11px;padding:5px 10px;margin-top:6px;}
+  .db-free-badge.compact{top:5px;right:5px;min-height:18px;height:18px;font-size:9px;padding:2px 6px;margin-top:0;max-width:54px;}
+
+  /* Mobile bottom sheets for delivery actions */
+  #modal-detail.modal-backdrop,
+  #modal-edit.modal-backdrop,
+  #modal-reschedule.modal-backdrop{
+    align-items:flex-end;
+    justify-content:center;
+    padding:0;
+  }
+  #modal-detail .modal,
+  #modal-edit .modal,
+  #modal-reschedule .modal{
+    width:100vw !important;
+    max-width:100vw !important;
+    max-height:min(88dvh, 88vh);
+    margin:0;
+    padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+    border-radius:18px 18px 0 0;
+    border-left:none;
+    border-right:none;
+    border-bottom:none;
+    overflow-x:hidden;
+    overflow-y:auto;
+    box-shadow:0 -14px 34px rgba(0,0,0,.34);
+  }
+  #modal-detail .modal{padding-top:14px;}
+  #modal-edit .mgrid,
+  #modal-reschedule .mgrid{
+    grid-template-columns:1fr !important;
+    gap:10px;
+  }
+  #modal-edit .mf,
+  #modal-edit .mf[style],
+  #modal-reschedule .mf,
+  #modal-reschedule .mf[style]{
+    grid-column:auto !important;
+  }
+  #modal-detail input,
+  #modal-detail select,
+  #modal-detail textarea,
+  #modal-edit input,
+  #modal-edit select,
+  #modal-edit textarea,
+  #modal-reschedule input,
+  #modal-reschedule select,
+  #modal-reschedule textarea{
+    min-height:52px !important;
+    font-size:16px !important;
+    padding:12px 14px !important;
+  }
+  #modal-edit textarea,
+  #modal-reschedule textarea{
+    min-height:92px !important;
+  }
+  #modal-detail .m-actions,
+  #modal-edit .m-actions,
+  #modal-reschedule .m-actions{
+    position:sticky;
+    bottom:0;
+    z-index:2;
+    background:linear-gradient(180deg, rgba(15,50,64,0) 0%, rgba(15,50,64,.96) 22%, rgba(15,50,64,.99) 100%);
+    margin:12px -16px calc(-18px - env(safe-area-inset-bottom));
+    padding:14px 16px calc(14px + env(safe-area-inset-bottom));
+    gap:10px;
+  }
+  #modal-detail .m-actions .btn,
+  #modal-edit .m-actions .btn,
+  #modal-reschedule .m-actions .btn{
+    flex:1;
+    min-height:50px;
+    font-size:15px;
+    padding:12px 14px;
+  }
+  #modal-detail .sheet-head,
+  #modal-edit .sheet-head,
+  #modal-reschedule .sheet-head,
+  #modal-reschedule .rs-head{
+    position:sticky;
+    top:0;
+    z-index:2;
+    background:var(--bg2);
+    padding-bottom:10px;
+    margin-bottom:12px;
+  }
+  #modal-detail .df-grid{grid-template-columns:1fr 1fr;}
+  #modal-detail .btn.btn-gr,
+  #modal-detail .btn.btn-re,
+  #modal-detail .btn.btn-bl,
+  #modal-detail .btn[style*='amber']{min-height:46px;}
 
   /* Quick-book modal: full mobile drawer style */
   #modal-quick-book.modal-backdrop{
@@ -804,6 +952,12 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
         <button class="notice-btn dismiss" id="site-notice-dismiss" onclick="dismissActiveSiteNotice()">Masquer</button>
       </div>
     </div>
+    <div class="notice-chip-wrap" id="site-notice-chip-wrap" style="display:none;">
+      <button class="notice-chip warning" id="site-notice-chip" onclick="openMobileNoticeSheet()">
+        <span class="notice-chip-icon" id="site-notice-chip-icon">⚠</span>
+        <span class="notice-chip-label" id="site-notice-chip-label">1 avis actif</span>
+      </button>
+    </div>
     <div class="stat-strip">
       <div class="stat-item"><div class="stat-lbl">En attente</div><div class="stat-val c-amber" id="ss-pending">0</div></div>
       <div class="stat-item"><div class="stat-lbl">Approuvées aujourd'hui</div><div class="stat-val c-green" id="ss-today">0</div></div>
@@ -818,7 +972,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
         <div class="clk" id="clock">00:00</div>
         <div class="clk-date" id="clock-date"></div>
         <div class="quick-grid">
-          <button class="quick-btn" onclick="showView('deliveries')">
+          <button class="quick-btn quick-btn-primary" onclick="showView('deliveries')">
             <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             Réserver une livraison
           </button>
@@ -868,7 +1022,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   <div class="view" id="view-deliveries">
     <div class="mob-del-tabs">
         <button class="mob-del-tab" id="mob-tab-cal" onclick="mobSwitchTab('cal')">Calendrier</button>
-        <button class="mob-del-tab active" id="mob-tab-form" onclick="mobSwitchTab('form')">Formulaire</button>
+        <button class="mob-del-tab" id="mob-tab-plan" onclick="mobSwitchTab('plan')">Plan du site</button>
       </div>
       <div class="del-layout" id="del-layout-wrap">
       <div class="booking-panel">
@@ -917,14 +1071,25 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
           <button class="cal-nav" onclick="changeWeek(-1)">&#8592;</button>
           <button class="cal-nav" onclick="changeWeek(1)">&#8594;</button>
           <button class="today-btn" onclick="goToToday()">Aujourd'hui</button>
-          <div class="mob-cal-view-switch" id="mob-cal-view-switch">
-            <button class="mob-cal-view-btn active" id="mob-cal-view-day" onclick="setMobCalendarMode('day')">Jour</button>
-            <button class="mob-cal-view-btn" id="mob-cal-view-week" onclick="setMobCalendarMode('week')">Semaine</button>
+          <div class="mob-cal-mode-switch" id="mob-cal-mode-switch">
+            <button type="button" class="mob-cal-mode-btn active" id="mob-cal-mode-day" onclick="setMobCalView('day')">Jour</button>
+            <button type="button" class="mob-cal-mode-btn" id="mob-cal-mode-week" onclick="setMobCalView('week')">Semaine</button>
           </div>
           <div style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;" id="zone-filters"></div>
         </div>
         <div class="mob-week-chips" id="mob-week-chips"></div>
         <div class="week-grid" id="week-grid"></div>
+      </div>
+      <div class="mob-plan-panel mob-panel-hidden" id="mob-plan-panel">
+        <div class="mob-plan-head">
+          <h2>Plan du site</h2>
+          <p>Repérez rapidement les zones avant de réserver une livraison.</p>
+        </div>
+        <div class="mob-plan-card">
+          <div class="mob-plan-empty" id="mob-delivery-plan-empty">Aucun plan téléversé pour le moment.</div>
+          <div class="mob-plan-stage" id="mob-delivery-plan-stage"></div>
+        </div>
+        <div class="mob-plan-legend" id="mob-delivery-plan-legend"></div>
       </div>
     </div>
   </div>
@@ -1256,12 +1421,29 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 </div>
 
-  <button class="mob-fab-book" id="mob-fab-book" onclick="mobOpenBooking()">
+  <button class="mob-fab-book" id="mob-fab-book" onclick="mobOpenBooking()" style="display:none;">
     <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
     Nouvelle livraison
   </button>
 
 <!-- QUICK BOOK MODAL -->
+<div class="modal-backdrop" id="modal-mobile-notices" onclick="if(event.target===this)closeMobileNoticeSheet()">
+  <div class="modal">
+    <div class="sheet-head" style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+      <div>
+        <div class="stat-lbl" style="margin-bottom:6px;">Avis de chantier</div>
+        <h2 style="margin:0;">Avis actifs</h2>
+      </div>
+      <button class="btn btn-gh" onclick="closeMobileNoticeSheet()" style="padding:5px 10px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:12px;">&#x2715;</button>
+    </div>
+    <div id="mobile-notices-list" class="notice-sheet-list"></div>
+    <div class="m-actions" style="display:flex;">
+      <button class="btn btn-gh" onclick="dismissActiveSiteNotice()">Masquer l'avis principal</button>
+      <button class="btn btn-am" onclick="closeMobileNoticeSheet()">Fermer</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modal-quick-book">
   <div class="modal" style="width:460px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -1279,21 +1461,29 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <div class="mf"><label>Heure de fin <span class="req">*</span></label>
         <select id="qb-end" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;"></select>
       </div>
-      <div class="mf" style="grid-column:1/-1;"><label>Compagnie / Sous-traitant <span class="req">*</span></label><select id="qb-company" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;"></select></div>
+      <div class="mf" style="grid-column:1/-1;"><label>Compagnie / Sous-traitant <span class="req">*</span></label><select id="qb-company" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;"></select><div id="qb-remembered-hint">Dernières infos utilisées préremplies pour aller plus vite.</div></div>
       <div class="mf"><label>Nom du contact <span class="req">*</span></label><input type="text" id="qb-contact" placeholder="ex. Marie Dubois"></div>
-      <div class="mf"><label>Téléphone</label><input type="tel" id="qb-phone" placeholder="514-555-0100"></div>
       <div class="mf" style="grid-column:1/-1;"><label>Matériel / Description <span class="req">*</span></label><input type="text" id="qb-material" placeholder="ex. Poutrelles d'acier, 12 pcs"></div>
-      <div class="mf"><label>Taille du camion</label>
-        <select id="qb-truck" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
-          <option value="">Sélectionner...</option>
-          <option>SINGLE-AXLE (20 FT)</option><option>TANDEM (28 FT)</option>
-          <option>SEMI-TRAILER (48 FT)</option><option>SEMI-TRAILER (53 FT)</option>
-          <option>B-TRAIN</option><option>LOWBOY</option><option>FLATBED</option>
-          <option>BOOM TRUCK</option><option>CRANE TRUCK</option><option>MIXER</option>
-          <option>PUMP TRUCK</option><option>ROLL-OFF</option><option>DUMP TRUCK</option><option>TANKER</option>
-        </select>
+      <div class="mf" style="grid-column:1/-1;">
+        <button type="button" id="qb-optional-toggle" onclick="toggleQbOptional()">
+          <span>Détails optionnels</span>
+          <span class="qb-toggle-caret">⌄</span>
+        </button>
       </div>
-      <div class="mf"><label>Notes</label><input type="text" id="qb-notes" placeholder="Exigences spéciales..."></div>
+      <div id="qb-optional-wrap" class="collapsed">
+        <div class="mf"><label>Téléphone</label><input type="tel" id="qb-phone" placeholder="514-555-0100"></div>
+        <div class="mf"><label>Taille du camion</label>
+          <select id="qb-truck" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
+            <option value="">Sélectionner...</option>
+            <option>SINGLE-AXLE (20 FT)</option><option>TANDEM (28 FT)</option>
+            <option>SEMI-TRAILER (48 FT)</option><option>SEMI-TRAILER (53 FT)</option>
+            <option>B-TRAIN</option><option>LOWBOY</option><option>FLATBED</option>
+            <option>BOOM TRUCK</option><option>CRANE TRUCK</option><option>MIXER</option>
+            <option>PUMP TRUCK</option><option>ROLL-OFF</option><option>DUMP TRUCK</option><option>TANKER</option>
+          </select>
+        </div>
+        <div class="mf" style="grid-column:1/-1;"><label>Notes</label><input type="text" id="qb-notes" placeholder="Exigences spéciales..."></div>
+      </div>
     </div>
     <div id="qb-err" class="modal-err" style="display:none;margin-top:8px;"></div>
     <div class="m-actions" style="margin-top:16px;">
@@ -1409,7 +1599,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 <!-- EDIT DELIVERY MODAL -->
 <div class="modal-backdrop" id="modal-edit">
   <div class="modal">
-    <h2>Modifier la livraison</h2>
+    <div class="sheet-head">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head-row">
+        <h2>Modifier la livraison</h2>
+        <button class="btn btn-gh sheet-x" onclick="closeModal('modal-edit')">✕</button>
+      </div>
+    </div>
     <input type="hidden" id="ed-id">
     <div class="mgrid">
       <div class="mf"><label>Company <span class="req">*</span></label><input type="text" id="ed-company"></div>
@@ -1438,11 +1634,12 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 <div class="modal-backdrop" id="modal-reschedule">
   <div class="modal res-modal">
     <div class="rs-head">
+      <div class="sheet-grab"></div>
       <div class="rs-title-wrap">
         <h2>Déplacer la livraison</h2>
         <div class="rs-sub">Déplacement rapide depuis le calendrier. Ajustez la zone si nécessaire, puis confirmez.</div>
       </div>
-      <button class="btn btn-gh" onclick="closeModal('modal-reschedule')" style="padding:5px 10px;flex-shrink:0;">✕</button>
+      <button class="btn btn-gh sheet-x" onclick="closeModal('modal-reschedule')" style="flex-shrink:0;">✕</button>
     </div>
     <div class="mgrid rs-grid">
       <div class="mf" style="grid-column:1/-1;"><label>Compagnie</label><input type="text" id="rs-company" class="rs-readonly" readonly></div>
@@ -1517,6 +1714,73 @@ let projectInfo   = {
 let mapImg        = null;
 let mapPdf        = null;
 let subcontractors = []; // list of company names for dropdown
+
+const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
+let mobZoneFiltersExpanded = false;
+
+function loadMobileBookingPrefs(){
+  try{
+    return JSON.parse(localStorage.getItem(MOBILE_BOOKING_PREF_KEY) || '{}') || {};
+  }catch(_){
+    return {};
+  }
+}
+function saveMobileBookingPrefs(prefs){
+  try{
+    localStorage.setItem(MOBILE_BOOKING_PREF_KEY, JSON.stringify({
+      company: prefs.company || '',
+      contact: prefs.contact || '',
+      phone: prefs.phone || '',
+      truck: prefs.truck || ''
+    }));
+  }catch(_){}
+}
+function ensureQuickBookCompanyOption(value){
+  const sel = g('qb-company');
+  if(!sel || !value) return;
+  const exists = Array.from(sel.options).some(o => o.value === value);
+  if(!exists){
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = value;
+    sel.appendChild(opt);
+  }
+}
+function applyQuickBookPrefs(){
+  const prefs = loadMobileBookingPrefs();
+  if(!prefs || (!prefs.company && !prefs.contact && !prefs.phone && !prefs.truck)) return;
+  if(prefs.company){
+    ensureQuickBookCompanyOption(prefs.company);
+    if(!g('qb-company').value) g('qb-company').value = prefs.company;
+  }
+  if(prefs.contact && !g('qb-contact').value) g('qb-contact').value = prefs.contact;
+  if(prefs.phone && !g('qb-phone').value) g('qb-phone').value = prefs.phone;
+  if(prefs.truck && !g('qb-truck').value) g('qb-truck').value = prefs.truck;
+}
+function setQbOptionalCollapsed(collapsed){
+  const wrap = g('qb-optional-wrap');
+  const btn = g('qb-optional-toggle');
+  if(!wrap || !btn) return;
+  wrap.classList.toggle('collapsed', !!collapsed);
+  btn.classList.toggle('expanded', !collapsed);
+}
+function toggleQbOptional(){
+  const wrap = g('qb-optional-wrap');
+  if(!wrap) return;
+  setQbOptionalCollapsed(!wrap.classList.contains('collapsed'));
+}
+function ensureMobileZoneFilterDefault(){
+  if(window.innerWidth > 768 || !zones.length) return;
+  if(!selZone || !zones.some(z => z.id === selZone)) selZone = zones[0].id;
+  if(activeZF.size !== 1 || !activeZF.has(selZone)){
+    activeZF = new Set([selZone]);
+  }
+}
+function toggleMobileZoneFilters(forceExpanded){
+  mobZoneFiltersExpanded = typeof forceExpanded === 'boolean' ? forceExpanded : !mobZoneFiltersExpanded;
+  renderZoneFilters();
+}
+
 let iconMarkers    = []; // standalone map icons
 let blackoutDates  = []; // [{id, zoneId, dateFrom, dateTo, reason}]
 let siteSchedule  = {
@@ -1531,7 +1795,7 @@ let siteSchedule  = {
 let notifications = [];
 let siteNotices   = [];
 let editingSiteNoticeId = null;
-let weekStart     = getMonday(new Date());
+let weekStart     = getMonday(todayDateObj());
 let pendingReschedule = null;
 let activeBookingTemplate = null;
 let _calendarDrag = { active:false, ghost:null, hoveredCol:null, hoveredSlotEl:null, hoveredTimeEl:null, tooltip:null, deliveryId:null, durationSlots:1 };
@@ -1629,6 +1893,7 @@ function subscribeDeliveries(){
 // ── UTILS ─────────────────────────────────────────────────
 function today(){ const d=new Date(); return dk(d); }
 function dk(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function todayDateObj(){ return new Date(today()+'T12:00:00'); }
 function getMonday(d){ const dt=new Date(d),day=dt.getDay(); dt.setDate(dt.getDate()-(day===0?6:day-1)); dt.setHours(0,0,0,0); return dt; }
 function addDays(d,n){ const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt; }
 function fmtDate(s){ if(!s)return''; return new Date(s+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}); }
@@ -1683,12 +1948,62 @@ function dismissActiveSiteNotice(){
   const map = getDismissedNoticeMap();
   map[top.id] = top.updatedAt||top.createdAt||new Date().toISOString();
   setDismissedNoticeMap(map);
+  closeMobileNoticeSheet();
   renderSiteNoticeBanner();
+}
+function openMobileNoticeSheet(){
+  const modal = g('modal-mobile-notices'); if(!modal) return;
+  renderMobileNoticeSheet();
+  modal.classList.add('open');
+}
+function closeMobileNoticeSheet(){
+  const modal = g('modal-mobile-notices'); if(modal) modal.classList.remove('open');
+}
+function renderMobileNoticeSheet(){
+  const list = g('mobile-notices-list'); if(!list) return;
+  const items = getSortedActiveSiteNotices();
+  if(!items.length){
+    list.innerHTML = '<div class="notice-empty">Aucun avis actif.</div>';
+    return;
+  }
+  list.innerHTML = items.map(n => `
+    <div class="notice-sheet-item">
+      <div class="notice-row-top">
+        <span class="notice-tag ${(n.severity||'info')}">${noticeSeverityLabel(n.severity||'info')}</span>
+      </div>
+      <div class="notice-row-msg">${escapeHtml(n.message||'')}</div>
+      <div class="notice-row-meta"><span>${formatNoticeDateRange(n)}</span></div>
+    </div>
+  `).join('');
+}
+function renderSiteNoticeChip(){
+  const wrap = g('site-notice-chip-wrap');
+  const chip = g('site-notice-chip');
+  if(!wrap || !chip) return;
+  const items = getSortedActiveSiteNotices();
+  const top = items[0];
+  if(!top){
+    wrap.style.display = 'none';
+    chip.className = 'notice-chip info';
+    return;
+  }
+  const count = items.length;
+  wrap.style.display = '';
+  chip.className = 'notice-chip ' + (top.severity||'info');
+  const icon = g('site-notice-chip-icon');
+  if(icon) icon.textContent = (top.severity==='urgent' || top.severity==='warning') ? '⚠' : 'i';
+  const label = g('site-notice-chip-label');
+  if(label) label.textContent = count + ' avis actif' + (count>1?'s':'');
 }
 function renderSiteNoticeBanner(){
   const el = g('site-notice-banner'); if(!el) return;
   const top = getSortedActiveSiteNotices()[0];
-  if(!top){ el.className = 'notice-banner'; return; }
+  if(!top){
+    el.className = 'notice-banner';
+    renderSiteNoticeChip();
+    renderMobileNoticeSheet();
+    return;
+  }
   const all = getSortedActiveSiteNotices(true);
   const countExtra = Math.max(0, all.length - 1);
   el.className = 'notice-banner show notice-' + (top.severity||'info');
@@ -1701,6 +2016,8 @@ function renderSiteNoticeBanner(){
   sub.push(formatNoticeDateRange(top));
   if(countExtra>0) sub.push(countExtra + ' autre' + (countExtra>1?'s':'') + ' avis actif' + (countExtra>1?'s':''));
   g('site-notice-sub').innerHTML = sub.map(s=>'<span>'+s+'</span>').join('');
+  renderSiteNoticeChip();
+  renderMobileNoticeSheet();
 }
 function clearSiteNoticeForm(){
   editingSiteNoticeId = null;
@@ -1814,10 +2131,62 @@ function showView(v){
 }
 
 // ── MOBILE HELPERS ────────────────────────────────────────────────────────────
-let _mobDelTab = 'form';
+let _mobDelTab = 'cal';
 let _mobAdminTab = 'review';
-let _mobCalendarMode = 'day';
-let _mobSelectedDate = today();
+let _mobCalView = 'day';
+let _mobActiveDayIndex = -1;
+
+function getMobileTodayIndex(){
+  const t = todayDateObj();
+  const diff = Math.round((getMonday(t) - weekStart) / 86400000);
+  const idx = Math.round((t - weekStart) / 86400000);
+  return (idx >= 0 && idx <= 6) ? idx : 0;
+}
+function syncMobDayIndex(){
+  if(window.innerWidth > 768) return;
+  if(typeof _mobActiveDayIndex !== 'number' || _mobActiveDayIndex < 0 || _mobActiveDayIndex > 6){
+    _mobActiveDayIndex = getMobileTodayIndex();
+  }
+}
+function updateMobCalModeUI(){
+  const switcher = g('mob-cal-mode-switch');
+  if(!switcher) return;
+  if(window.innerWidth > 768){
+    switcher.style.display = 'none';
+    return;
+  }
+  switcher.style.display = 'inline-flex';
+  g('mob-cal-mode-day')?.classList.toggle('active', _mobCalView === 'day');
+  g('mob-cal-mode-week')?.classList.toggle('active', _mobCalView === 'week');
+}
+function setMobCalView(view){
+  _mobCalView = (view === 'week') ? 'week' : 'day';
+  syncMobDayIndex();
+  updateMobCalModeUI();
+  renderWeekCalendar();
+}
+function updateMobileCalendarMode(){
+  if(window.innerWidth > 768){
+    updateMobCalModeUI();
+    updateTodayButtonLabel();
+    return;
+  }
+  syncMobDayIndex();
+  updateMobCalModeUI();
+  updateTodayButtonLabel();
+}
+
+function updateTodayButtonLabel(){
+  const btn = document.querySelector('#view-deliveries .today-btn');
+  if(!btn) return;
+  if(window.innerWidth > 768){
+    btn.textContent = "Aujourd'hui";
+    return;
+  }
+  const t = todayDateObj();
+  const shortDay = t.toLocaleDateString('fr-CA',{weekday:'short'});
+  btn.textContent = "Aujourd’hui · " + shortDay.charAt(0).toUpperCase() + shortDay.slice(1) + ' ' + t.getDate();
+}
 
 function updateMobileFab(){
   const fab = g('mob-fab-book');
@@ -1831,6 +2200,7 @@ function mobOpenBooking(){
   showView('deliveries');
   if(window.innerWidth <= 768){
     mobSwitchTab('cal');
+    updateMobileCalendarMode();
     const calWrap = document.querySelector('#view-deliveries .week-grid');
     if(calWrap) calWrap.scrollTo({top:0, behavior:'smooth'});
   } else {
@@ -1846,68 +2216,93 @@ function renderMobWeekChips(){
   if(window.innerWidth > 768){ wrap.innerHTML=''; return; }
   const days = Array.from({length:7},(_,i)=>addDays(weekStart,i));
   const labels = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  syncMobDayIndex();
   wrap.innerHTML = days.map((d,i)=>{
-    const ds = dk(d);
-    const isToday = ds===today();
-    const isActive = ds===_mobSelectedDate;
-    return `<button class="mob-week-chip ${isActive?'active':''} ${isToday?'today':''}" data-day-index="${i}" onclick="mobJumpToDay(${i})"><span>${labels[(d.getDay()+6)%7]}</span><strong>${d.getDate()}</strong></button>`;
+    const isToday = dk(d)===today();
+    return `<button class="mob-week-chip ${i===_mobActiveDayIndex?'active':''} ${isToday?'today':''}" data-day-index="${i}" onclick="mobJumpToDay(${i})"><span>${labels[(d.getDay()+6)%7]}</span><strong>${d.getDate()}</strong></button>`;
   }).join('');
 }
 function mobJumpToDay(idx){
-  _mobSelectedDate = dk(addDays(weekStart, idx));
+  _mobActiveDayIndex = idx;
+  const cols = Array.from(document.querySelectorAll('#week-grid .wg-day-col'));
   const chips = Array.from(document.querySelectorAll('#mob-week-chips .mob-week-chip'));
   chips.forEach((chip,i)=>chip.classList.toggle('active', i===idx));
-  if(_mobCalendarMode === 'day'){
+  if(window.innerWidth <= 768 && _mobCalView === 'day'){
     renderWeekCalendar();
     return;
   }
-  const cols = Array.from(document.querySelectorAll('#week-grid .wg-day-col'));
   if(cols[idx]) cols[idx].scrollIntoView({behavior:'smooth', inline:'start', block:'nearest'});
 }
-function syncMobCalendarControls(){
-  const wrap = g('mob-cal-view-switch');
-  if(!wrap) return;
-  const mobile = window.innerWidth <= 768;
-  wrap.style.display = mobile ? 'inline-flex' : 'none';
-  if(g('mob-cal-view-day')) g('mob-cal-view-day').classList.toggle('active', _mobCalendarMode === 'day');
-  if(g('mob-cal-view-week')) g('mob-cal-view-week').classList.toggle('active', _mobCalendarMode === 'week');
-}
-function ensureMobSelectedDateInWeek(){
-  const start = dk(weekStart);
-  const end = dk(addDays(weekStart, 6));
-  if(!_mobSelectedDate || _mobSelectedDate < start || _mobSelectedDate > end){
-    _mobSelectedDate = start;
+
+function mobCalendarSwipeNavigate(dir){
+  if(window.innerWidth > 768 || _mobDelTab !== 'cal') return;
+  syncMobDayIndex();
+  if(_mobCalView === 'day'){
+    let nextIdx = _mobActiveDayIndex + dir;
+    if(nextIdx < 0){
+      weekStart = addDays(weekStart, -7);
+      _mobActiveDayIndex = 6;
+    } else if(nextIdx > 6){
+      weekStart = addDays(weekStart, 7);
+      _mobActiveDayIndex = 0;
+    } else {
+      _mobActiveDayIndex = nextIdx;
+    }
+    renderWeekCalendar();
+    return;
   }
+  changeWeek(dir);
 }
-function setMobCalendarMode(mode){
-  _mobCalendarMode = mode === 'week' ? 'week' : 'day';
-  if(window.innerWidth <= 768){
-    ensureMobSelectedDateInWeek();
-  }
-  syncMobCalendarControls();
-  renderWeekCalendar();
-}
-function mobilePrefillBookingFromCalendar(date, time){
-  const zoneSource = activeZF.size === 1 ? Array.from(activeZF)[0] : (selZone || zones[0]?.id || null);
-  if(g('b-date')) g('b-date').value = date;
-  if(zoneSource) selZone = zoneSource;
-  renderZonePicker();
-  renderStartTimes();
-  const startSel = g('b-time-start');
-  if(startSel){
-    startSel.value = time;
-    onStartChange();
-  }
-  const panel = document.querySelector('.booking-panel');
-  mobSwitchTab('form');
-  if(panel) panel.scrollTo({top:0, behavior:'smooth'});
-  setTimeout(()=>{ if(g('b-company')) g('b-company').focus(); }, 180);
-}
-function calendarCellAction(date, time, event){
-  if(window.innerWidth <= 768){
-    if(event) event.preventDefault();
-    mobilePrefillBookingFromCalendar(date, time);
-  }
+
+function bindMobileCalendarSwipe(){
+  const grid = g('week-grid');
+  if(!grid || grid._mobileSwipeBound) return;
+  grid._mobileSwipeBound = true;
+
+  let startX = 0;
+  let startY = 0;
+  let startAt = 0;
+  let tracking = false;
+  let startedOnInteractive = false;
+
+  grid.addEventListener('touchstart', (e) => {
+    if(window.innerWidth > 768 || _mobDelTab !== 'cal') return;
+    const touch = e.touches && e.touches[0];
+    if(!touch) return;
+    startX = touch.clientX;
+    startY = touch.clientY;
+    startAt = Date.now();
+    tracking = true;
+    startedOnInteractive = !!e.target.closest('button,input,select,textarea,a,[role="button"]');
+  }, { passive:true });
+
+  grid.addEventListener('touchend', (e) => {
+    if(!tracking){
+      return;
+    }
+    tracking = false;
+    if(window.innerWidth > 768 || _mobDelTab !== 'cal' || startedOnInteractive){
+      return;
+    }
+    const touch = (e.changedTouches && e.changedTouches[0]) || null;
+    if(!touch) return;
+
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    const elapsed = Date.now() - startAt;
+    const absX = Math.abs(dx);
+    const absY = Math.abs(dy);
+
+    if(elapsed > 900) return;
+    if(absX < 48) return;
+    if(absX <= absY * 1.25) return;
+
+    mobCalendarSwipeNavigate(dx < 0 ? 1 : -1);
+  }, { passive:true });
+
+  grid.addEventListener('touchcancel', () => {
+    tracking = false;
+  }, { passive:true });
 }
 function setMobAdminTab(tab){
   _mobAdminTab = tab;
@@ -1941,38 +2336,105 @@ function mobSwitchTab(tab){
   _mobDelTab = tab;
   const form = document.querySelector('.booking-panel');
   const cal  = document.querySelector('.cal-main');
-  if(tab === 'form'){
+  const plan = g('mob-plan-panel');
+  const tc   = g('mob-tab-cal');
+  const tp   = g('mob-tab-plan');
+
+  if(window.innerWidth > 768){
     if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
-    if(cal){  cal.classList.add('mob-panel-hidden');     cal.style.display='';  }
-    const tf=g('mob-tab-form'); if(tf) tf.classList.add('active');
-    const tc=g('mob-tab-cal');  if(tc) tc.classList.remove('active');
+    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display=''; }
+    if(plan){ plan.classList.add('mob-panel-hidden');    plan.style.display='none'; }
+    if(tc) tc.classList.remove('active');
+    if(tp) tp.classList.remove('active');
+    updateMobileCalendarMode();
+    return;
+  }
+
+  if(form){ form.classList.add('mob-panel-hidden'); form.style.display='none'; }
+
+  if(tab === 'plan'){
+    if(cal){  cal.classList.add('mob-panel-hidden');  cal.style.display='none'; }
+    if(plan){ plan.classList.remove('mob-panel-hidden'); plan.style.display='block'; }
+    if(tc) tc.classList.remove('active');
+    if(tp) tp.classList.add('active');
+    renderMobilePlanPanel();
   } else {
-    if(form){ form.classList.add('mob-panel-hidden');    form.style.display=''; }
-    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
-    const tf=g('mob-tab-form'); if(tf) tf.classList.remove('active');
-    const tc=g('mob-tab-cal');  if(tc) tc.classList.add('active');
+    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display=''; }
+    if(plan){ plan.classList.add('mob-panel-hidden');    plan.style.display='none'; }
+    if(tc) tc.classList.add('active');
+    if(tp) tp.classList.remove('active');
+    updateMobileCalendarMode();
     renderWeekCalendar();
   }
 }
 
 function _initMobDelTabs(){
-  if(window.innerWidth > 768){
-    // Desktop: always clear any mobile-applied hiding
-    const form=document.querySelector('.booking-panel');
-    const cal=document.querySelector('.cal-main');
-    if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
-    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
-    return;
-  }
-  // Mobile: hide calendar, show form
   const form=document.querySelector('.booking-panel');
   const cal=document.querySelector('.cal-main');
-  if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
-  if(cal){  cal.classList.add('mob-panel-hidden');     cal.style.display='';  }
-  const tf=g('mob-tab-form'); if(tf) tf.classList.add('active');
-  const tc=g('mob-tab-cal');  if(tc) tc.classList.remove('active');
-  _mobDelTab='form';
-  syncMobCalendarControls();
+  const plan=g('mob-plan-panel');
+  if(window.innerWidth > 768){
+    if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
+    if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display=''; }
+    if(plan){ plan.classList.add('mob-panel-hidden'); plan.style.display='none'; }
+    return;
+  }
+  if(form){ form.classList.add('mob-panel-hidden'); form.style.display='none'; }
+  if(cal){  cal.classList.remove('mob-panel-hidden'); cal.style.display=''; }
+  if(plan){ plan.classList.add('mob-panel-hidden'); plan.style.display='none'; }
+  const tc=g('mob-tab-cal');  if(tc) tc.classList.add('active');
+  const tp=g('mob-tab-plan'); if(tp) tp.classList.remove('active');
+  _mobDelTab='cal';
+  updateMobileCalendarMode();
+  renderMobilePlanPanel();
+}
+
+function renderMobilePlanPanel(){
+  const panel = g('mob-plan-panel');
+  const stage = g('mob-delivery-plan-stage');
+  const empty = g('mob-delivery-plan-empty');
+  const legend = g('mob-delivery-plan-legend');
+  if(!panel || !stage || !empty || !legend) return;
+  if(window.innerWidth > 768){
+    panel.classList.add('mob-panel-hidden');
+    panel.style.display = 'none';
+    return;
+  }
+  stage.innerHTML = '';
+  legend.innerHTML = '';
+  if(!mapImg){
+    empty.style.display = 'flex';
+    stage.style.display = 'none';
+    legend.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  stage.style.display = 'block';
+  const img = document.createElement('img');
+  img.src = mapImg;
+  img.alt = 'Plan du site';
+  img.loading = 'lazy';
+  stage.appendChild(img);
+  zones.filter(z => z.visible !== false).forEach(z => {
+    const rect = document.createElement('div');
+    rect.className = 'mob-plan-zone';
+    rect.style.left = (z.xPct || 5) + '%';
+    rect.style.top = (z.yPct || 5) + '%';
+    rect.style.width = (z.wPct || 18) + '%';
+    rect.style.height = (z.hPct || 15) + '%';
+    rect.style.borderColor = z.color || '#5DCAA5';
+    rect.style.background = (z.color || '#5DCAA5') + '22';
+    const chip = document.createElement('span');
+    chip.style.background = z.color || '#5DCAA5';
+    chip.textContent = z.name || 'Zone';
+    rect.appendChild(chip);
+    stage.appendChild(rect);
+
+    const item = document.createElement('div');
+    item.className = 'mob-plan-legend-item';
+    item.innerHTML = '<span class="mob-plan-legend-dot" style="background:' + (z.color || '#5DCAA5') + '"></span><span>' + (z.name || 'Zone') + '</span>';
+    legend.appendChild(item);
+  });
+  legend.style.display = zones.filter(z => z.visible !== false).length ? 'grid' : 'none';
 }
 
 let _mobMapVisible = true;
@@ -2219,7 +2681,7 @@ function renderHome(){
     <span style="display:flex;align-items:center;gap:7px;"><span style="width:9px;height:9px;border-radius:2px;background:${z.color};flex-shrink:0;"></span><span class="info-k">${z.name}</span></span>
     <span class="info-v" style="font-size:11px;color:var(--text3);">${deliveries.filter(d=>d.zone===z.id&&d.status==='approved'&&d.date===today()).length} aujourd’hui</span>
   </div>`).join('');
-  renderMapZones(); renderIconMarkers();
+  renderMapZones(); renderIconMarkers(); renderMobilePlanPanel();
   // Re-render after layout settles (fixes first-load sizing)
   setTimeout(()=>{ if(mapImg){ renderMapZones(); renderIconMarkers(); } }, 120);
   renderTodayDeliveries();
@@ -2565,13 +3027,13 @@ function uploadMap(e){
         await page.render({canvasContext:cvs.getContext('2d'),viewport}).promise;
         mapImg=cvs.toDataURL('image/jpeg',0.88);
         await fbSaveConfig('mapImg',mapImg);
-        renderHome();
+        renderHome(); renderMobilePlanPanel();
       }catch(err){alert('Could not render PDF: '+err.message);}
     };
     r.readAsArrayBuffer(file);
   } else {
     const r=new FileReader();
-    r.onload=ev=>{mapImg=ev.target.result;fbSaveConfig('mapImg',mapImg);renderHome();};
+    r.onload=ev=>{mapImg=ev.target.result;fbSaveConfig('mapImg',mapImg);renderHome(); renderMobilePlanPanel();};
     r.readAsDataURL(file);
   }
   e.target.value='';
@@ -2764,6 +3226,8 @@ function renderDeliveries(){
   renderStartTimes();
   renderWeekCalendar();
   renderZoneFilters();
+  if(window.innerWidth <= 768) renderWeekCalendar();
+  renderMobilePlanPanel();
   updateMobileFab();
 }
 
@@ -2851,12 +3315,39 @@ function onStartChange(){
 }
 
 function renderZoneFilters(){
-  g('zone-filters').innerHTML=zones.map(z=>{
+  const wrap = g('zone-filters');
+  if(!wrap) return;
+  const isMobile = window.innerWidth <= 768;
+  if(isMobile){
+    ensureMobileZoneFilterDefault();
+    const activeId = activeZF.size ? Array.from(activeZF)[0] : selZone;
+    const activeZone = zones.find(z => z.id === activeId) || zones[0];
+    wrap.className = mobZoneFiltersExpanded ? 'mobile-expanded' : 'mobile-collapsed';
+    const chips = (mobZoneFiltersExpanded ? zones : [activeZone]).map(z=>{
+      const on = activeZone && z.id === activeZone.id;
+      return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
+    }).join('');
+    wrap.innerHTML = chips + `<button class="zf-btn zf-aux" onclick="toggleMobileZoneFilters(${mobZoneFiltersExpanded ? 'false' : 'true'})">${mobZoneFiltersExpanded ? 'Réduire' : 'Choisir zone'}</button>`;
+    return;
+  }
+  wrap.className = '';
+  wrap.innerHTML = zones.map(z=>{
     const on=activeZF.size===0||activeZF.has(z.id);
-    return `<button class="zf-btn" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
+    return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
   }).join('');
 }
-function toggleZF(id){ if(activeZF.has(id))activeZF.delete(id);else activeZF.add(id); renderZoneFilters();renderWeekCalendar(); }
+function toggleZF(id){
+  if(window.innerWidth <= 768){
+    activeZF = new Set([id]);
+    selZone = id;
+    mobZoneFiltersExpanded = false;
+    renderZoneFilters();
+    renderWeekCalendar();
+    return;
+  }
+  if(activeZF.has(id)) activeZF.delete(id); else activeZF.add(id);
+  renderZoneFilters();renderWeekCalendar();
+}
 
 
 // ── ICON LIBRARY ─────────────────────────────────────────────────────────────
@@ -3179,22 +3670,26 @@ function commitDraggedReschedule(){
 }
 
 function renderWeekCalendar(){
-  syncMobCalendarControls();
-  if(window.innerWidth <= 768 && _mobCalendarMode === 'day'){
-    renderDayCalendar();
+  const allDays=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
+  syncMobDayIndex();
+  const isMobile = window.innerWidth <= 768;
+  const useDayView = isMobile && _mobCalView === 'day';
+  const days = useDayView ? [allDays[_mobActiveDayIndex] || allDays[0]] : allDays;
+  const months=[...new Set(allDays.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
+  if(useDayView){
+    const active = days[0];
+    const full = active.toLocaleDateString('fr-CA',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    g('cal-title').textContent = full.charAt(0).toUpperCase() + full.slice(1);
   } else {
-    renderGridWeekCalendar();
+    g('cal-title').textContent=months.join(' / ');
   }
-}
-
-function renderGridWeekCalendar(){
-  const days=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
-  const months=[...new Set(days.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
-  g('cal-title').textContent=months.join(' / ');
+  updateMobileCalendarMode();
+  updateTodayButtonLabel();
   renderMobWeekChips();
   const SLOT_H=34;
   const totalH=TIME_SLOTS.length*SLOT_H;
 
+  // ── Header row ──
   let headerHtml='<div style="width:52px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);"></div>';
   days.forEach(d=>{
     const ds=dk(d),isT=ds===tod;
@@ -3203,131 +3698,122 @@ function renderGridWeekCalendar(){
       +'<div class="wg-dd">'+d.getDate()+'</div></div>';
   });
 
+  // ── Time label column ──
   let timeHtml='';
   TIME_SLOTS.forEach(t=>{
     const half=t.endsWith(':30');
     timeHtml+='<div class="wg-t'+(half?' half':'')+'">'+(half?'':t)+'</div>';
   });
 
+  // ── Day columns ──
   let dayColsHtml='';
-  days.forEach(d=>{ dayColsHtml += renderCalendarDayColumn(dk(d), totalH, SLOT_H, false); });
+  days.forEach(d=>{
+    const ds=dk(d);
+    const dayDels=deliveries.filter(del=>
+      del.date===ds&&del.status!=='rejected'&&del.status!=='cancelled'&&
+      (activeZF.size===0||activeZF.has(del.zone))
+    );
 
+    // Grid lines
+    let gridLines='';
+    TIME_SLOTS.forEach(t=>{
+      const half=t.endsWith(':30');
+      const cellAction = isMobile ? 'onclick' : 'ondblclick';
+      gridLines+='<div class="wg-c '+(half?'half':'')+'" style="position:absolute;left:0;right:0;top:'+(slotIndex(t)*SLOT_H)+'px;height:'+SLOT_H+'px;" '+cellAction+'="quickBook(\''+ds+'\',\''+t+'\')"></div>';
+    });
+
+    // Sort and assign side-by-side columns
+    const sorted=[...dayDels].sort((a,b)=>slotIndex(a.timeStart||a.time)-slotIndex(b.timeStart||b.time));
+    const colEnds=[];
+    const layout=sorted.map(del=>{
+      const si=slotIndex(del.timeStart||del.time);
+      const te=del.timeEnd;
+      const ei=te&&slotIndex(te)>si?slotIndex(te):si+1;
+      let col=colEnds.findIndex(e=>e<=si);
+      if(col===-1)col=colEnds.length;
+      colEnds[col]=ei;
+      return{del,col,si,ei};
+    });
+    const blockInfos=layout.map(item=>{
+      const concurrent=layout.filter(o=>o.si<item.ei&&o.ei>item.si);
+      return{...item,totalCols:Math.max(...concurrent.map(c=>c.col))+1};
+    });
+
+    // Render blocks
+    let blocks='';
+    blockInfos.forEach(({del,col,si,ei,totalCols})=>{
+      const z=zones.find(z=>z.id===del.zone),appr=del.status==='approved';
+      const top=si*SLOT_H+2;
+      const height=Math.max((ei-si)*SLOT_H-4,24);
+      const pct=100/totalCols;
+      const baseColor=appr?(z?z.color:'#4CAF7D'):'';
+      const sty=appr
+        ?'background:'+baseColor+'22;border:1px solid '+baseColor+'55;color:'+baseColor+';'
+        :'background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);';
+      const tsDisp=del.timeStart||del.time;
+      const teDisp=del.timeEnd?(' \u2013 '+del.timeEnd):'';
+      const quickSlotEnd = nextTimeSlotValue(tsDisp);
+      const availableOtherZones = (isMobile && useDayView)
+        ? getAvailableZonesForSlot(ds, tsDisp, quickSlotEnd).filter(zx => zx.id !== del.zone)
+        : [];
+      const firstFreeZoneId = availableOtherZones[0]?.id || '';
+      const freeZoneNames = availableOtherZones.map(zx => zx.name).join(', ');
+      const compactFreeBadge = availableOtherZones.length > 0 && height <= 54;
+      const freeBadgeLabel = compactFreeBadge
+        ? ('+' + availableOtherZones.length)
+        : ('+'+availableOtherZones.length+' '+(availableOtherZones.length>1?'zones libres':'zone libre'));
+      const freeBadge = availableOtherZones.length > 0
+        ? '<button type="button" class="db-free-badge'+(compactFreeBadge?' compact':'')+'" title="Autres zones libres : '+freeZoneNames.replace(/"/g,'&quot;')+'" aria-label="'+availableOtherZones.length+' autre'+(availableOtherZones.length>1?'s':'')+' zone'+(availableOtherZones.length>1?'s':'')+' libre'+(availableOtherZones.length>1?'s':'')+'" onclick="quickBookWithZone(\''+ds+'\',\''+tsDisp+'\',\''+firstFreeZoneId+'\',event)">'+freeBadgeLabel+'</button>'
+        : '';
+      const conflictWarn = isZoneBlackedOut(del.zone, del.date)
+        ? '<div style="font-size:8px;font-weight:700;background:rgba(212,96,96,0.35);color:#ff8080;border-radius:2px;padding:1px 4px;margin-top:2px;display:inline-block;">\u26a0 Zone bloqu\u00e9e</div>'
+        : '';
+      const dragCue = isAdmin() ? 'cursor:grab;' : '';
+      const dragTitle = isAdmin() ? ' title="Glissez pour reprogrammer"' : '';
+      blocks+='<div class="db '+(appr?'db-approved':'db-pending')+(compactFreeBadge?' compact-free':'')+'" data-delivery-id="'+del.id+'" '
+        +'style="top:'+top+'px;height:'+height+'px;left:calc('+col*pct+'% + 2px);width:calc('+pct+'% - 4px);'+sty+dragCue+'" '
+        +'onmousedown="startCalendarDrag(event,\''+del.id+'\',this)" '
+        +dragTitle+' '
+        +'onclick="openDetail(\''+del.id+'\',event)">'
+        +'<div class="db-co">'+del.company+'</div>'
+        +'<div class="db-sub">'+(z?z.name:'')+(z?' \xb7 ':'')+tsDisp+teDisp+'</div>'
+        +conflictWarn
+        +freeBadge
+        +'</div>';
+    });
+
+    // Blackout stripes — one per blacked-out zone for this day
+    let blackoutStripes = '';
+    zones.forEach(z => {
+      const bos = getBlackoutsForZoneDate(z.id, ds);
+      if(bos.length > 0){
+        const reason = bos[0].reason || 'Zone bloquée';
+        blackoutStripes += '<div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:2;">'
+          + '<div style="position:absolute;left:0;right:0;top:0;bottom:0;background:' + z.color + '0D;"></div>'
+          + '<div style="position:absolute;top:4px;left:2px;right:2px;background:' + z.color + '33;border:1px solid ' + z.color + '77;border-radius:3px;padding:3px 6px;font-size:9px;font-weight:700;color:' + z.color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
+          + '⛔ ' + z.name + ' — ' + reason
+          + '</div></div>';
+        // Flag any approved deliveries that now conflict — show warning badge
+        deliveries.filter(d => d.zone === z.id && d.date === ds && (d.status === 'approved' || d.status === 'pending')).forEach(d => {
+          d._blackoutConflict = true;
+        });
+      } else {
+        deliveries.filter(d => d.zone === z.id && d.date === ds).forEach(d => { d._blackoutConflict = false; });
+      }
+    });
+
+    dayColsHtml+='<div class="wg-day-col" data-date="'+ds+'" style="position:relative;height:'+totalH+'px;flex:1;min-width:0;border-right:1px solid var(--border);">'+gridLines+blackoutStripes+blocks+'</div>';
+  });
+
+  // Assemble: header row + scrollable body row
+  const grid = g('week-grid');
+  if(grid) grid.dataset.mobileView = useDayView ? 'day' : 'week';
   g('week-grid').innerHTML=
     '<div style="display:flex;flex-direction:row;position:sticky;top:0;z-index:10;background:var(--bg2);">'+headerHtml+'</div>'
     +'<div style="display:flex;flex-direction:row;overflow-y:auto;flex:1;width:100%;">'
       +'<div class="wg-time-col">'+timeHtml+'</div>'
       +dayColsHtml
     +'</div>';
-}
-
-function renderDayCalendar(){
-  ensureMobSelectedDateInWeek();
-  renderMobWeekChips();
-  const d = new Date(_mobSelectedDate+'T12:00:00');
-  const title = d.toLocaleDateString('en-CA',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  g('cal-title').textContent = title.charAt(0).toUpperCase()+title.slice(1);
-  const SLOT_H = 40;
-  const totalH = TIME_SLOTS.length * SLOT_H;
-
-  let headerHtml = '<div style="width:58px;flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);border-bottom:1px solid var(--border);"></div>';
-  headerHtml += '<div class="wg-dh '+(_mobSelectedDate===today()?'today':'')+'" style="flex:1;min-width:0;">'
-    +'<div class="wg-dn">'+d.toLocaleDateString('en-CA',{weekday:'short'})+'</div>'
-    +'<div class="wg-dd">'+d.getDate()+'</div></div>';
-
-  let timeHtml='';
-  TIME_SLOTS.forEach(t=>{
-    const half=t.endsWith(':30');
-    timeHtml+='<div class="wg-t'+(half?' half':'')+'">'+(half?'':t)+'</div>';
-  });
-
-  const dayColHtml = renderCalendarDayColumn(_mobSelectedDate, totalH, SLOT_H, true);
-
-  g('week-grid').innerHTML=
-    '<div style="display:flex;flex-direction:row;position:sticky;top:0;z-index:10;background:var(--bg2);">'+headerHtml+'</div>'
-    +'<div style="display:flex;flex-direction:row;overflow-y:auto;flex:1;width:100%;">'
-      +'<div class="wg-time-col" style="width:58px;">'+timeHtml+'</div>'
-      +dayColHtml
-    +'</div>';
-}
-
-function renderCalendarDayColumn(ds, totalH, SLOT_H, isDayMode){
-  const dayDels=deliveries.filter(del=>
-    del.date===ds&&del.status!=='rejected'&&del.status!=='cancelled'&&
-    (activeZF.size===0||activeZF.has(del.zone))
-  );
-
-  let gridLines='';
-  TIME_SLOTS.forEach(t=>{
-    const half=t.endsWith(':30');
-    const action = window.innerWidth <= 768
-      ? ' onclick="calendarCellAction(\''+ds+'\',\''+t+'\', event)"'
-      : ' ondblclick="quickBook(\''+ds+'\',\''+t+'\')"';
-    gridLines+='<div class="wg-c '+(half?'half':'')+'" style="position:absolute;left:0;right:0;top:'+(slotIndex(t)*SLOT_H)+'px;height:'+SLOT_H+'px;"'+action+'></div>';
-  });
-
-  const sorted=[...dayDels].sort((a,b)=>slotIndex(a.timeStart||a.time)-slotIndex(b.timeStart||b.time));
-  const colEnds=[];
-  const layout=sorted.map(del=>{
-    const si=slotIndex(del.timeStart||del.time);
-    const te=del.timeEnd;
-    const ei=te&&slotIndex(te)>si?slotIndex(te):si+1;
-    let col=colEnds.findIndex(e=>e<=si);
-    if(col===-1)col=colEnds.length;
-    colEnds[col]=ei;
-    return{del,col,si,ei};
-  });
-  const blockInfos=layout.map(item=>{
-    const concurrent=layout.filter(o=>o.si<item.ei&&o.ei>item.si);
-    return{...item,totalCols:Math.max(...concurrent.map(c=>c.col))+1};
-  });
-
-  let blocks='';
-  blockInfos.forEach(({del,col,si,ei,totalCols})=>{
-    const z=zones.find(z=>z.id===del.zone),appr=del.status==='approved';
-    const top=si*SLOT_H+2;
-    const height=Math.max((ei-si)*SLOT_H-4, isDayMode ? 44 : 24);
-    const pct=100/totalCols;
-    const baseColor=appr?(z?z.color:'#4CAF7D'):'';
-    const sty=appr
-      ?'background:'+baseColor+'22;border:1px solid '+baseColor+'55;color:'+baseColor+';'
-      :'background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);';
-    const tsDisp=del.timeStart||del.time;
-    const teDisp=del.timeEnd?(' – '+del.timeEnd):'';
-    const conflictWarn = isZoneBlackedOut(del.zone, del.date)
-      ? '<div style="font-size:8px;font-weight:700;background:rgba(212,96,96,0.35);color:#ff8080;border-radius:2px;padding:1px 4px;margin-top:2px;display:inline-block;">⚠ Zone bloquée</div>'
-      : '';
-    const dragCue = isAdmin() ? 'cursor:grab;' : '';
-    const dragTitle = isAdmin() ? ' title="Glissez pour reprogrammer"' : '';
-    blocks+='<div class="db '+(appr?'db-approved':'db-pending')+'" data-delivery-id="'+del.id+'" '
-      +'style="top:'+top+'px;height:'+height+'px;left:calc('+col*pct+'% + 2px);width:calc('+pct+'% - 4px);'+sty+dragCue+'" '
-      +'onmousedown="startCalendarDrag(event,\''+del.id+'\',this)"'+dragTitle+' '
-      +'onclick="openDetail(\''+del.id+'\',event)">'
-      +'<div class="db-co">'+del.company+'</div>'
-      +'<div class="db-sub">'+(z?z.name:'')+(z?' · ':'')+tsDisp+teDisp+'</div>'
-      +conflictWarn
-      +'</div>';
-  });
-
-  let blackoutStripes = '';
-  zones.forEach(z => {
-    const bos = getBlackoutsForZoneDate(z.id, ds);
-    if(bos.length > 0){
-      const reason = bos[0].reason || 'Zone bloquée';
-      blackoutStripes += '<div style="position:absolute;left:0;right:0;top:0;bottom:0;pointer-events:none;z-index:2;">'
-        + '<div style="position:absolute;left:0;right:0;top:0;bottom:0;background:' + z.color + '0D;"></div>'
-        + '<div style="position:absolute;top:4px;left:2px;right:2px;background:' + z.color + '33;border:1px solid ' + z.color + '77;border-radius:3px;padding:3px 6px;font-size:9px;font-weight:700;color:' + z.color + ';white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'
-        + '⛔ ' + z.name + ' — ' + reason
-        + '</div></div>';
-      deliveries.filter(d => d.zone === z.id && d.date === ds && (d.status === 'approved' || d.status === 'pending')).forEach(d => {
-        d._blackoutConflict = true;
-      });
-    } else {
-      deliveries.filter(d => d.zone === z.id && d.date === ds).forEach(d => { d._blackoutConflict = false; });
-    }
-  });
-
-  const minWidth = isDayMode ? 'min-width:calc(100vw - 70px);' : 'min-width:0;';
-  return '<div class="wg-day-col" data-date="'+ds+'" style="position:relative;height:'+totalH+'px;flex:1;'+minWidth+'border-right:1px solid var(--border);">'+gridLines+blackoutStripes+blocks+'</div>';
 }
 function cellClick(date,time){
   g('b-date').value=date; renderStartTimes();
@@ -3336,21 +3822,34 @@ function cellClick(date,time){
   onStartChange();
 }
 function changeWeek(dir){
-  if(window.innerWidth <= 768 && _mobCalendarMode === 'day'){
-    const next = addDays(new Date(_mobSelectedDate+'T12:00:00'), dir);
-    _mobSelectedDate = dk(next);
-    weekStart = getMonday(next);
-  } else {
-    weekStart = addDays(weekStart,dir*7);
-    if(window.innerWidth <= 768){ ensureMobSelectedDateInWeek(); }
+  weekStart=addDays(weekStart,dir*7);
+  if(window.innerWidth <= 768 && _mobCalView === 'day'){
+    const keep = Math.max(0, Math.min(6, _mobActiveDayIndex));
+    _mobActiveDayIndex = keep;
   }
   renderWeekCalendar();
 }
 function goToToday(){
   const now = new Date();
-  weekStart = getMonday(now);
-  _mobSelectedDate = today();
+  const t = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0);
+  weekStart = getMonday(t);
+  _mobActiveDayIndex = (t.getDay() + 6) % 7;
+  if(window.innerWidth <= 768){
+    _mobCalView = 'day';
+    const dateField = g('b-date');
+    if(dateField){
+      dateField.value = dk(t);
+      dateField.min = today();
+    }
+  }
   renderWeekCalendar();
+  if(window.innerWidth <= 768){
+    requestAnimationFrame(() => {
+      renderMobWeekChips();
+      const chips = Array.from(document.querySelectorAll('#mob-week-chips .mob-week-chip'));
+      chips.forEach((chip,i)=>chip.classList.toggle('active', i===_mobActiveDayIndex));
+    });
+  }
 }
 
 // ── SUBMIT ────────────────────────────────────────────────
@@ -3415,7 +3914,14 @@ function openDetail(id,e){
   const adm=isAdmin();
   const ownEditable = !!firebaseUser && d.userId===firebaseUser.uid && d.status!=='cancelled';
   const statusLabel = d.status==='approved' ? 'APPROUVÉE' : d.status==='pending' ? 'EN ATTENTE' : d.status==='cancelled' ? 'ANNULÉE' : 'REJETÉE';
-  let html=`<h2 style="margin-bottom:16px;">${d.company}</h2>
+  let html=`
+    <div class="sheet-head">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head-row">
+        <h2>${d.company}</h2>
+        <button class="btn btn-gh sheet-x" onclick="closeModal('modal-detail')">✕</button>
+      </div>
+    </div>
     <div class="df-grid">
       ${[['Contact',d.contact],['Phone',d.phone||'—'],['Material',d.material],['Truck',d.truck||'—'],
          ['Zone',z?.name||d.zone],['Date',fmtDate(d.date)],['Time',tdisp],
@@ -4098,8 +4604,10 @@ window.addEventListener('resize', ()=>{
     if(form){ form.classList.remove('mob-panel-hidden'); form.style.display=''; }
     if(cal){  cal.classList.remove('mob-panel-hidden');  cal.style.display='';  }
   }
+  renderZoneFilters();
   updateMobileFab();
   syncMobAdminTab();
+  updateMobileCalendarMode();
   renderMobWeekChips();
 });
 
@@ -4107,6 +4615,11 @@ window.addEventListener('resize', ()=>{
 
 function mobilePrefillBookingFromCalendar(date, time){
   showView('deliveries');
+  if(window.innerWidth <= 768){
+    mobSwitchTab('cal');
+    quickBook(date, time);
+    return;
+  }
   let targetZone = selZone;
   if((!targetZone || !zones.find(z=>z.id===targetZone)) && activeZF.size===1){
     targetZone = Array.from(activeZF)[0];
@@ -4127,16 +4640,46 @@ function mobilePrefillBookingFromCalendar(date, time){
   }
   onStartChange();
   const panel = document.querySelector('.booking-panel');
-  if(window.innerWidth <= 768) mobSwitchTab('form');
   if(panel) panel.scrollTo({top:0, behavior:'smooth'});
   setTimeout(()=>g('b-company')?.focus(), 180);
 }
 
-function quickBook(date, time){
-  if(window.innerWidth <= 768){
-    mobilePrefillBookingFromCalendar(date, time);
-    return;
+
+function nextTimeSlotValue(time){
+  const idx = TIME_SLOTS.indexOf(time);
+  if(idx === -1) return time;
+  return TIME_SLOTS[Math.min(idx + 1, TIME_SLOTS.length - 1)] || time;
+}
+function getAvailableZonesForSlot(date, startTime, endTime){
+  const start = startTime;
+  const end = endTime || nextTimeSlotValue(startTime);
+  return zones.filter(z =>
+    (activeZF.size === 0 || activeZF.has(z.id)) &&
+    !isZoneBlackedOut(z.id, date) &&
+    !deliveries.some(d =>
+      d.zone === z.id &&
+      d.date === date &&
+      d.status !== 'rejected' &&
+      d.status !== 'cancelled' &&
+      overlap(start, end, d.timeStart || d.time, d.timeEnd || nextTimeSlotValue(d.timeStart || d.time))
+    )
+  );
+}
+function quickBookWithZone(date, time, zoneId, ev){
+  if(ev){
+    ev.preventDefault();
+    ev.stopPropagation();
   }
+  quickBook(date, time, zoneId);
+}
+function resetQuickBookSheetPosition(){
+  const modal = document.querySelector('#modal-quick-book .modal');
+  if(!modal) return;
+  modal.scrollTop = 0;
+  try{ modal.scrollTo({top:0, left:0, behavior:'instant'}); }catch(_){}
+}
+function quickBook(date, time, preferredZone){
+
   const dateObj = new Date(date+'T12:00:00');
   const dateDisp = dateObj.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'});
   const capDate = dateDisp.charAt(0).toUpperCase()+dateDisp.slice(1);
@@ -4148,7 +4691,11 @@ function quickBook(date, time){
     +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
   const zsel=g('qb-zone');
   zsel.innerHTML=zones.map(z=>'<option value="'+z.id+'">'+ z.name+'</option>').join('');
-  if(selZone) zsel.value=selZone;
+  if(preferredZone && zones.some(z=>z.id===preferredZone)) zsel.value=preferredZone;
+  else if(selZone) zsel.value=selZone;
+  if(zsel.value) selZone = zsel.value;
+  applyQuickBookPrefs();
+  setQbOptionalCollapsed(window.innerWidth <= 768);
   const allowed=allowedSlotsForDate(date);
   const startSel=g('qb-start');
   startSel.innerHTML='<option value="">Sélectionner...</option>'
@@ -4156,7 +4703,10 @@ function quickBook(date, time){
   qbStartChange();
   g('qb-err').style.display='none';
   g('modal-quick-book').classList.add('open');
-  setTimeout(()=>g('qb-company').focus(),80);
+  resetQuickBookSheetPosition();
+  requestAnimationFrame(resetQuickBookSheetPosition);
+  setTimeout(resetQuickBookSheetPosition, 40);
+  setTimeout(()=>{ resetQuickBookSheetPosition(); g('qb-date')?.scrollIntoView({block:'start'}); },80);
 }
 function qbStartChange(){
   const sv=g('qb-start').value, date=g('qb-date').value, zoneId=g('qb-zone').value;
@@ -4201,6 +4751,7 @@ function submitQuickBook(){
     submittedAt:new Date().toISOString(),
     userId:firebaseUser?firebaseUser.uid:null,userEmail:firebaseUser?firebaseUser.email:null};
   deliveries.unshift(d);
+  saveMobileBookingPrefs({company, contact, phone, truck});
   notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===zoneId)||{name:'?'}).name+')','approved');
   saveDelivery(d);
   closeModal('modal-quick-book');
@@ -4305,6 +4856,7 @@ async function initApp(){
 
   // Show loading state
   g('week-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;grid-column:1/-1;">Connecting to database…</div>';
+  bindMobileCalendarSwipe();
 
   if(window._db){
     // Load config docs in parallel
