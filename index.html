@@ -1772,9 +1772,6 @@ function toggleQbOptional(){
 function ensureMobileZoneFilterDefault(){
   if(window.innerWidth > 768 || !zones.length) return;
   if(!selZone || !zones.some(z => z.id === selZone)) selZone = zones[0].id;
-  if(activeZF.size !== 1 || !activeZF.has(selZone)){
-    activeZF = new Set([selZone]);
-  }
 }
 function toggleMobileZoneFilters(forceExpanded){
   mobZoneFiltersExpanded = typeof forceExpanded === 'boolean' ? forceExpanded : !mobZoneFiltersExpanded;
@@ -2162,6 +2159,9 @@ function updateMobCalModeUI(){
 function setMobCalView(view){
   _mobCalView = (view === 'week') ? 'week' : 'day';
   syncMobDayIndex();
+  if(_mobCalView === 'week' && _mobActiveDayIndex > 4){
+    _mobActiveDayIndex = 4;
+  }
   updateMobCalModeUI();
   renderWeekCalendar();
 }
@@ -2214,7 +2214,9 @@ function renderMobWeekChips(){
   const wrap = g('mob-week-chips');
   if(!wrap) return;
   if(window.innerWidth > 768){ wrap.innerHTML=''; return; }
-  const days = Array.from({length:7},(_,i)=>addDays(weekStart,i));
+  const showWorkWeekOnly = _mobCalView === 'week';
+  const dayCount = showWorkWeekOnly ? 5 : 7;
+  const days = Array.from({length:dayCount},(_,i)=>addDays(weekStart,i));
   const labels = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
   syncMobDayIndex();
   wrap.innerHTML = days.map((d,i)=>{
@@ -3320,23 +3322,44 @@ function renderZoneFilters(){
   const isMobile = window.innerWidth <= 768;
   if(isMobile){
     ensureMobileZoneFilterDefault();
-    const activeId = activeZF.size ? Array.from(activeZF)[0] : selZone;
+    const isAllZones = activeZF.size === 0;
+    const activeId = !isAllZones && activeZF.size ? Array.from(activeZF)[0] : selZone;
     const activeZone = zones.find(z => z.id === activeId) || zones[0];
     wrap.className = mobZoneFiltersExpanded ? 'mobile-expanded' : 'mobile-collapsed';
-    const chips = (mobZoneFiltersExpanded ? zones : [activeZone]).map(z=>{
-      const on = activeZone && z.id === activeZone.id;
+
+    const allBtn = `<button class="zf-btn ${isAllZones ? 'zf-active' : ''}" onclick="toggleZF('__all__')">Toutes les zones</button>`;
+    const zoneBtns = zones.map(z=>{
+      const on = !isAllZones && activeZone && z.id === activeZone.id;
       return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
     }).join('');
+
+    const activeZoneBtn = !isAllZones && activeZone
+      ? `<button class="zf-btn zf-active" onclick="toggleZF('${activeZone.id}')" style="background:${activeZone.color}22;border-color:${activeZone.color}55;color:${activeZone.color};">${activeZone.name}</button>`
+      : '';
+
+    const chips = mobZoneFiltersExpanded
+      ? allBtn + zoneBtns
+      : (isAllZones ? allBtn : activeZoneBtn);
+
     wrap.innerHTML = chips + `<button class="zf-btn zf-aux" onclick="toggleMobileZoneFilters(${mobZoneFiltersExpanded ? 'false' : 'true'})">${mobZoneFiltersExpanded ? 'Réduire' : 'Choisir zone'}</button>`;
     return;
   }
   wrap.className = '';
-  wrap.innerHTML = zones.map(z=>{
-    const on=activeZF.size===0||activeZF.has(z.id);
-    return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
-  }).join('');
+  wrap.innerHTML =
+    `<button class="zf-btn ${activeZF.size===0 ? 'zf-active' : ''}" onclick="toggleZF('__all__')">Toutes les zones</button>`
+    + zones.map(z=>{
+      const on=activeZF.size===0||activeZF.has(z.id);
+      return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
+    }).join('');
 }
 function toggleZF(id){
+  if(id === '__all__'){
+    activeZF = new Set();
+    mobZoneFiltersExpanded = false;
+    renderZoneFilters();
+    renderWeekCalendar();
+    return;
+  }
   if(window.innerWidth <= 768){
     activeZF = new Set([id]);
     selZone = id;
@@ -3671,11 +3694,12 @@ function commitDraggedReschedule(){
 
 function renderWeekCalendar(){
   const allDays=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
+  const workWeekDays = allDays.slice(0,5);
   syncMobDayIndex();
   const isMobile = window.innerWidth <= 768;
   const useDayView = isMobile && _mobCalView === 'day';
-  const days = useDayView ? [allDays[_mobActiveDayIndex] || allDays[0]] : allDays;
-  const months=[...new Set(allDays.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
+  const days = useDayView ? [allDays[_mobActiveDayIndex] || allDays[0]] : workWeekDays;
+  const months=[...new Set(days.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
   if(useDayView){
     const active = days[0];
     const full = active.toLocaleDateString('fr-CA',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
