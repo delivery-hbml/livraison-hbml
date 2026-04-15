@@ -3718,7 +3718,7 @@ function renderWeekCalendar(){
   days.forEach(d=>{
     const ds=dk(d),isT=ds===tod;
     headerHtml+='<div class="wg-dh '+(isT?'today':'')+'" style="flex:1;min-width:0;">'
-      +'<div class="wg-dn">'+d.toLocaleDateString('en-CA',{weekday:'short'})+'</div>'
+      +'<div class="wg-dn">'+d.toLocaleDateString('fr-CA',{weekday:'short'})+'</div>'
       +'<div class="wg-dd">'+d.getDate()+'</div></div>';
   });
 
@@ -4216,18 +4216,19 @@ function saveEdit(){
 function renderScheduleMgr(){
   const el = g('schedule-mgr'); if (!el) return;
   const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dayLabels = { Mon:'Lun', Tue:'Mar', Wed:'Mer', Thu:'Jeu', Fri:'Ven', Sat:'Sam', Sun:'Dim' };
   el.innerHTML = days.map(day => {
     const sch = siteSchedule[day];
     const timeOpts = TIME_SLOTS.map(t => `<option value="${t}" ${t===sch.open?'selected':''} >${t}</option>`).join('');
     const timeOptsClose = TIME_SLOTS.map(t => `<option value="${t}" ${t===sch.close?'selected':''} >${t}</option>`).join('');
     return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-      <span style="font-size:12px;font-weight:700;color:var(--text);width:32px;flex-shrink:0;">${day}</span>
+      <span style="font-size:12px;font-weight:700;color:var(--text);width:32px;flex-shrink:0;">${dayLabels[day] || day}</span>
       <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);cursor:pointer;">
         <input type="checkbox" ${sch.closed?'':'checked'} onchange="setDayOpen('${day}',this.checked)" style="cursor:pointer;"> Ouvert
       </label>
       <div style="display:flex;align-items:center;gap:6px;${sch.closed?'opacity:0.3;pointer-events:none;':''}">
         <select onchange="setDayHour('${day}','open',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;">${timeOpts}</select>
-        <span style="font-size:11px;color:var(--text3);">to</span>
+        <span style="font-size:11px;color:var(--text3);">à</span>
         <select onchange="setDayHour('${day}','close',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;">${timeOptsClose}</select>
       </div>
     </div>`;
