@@ -1914,13 +1914,17 @@ function saveLocalProjectInfo(){
   }catch(_){}
 }
 async function saveProjectInfoConfig(){
+  // Save locally immediately so refresh always keeps the selected setting.
   saveLocalProjectInfo();
-  if(window._db){
-    await fbSaveConfig('projectInfo', projectInfo);
-  }
+
   const nameEl = g('app-name');
   if(nameEl) nameEl.textContent = projectInfo.appname || 'SiteDelivery';
   updateAutoApproveUI();
+
+  // Then sync to Firebase when available.
+  if(window._db){
+    await fbSaveConfig('projectInfo', projectInfo);
+  }
 }
 
 function ensureQuickBookCompanyOption(value){
@@ -3244,6 +3248,8 @@ function updateAutoApproveUI(){
 }
 function toggleAutoApprove(){
   projectInfo.autoApprove = projectInfo.autoApprove===false;
+  // Persist before any async Firebase operation, so a refresh cannot reset the toggle.
+  saveLocalProjectInfo();
   updateAutoApproveUI();
   saveProjectInfoConfig().catch(e => console.error('saveProjectInfoConfig', e));
 }
@@ -5123,7 +5129,12 @@ async function initApp(){
       fbLoadConfig('siteNotices',     []),
     ]);
     zones          = z;
-    projectInfo    = {...projectInfo, ...pi};
+    // Merge order matters:
+    // 1) defaults / current state
+    // 2) Firebase projectInfo
+    // 3) local projectInfo, so a recently toggled autoApprove value survives refresh
+    //    even if Firebase did not write quickly enough or is temporarily unavailable.
+    projectInfo    = {...projectInfo, ...pi, ...loadLocalProjectInfo()};
     saveLocalProjectInfo();
     notifications  = no;
     mapImg         = mi;
