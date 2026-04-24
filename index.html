@@ -163,16 +163,20 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .wg-c{border-right:none;border-bottom:1px solid var(--border);cursor:pointer;}
 .wg-c.half{border-bottom:1px dashed rgba(255,255,255,0.04);}
 .wg-c:hover{background:rgba(232,98,42,0.05);}
-.db{position:absolute;border-radius:3px;padding:4px 7px;font-size:11px;overflow:hidden;cursor:pointer;transition:filter .14s;z-index:5;box-sizing:border-box;}
-.db:hover{filter:brightness(1.2);}
-.db-co{font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.db-sub{font-size:10px;opacity:.8;}
+.db{position:absolute;border-radius:6px;padding:6px 8px 6px 18px;font-size:11px;overflow:hidden;cursor:pointer;transition:transform .14s ease,box-shadow .16s ease,filter .14s;z-index:5;box-sizing:border-box;box-shadow:0 5px 12px rgba(15,50,64,0.08);}
+.db::before{content:'';position:absolute;left:0;top:0;bottom:0;width:8px;background:var(--db-accent,var(--accent));opacity:.96;}
+.db:hover{filter:none;transform:translateY(-1px);box-shadow:0 8px 18px rgba(15,50,64,0.12);}
+.db-co{position:relative;z-index:1;font-size:11px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#12394A;}
+.db-sub{position:relative;z-index:1;font-size:10px;line-height:1.25;color:rgba(18,57,74,0.70);}
+.db-status{position:absolute;top:6px;right:7px;z-index:2;display:inline-flex;align-items:center;justify-content:center;padding:2px 7px;border-radius:6px;font-size:9px;font-weight:800;line-height:1.15;white-space:nowrap;letter-spacing:.01em;}
+.db-status-pending{background:rgba(255,255,255,0.78);border:1px solid rgba(232,98,42,0.55);color:#E8622A;}
+.db-pending .db-co,.db-pending .db-sub{padding-right:78px;}
 .db.compact-free{padding-right:56px;}
-.db-free-badge{display:inline-flex;align-items:center;gap:4px;margin-top:4px;padding:3px 8px;border-radius:999px;border:1px solid rgba(93,202,165,0.40);background:rgba(93,202,165,0.14);color:var(--blue);font-size:10px;font-weight:700;line-height:1;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.db-free-badge{position:relative;z-index:1;display:inline-flex;align-items:center;gap:4px;margin-top:5px;padding:3px 8px;border-radius:999px;border:1px solid rgba(93,202,165,0.40);background:rgba(255,255,255,0.70);color:var(--blue);font-size:10px;font-weight:700;line-height:1;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .db-free-badge.compact{position:absolute;top:5px;right:5px;margin-top:0;padding:2px 6px;min-height:18px;height:18px;font-size:9px;line-height:1;max-width:60px;justify-content:center;}
-.db-free-badge:hover{background:rgba(93,202,165,0.22);}
-.db-approved{background:var(--green-dim);border:1px solid var(--green-bd);color:var(--green);}
-.db-pending{background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);}
+.db-free-badge:hover{background:rgba(255,255,255,0.88);}
+.db-approved{background:#FFFCF7;border:1px solid rgba(201,169,110,0.34);color:#12394A;}
+.db-pending{background:#FFF8F1;border-style:dashed !important;border-width:1.5px !important;color:#12394A;}
 
 /* ADMIN */
 .admin-wrap{padding:24px;max-width:1400px;margin:0 auto;}
@@ -457,7 +461,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .wg-dn{font-size:11px;}
   .wg-dd{font-size:24px;}
   .wg-t{font-size:10px;padding-right:8px;}
-  .db{padding:5px 7px;border-radius:6px;}
+  .db{padding:6px 8px 6px 17px;border-radius:6px;}
   .db-co{font-size:11px;}
   .db-sub{font-size:10px;}
   .mob-week-chips{display:flex;gap:8px;overflow-x:auto;padding:0 12px 10px;background:var(--bg2);border-bottom:1px solid var(--border);}
@@ -605,7 +609,16 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .wg-time-col{width:58px;}
   .db{
     min-height:40px;
-    padding:6px 8px;
+    padding:6px 8px 6px 18px;
+  }
+  .db-status{
+    top:5px;
+    right:6px;
+    font-size:8px;
+    padding:2px 5px;
+  }
+  .db-pending .db-co,.db-pending .db-sub{
+    padding-right:64px;
   }
   .db-co{font-size:12px;}
   .db-sub{font-size:10px;line-height:1.25;}
@@ -818,6 +831,157 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   }
 }
 
+
+/* LIGHT CALENDAR THEME — warm cream calendar surface */
+:root{
+  --cal-bg:#F0EEE4;
+  --cal-surface:#F7F3EA;
+  --cal-surface-2:#EFE9DD;
+  --cal-line:rgba(15,50,64,0.13);
+  --cal-line-soft:rgba(15,50,64,0.075);
+  --cal-text:#12394A;
+  --cal-muted:#7E8B8F;
+  --cal-muted-2:#A0A29A;
+}
+
+#view-deliveries .cal-main{
+  background:var(--cal-bg) !important;
+  color:var(--cal-text) !important;
+}
+
+#view-deliveries .cal-toolbar{
+  background:var(--cal-surface) !important;
+  border-bottom:1px solid var(--cal-line) !important;
+  box-shadow:0 1px 0 rgba(15,50,64,0.04) !important;
+}
+
+#view-deliveries .cal-title,
+#view-deliveries .wg-dd{
+  color:var(--cal-text) !important;
+}
+
+#view-deliveries .wg-dn,
+#view-deliveries .wg-t,
+#view-deliveries .today-btn,
+#view-deliveries .cal-nav,
+#view-deliveries .zf-btn{
+  color:var(--cal-muted) !important;
+}
+
+#view-deliveries .cal-nav,
+#view-deliveries .today-btn{
+  background:rgba(255,255,255,0.42) !important;
+  border-color:var(--cal-line) !important;
+  color:var(--cal-text) !important;
+}
+
+#view-deliveries .cal-nav:hover,
+#view-deliveries .today-btn:hover{
+  background:#fffaf0 !important;
+  border-color:rgba(201,169,110,0.42) !important;
+  color:var(--cal-text) !important;
+}
+
+#view-deliveries .week-grid{
+  background:var(--cal-bg) !important;
+}
+
+#view-deliveries #week-grid > div:first-child{
+  background:var(--cal-surface) !important;
+  border-bottom:1px solid var(--cal-line) !important;
+}
+
+#view-deliveries #week-grid > div:first-child > div:first-child,
+#view-deliveries .wg-corner,
+#view-deliveries .wg-dh,
+#view-deliveries .wg-time-col{
+  background:var(--cal-surface) !important;
+  border-color:var(--cal-line) !important;
+}
+
+#view-deliveries .wg-dh{
+  border-right:1px solid var(--cal-line) !important;
+  border-bottom:1px solid var(--cal-line) !important;
+}
+
+#view-deliveries .wg-day-col{
+  background:var(--cal-bg) !important;
+  border-right:1px solid var(--cal-line) !important;
+}
+
+#view-deliveries .wg-t{
+  background:var(--cal-surface) !important;
+  border-right:1px solid var(--cal-line) !important;
+  border-bottom:1px solid var(--cal-line-soft) !important;
+}
+
+#view-deliveries .wg-t.half{
+  border-bottom:1px dashed var(--cal-line-soft) !important;
+}
+
+#view-deliveries .wg-c{
+  border-bottom:1px solid var(--cal-line-soft) !important;
+}
+
+#view-deliveries .wg-c.half{
+  border-bottom:1px dashed var(--cal-line-soft) !important;
+}
+
+#view-deliveries .wg-c:hover{
+  background:rgba(201,169,110,0.10) !important;
+}
+
+#view-deliveries .wg-dh.today .wg-dd{
+  color:var(--accent) !important;
+}
+
+#view-deliveries .db{
+  box-shadow:0 5px 12px rgba(15,50,64,0.08) !important;
+}
+
+#view-deliveries .db:hover{
+  box-shadow:0 8px 18px rgba(15,50,64,0.12) !important;
+}
+
+#view-deliveries .db-pending{
+  background:#FFF8F1 !important;
+  border-color:rgba(232,98,42,0.55) !important;
+  border-style:dashed !important;
+  border-width:1.5px !important;
+  color:#12394A !important;
+}
+
+#view-deliveries #zone-filters .zf-btn{
+  background:rgba(255,255,255,0.35) !important;
+}
+
+#view-deliveries #zone-filters .zf-btn.zf-active{
+  background:rgba(255,255,255,0.55) !important;
+}
+
+@media(max-width:768px){
+  #view-deliveries .cal-toolbar{
+    background:var(--cal-surface) !important;
+    box-shadow:0 1px 0 var(--cal-line) !important;
+  }
+  #view-deliveries .mob-week-chips{
+    background:var(--cal-surface) !important;
+    border-bottom:1px solid var(--cal-line) !important;
+  }
+  #view-deliveries .mob-week-chip{
+    background:rgba(255,255,255,0.45) !important;
+    border-color:var(--cal-line) !important;
+    color:var(--cal-muted) !important;
+  }
+  #view-deliveries .mob-week-chip strong{
+    color:var(--cal-text) !important;
+  }
+  #view-deliveries .mob-week-chip.active{
+    background:rgba(201,169,110,0.16) !important;
+    border-color:rgba(201,169,110,0.42) !important;
+    color:var(--accent) !important;
+  }
+}
 </style>
   <!-- PDF.js for rendering PDF site plans -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -1716,6 +1880,7 @@ let mapPdf        = null;
 let subcontractors = []; // list of company names for dropdown
 
 const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
+const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -1735,6 +1900,29 @@ function saveMobileBookingPrefs(prefs){
     }));
   }catch(_){}
 }
+
+function loadLocalProjectInfo(){
+  try{
+    return JSON.parse(localStorage.getItem(PROJECT_INFO_PREF_KEY) || '{}') || {};
+  }catch(_){
+    return {};
+  }
+}
+function saveLocalProjectInfo(){
+  try{
+    localStorage.setItem(PROJECT_INFO_PREF_KEY, JSON.stringify(projectInfo));
+  }catch(_){}
+}
+async function saveProjectInfoConfig(){
+  saveLocalProjectInfo();
+  if(window._db){
+    await fbSaveConfig('projectInfo', projectInfo);
+  }
+  const nameEl = g('app-name');
+  if(nameEl) nameEl.textContent = projectInfo.appname || 'SiteDelivery';
+  updateAutoApproveUI();
+}
+
 function ensureQuickBookCompanyOption(value){
   const sel = g('qb-company');
   if(!sel || !value) return;
@@ -1838,6 +2026,7 @@ async function save(){
       await fbSaveDelivery(d);
     }
     await fbSaveConfig('zones', zones);
+    saveLocalProjectInfo();
     await fbSaveConfig('projectInfo', projectInfo);
     await fbSaveConfig('notifications', notifications);
     await fbSaveConfig('siteNotices', siteNotices);
@@ -3056,6 +3245,7 @@ function updateAutoApproveUI(){
 function toggleAutoApprove(){
   projectInfo.autoApprove = projectInfo.autoApprove===false;
   updateAutoApproveUI();
+  saveProjectInfoConfig().catch(e => console.error('saveProjectInfoConfig', e));
 }
 function openInfoModal(){
   [['name','mi-name'],['addr','mi-addr'],['hours','mi-hours'],['contact','mi-contact'],['safety','mi-safety'],['coord','mi-coord'],['notes','mi-notes']]
@@ -3069,10 +3259,9 @@ function saveInfo(){
     .forEach(([k,id])=>{const el=g(id);if(el)projectInfo[k]=el.value;});
   const appEl = g('mi-appname');
   if(appEl) projectInfo.appname = appEl.value.trim() || 'SiteDelivery';
-  // Update topbar text live
-  const nameEl = g('app-name');
-  if(nameEl) nameEl.textContent = projectInfo.appname;
-  fbSaveConfig('projectInfo',projectInfo);closeModal('modal-info');renderHome();
+  // Persist project information, including auto-approval setting.
+  saveProjectInfoConfig().catch(e => console.error('saveProjectInfoConfig', e));
+  closeModal('modal-info');renderHome();
 }
 
 // ── DELIVERIES ────────────────────────────────────────────
@@ -3316,6 +3505,38 @@ function onStartChange(){
     });
 }
 
+
+function hexToRgb(hex){
+  const clean = String(hex || '').replace('#','').trim();
+  if(!/^[0-9a-fA-F]{6}$/.test(clean)) return {r:93,g:202,b:165};
+  return {
+    r: parseInt(clean.slice(0,2),16),
+    g: parseInt(clean.slice(2,4),16),
+    b: parseInt(clean.slice(4,6),16)
+  };
+}
+function rgbaFromHex(hex, alpha){
+  const c = hexToRgb(hex);
+  return 'rgba('+c.r+','+c.g+','+c.b+','+alpha+')';
+}
+function readableTextOn(hex){
+  const c = hexToRgb(hex);
+  const lum = (0.299*c.r + 0.587*c.g + 0.114*c.b) / 255;
+  return lum > 0.62 ? '#12394A' : '#FFFFFF';
+}
+function zoneFilterChipStyle(z, active){
+  const color = z?.color || '#5DCAA5';
+  if(active){
+    return 'background:'+color+' !important;'
+      + 'border-color:'+color+' !important;'
+      + 'color:'+readableTextOn(color)+' !important;'
+      + 'box-shadow:0 2px 7px '+rgbaFromHex(color,0.22)+', inset 0 0 0 1px rgba(255,255,255,0.34) !important;';
+  }
+  return 'background:'+rgbaFromHex(color,0.10)+' !important;'
+    + 'border-color:'+rgbaFromHex(color,0.46)+' !important;'
+    + 'color:'+color+' !important;';
+}
+
 function renderZoneFilters(){
   const wrap = g('zone-filters');
   if(!wrap) return;
@@ -3330,11 +3551,11 @@ function renderZoneFilters(){
     const allBtn = `<button class="zf-btn ${isAllZones ? 'zf-active' : ''}" onclick="toggleZF('__all__')">Toutes les zones</button>`;
     const zoneBtns = zones.map(z=>{
       const on = !isAllZones && activeZone && z.id === activeZone.id;
-      return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
+      return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${zoneFilterChipStyle(z,on)}">${z.name}</button>`;
     }).join('');
 
     const activeZoneBtn = !isAllZones && activeZone
-      ? `<button class="zf-btn zf-active" onclick="toggleZF('${activeZone.id}')" style="background:${activeZone.color}22;border-color:${activeZone.color}55;color:${activeZone.color};">${activeZone.name}</button>`
+      ? `<button class="zf-btn zf-active" onclick="toggleZF('${activeZone.id}')" style="${zoneFilterChipStyle(activeZone,true)}">${activeZone.name}</button>`
       : '';
 
     const chips = mobZoneFiltersExpanded
@@ -3349,7 +3570,7 @@ function renderZoneFilters(){
     `<button class="zf-btn ${activeZF.size===0 ? 'zf-active' : ''}" onclick="toggleZF('__all__')">Toutes les zones</button>`
     + zones.map(z=>{
       const on=activeZF.size===0||activeZF.has(z.id);
-      return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${on?`background:${z.color}22;border-color:${z.color}55;color:${z.color};`:''}">${z.name}</button>`;
+      return `<button class="zf-btn ${on ? 'zf-active' : ''}" onclick="toggleZF('${z.id}')" style="${zoneFilterChipStyle(z,on)}">${z.name}</button>`;
     }).join('');
 }
 function toggleZF(id){
@@ -3770,10 +3991,11 @@ function renderWeekCalendar(){
       const top=si*SLOT_H+2;
       const height=Math.max((ei-si)*SLOT_H-4,24);
       const pct=100/totalCols;
-      const baseColor=appr?(z?z.color:'#4CAF7D'):'';
-      const sty=appr
-        ?'background:'+baseColor+'22;border:1px solid '+baseColor+'55;color:'+baseColor+';'
-        :'background:var(--amber-dim);border:1px solid var(--amber-bd);color:var(--amber);';
+      const zoneColor = z ? z.color : '#C9A96E';
+      const accentColor = appr ? zoneColor : '#E8622A';
+      const fillColor = appr ? rgbaFromHex(zoneColor, 0.12) : 'rgba(232,98,42,0.10)';
+      const borderColor = appr ? rgbaFromHex(zoneColor, 0.36) : 'rgba(232,98,42,0.34)';
+      const sty='--db-accent:'+accentColor+';background:'+fillColor+';border:'+(appr?'1px solid ':'1.5px dashed ')+borderColor+';color:#12394A;';
       const tsDisp=del.timeStart||del.time;
       const teDisp=del.timeEnd?(' \u2013 '+del.timeEnd):'';
       const quickSlotEnd = nextTimeSlotValue(tsDisp);
@@ -3800,6 +4022,7 @@ function renderWeekCalendar(){
         +dragTitle+' '
         +'onclick="openDetail(\''+del.id+'\',event)">'
         +'<div class="db-co">'+del.company+'</div>'
+        +(!appr?'<div class="db-status db-status-pending">À approuver</div>':'')
         +'<div class="db-sub">'+(z?z.name:'')+(z?' \xb7 ':'')+tsDisp+teDisp+'</div>'
         +conflictWarn
         +freeBadge
@@ -4883,6 +5106,9 @@ async function initApp(){
   g('week-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;grid-column:1/-1;">Connecting to database…</div>';
   bindMobileCalendarSwipe();
 
+  // Restore local project settings first as a fallback for refresh/offline cases.
+  projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
+
   if(window._db){
     // Load config docs in parallel
     const [z, pi, no, mi, sch, bd, sc, im, sn] = await Promise.all([
@@ -4897,7 +5123,8 @@ async function initApp(){
       fbLoadConfig('siteNotices',     []),
     ]);
     zones          = z;
-    projectInfo    = pi;
+    projectInfo    = {...projectInfo, ...pi};
+    saveLocalProjectInfo();
     notifications  = no;
     mapImg         = mi;
     mapPdf         = null;
