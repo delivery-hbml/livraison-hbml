@@ -1076,7 +1076,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   <script type="module">
     import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getFirestore, collection, doc, onSnapshot,
-             setDoc, deleteDoc, getDoc }
+             setDoc, deleteDoc, getDoc, addDoc, serverTimestamp }
                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
              signOut, onAuthStateChanged, updateProfile }
@@ -1109,6 +1109,8 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     window._setDoc     = setDoc;
     window._delDoc     = deleteDoc;
     window._getDoc     = getDoc;
+    window._addDoc     = addDoc;
+    window._serverTimestamp = serverTimestamp;
     window._onSnapshot = onSnapshot;
     window._createUser = (email, pass) => createUserWithEmailAndPassword(auth, email, pass);
     window._signIn     = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
@@ -2264,6 +2266,71 @@ function notif(msg,type){
   notifications.unshift({msg,type,time:new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})});
   if(notifications.length>40)notifications.pop();
   fbSaveConfig('notifications', notifications).catch(()=>{});
+}
+
+// ── EMAIL NOTIFICATIONS ─────────────────────────────────────
+// The static website only queues email events in Firestore.
+// A Firebase Cloud Function sends the real email securely from the server.
+function deliveryEmailPayload(d, type, changes){
+  if(!d || !d.userEmail) return null; // only notify the person who booked the delivery
+  const z = zones.find(x => x.id === d.zone);
+  return {
+    type,
+    deliveryId: d.id,
+    to: d.userEmail,
+    bookedByUserId: d.userId || null,
+    company: d.company || '',
+    contact: d.contact || '',
+    phone: d.phone || '',
+    material: d.material || '',
+    zoneName: z ? z.name : '',
+    date: d.date || '',
+    timeStart: d.timeStart || d.time || '',
+    timeEnd: d.timeEnd || '',
+    truck: d.truck || '',
+    notes: d.notes || '',
+    status: d.status || '',
+    changes: changes || null,
+    createdAt: window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString()
+  };
+}
+
+async function queueDeliveryEmail(d, type, changes){
+  try{
+    if(!window._db || !window._addDoc) return;
+    const payload = deliveryEmailPayload(d, type, changes);
+    if(!payload) return;
+    await window._addDoc(window._col('deliveryEmailEvents'), payload);
+  }catch(e){
+    console.error('queueDeliveryEmail', e);
+  }
+}
+
+function snapshotDelivery(d){
+  if(!d) return null;
+  return {
+    company:d.company||'', contact:d.contact||'', phone:d.phone||'', material:d.material||'',
+    date:d.date||'', timeStart:d.timeStart||d.time||'', timeEnd:d.timeEnd||'',
+    truck:d.truck||'', notes:d.notes||'', zone:d.zone||'', status:d.status||''
+  };
+}
+
+function deliveryChanges(before, after){
+  if(!before || !after) return null;
+  const labels = {company:'Compagnie',contact:'Contact',phone:'Téléphone',material:'Matériel',date:'Date',timeStart:'Heure de début',timeEnd:'Heure de fin',truck:'Camion',notes:'Notes',zone:'Zone'};
+  const changes = [];
+  Object.keys(labels).forEach(k => {
+    if((before[k]||'') !== (after[k]||'')){
+      let oldValue = before[k] || '';
+      let newValue = after[k] || '';
+      if(k==='zone'){
+        oldValue = (zones.find(z=>z.id===before[k])||{}).name || oldValue;
+        newValue = (zones.find(z=>z.id===after[k])||{}).name || newValue;
+      }
+      changes.push({field:labels[k], oldValue, newValue});
+    }
+  });
+  return changes;
 }
 
 // Subscribe to real-time delivery updates
@@ -4413,8 +4480,9 @@ function submitDelivery(){
       userId: firebaseUser ? firebaseUser.uid : null,
       userEmail: firebaseUser ? firebaseUser.email : null};
     deliveries.unshift(d);
-    notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===selZone)||{name:'?'}).name+')','pending');
+    notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===selZone)||{name:'?'}).name+')',d.status==='approved'?'approved':'pending');
     saveDelivery(d);
+    if(d.status === 'approved') queueDeliveryEmail(d, 'confirmed');
     activeBookingTemplate = null;
     const tplBanner=g('booking-template-banner'); if(tplBanner) tplBanner.style.display='none';
     g('booking-content').style.display='none';
@@ -4611,7 +4679,9 @@ function decide(id,status){
   const note=g('note-'+id)?.value.trim()||'';
   d.status=status;if(note)d.rejectionNote=note;
   notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
-  saveDelivery(d);renderAdmin();renderWeekCalendar();
+  saveDelivery(d);
+  if(status === 'approved') queueDeliveryEmail(d, 'confirmed');
+  renderAdmin();renderWeekCalendar();
 }
 function pickSlot(id){
   const d=deliveries.find(x=>x.id===id);if(!d)return;
@@ -4619,6 +4689,7 @@ function pickSlot(id){
     .forEach(x=>{x.status='rejected';x.rejectionNote='Un autre créneau a été sélectionné.';});
   d.status='approved';
   notif(d.company+' selected for '+(zones.find(z=>z.id===d.zone)||{name:'?'}).name+' · '+(d.timeStart||d.time)+' · '+fmtDate(d.date)+'.','approved');
+  queueDeliveryEmail(d, 'confirmed');
   // Save all affected deliveries
   Promise.all(deliveries.filter(x=>x.zone===d.zone&&x.date===d.date).map(x=>saveDelivery(x)));
   renderAdmin();renderWeekCalendar();
@@ -4627,7 +4698,9 @@ function cancelDel(id,fromModal){
   const d=deliveries.find(x=>x.id===id);if(!d)return;
   d.status='cancelled';d.rejectionNote='Annulée par le surintendant.';
   notif('Cancelled: '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','rejected');
-  saveDelivery(d);if(fromModal)closeModal('modal-detail');renderAdmin();renderWeekCalendar();updateBadges();
+  saveDelivery(d);
+  queueDeliveryEmail(d, 'cancelled');
+  if(fromModal)closeModal('modal-detail');renderAdmin();renderWeekCalendar();updateBadges();
 }
 function uncancelDel(id){
   const d=deliveries.find(x=>x.id===id);if(!d)return;
@@ -4801,6 +4874,7 @@ function saveEdit(){
     const cf=deliveries.find(x=>x.id!==id&&x.zone===newZone&&x.date===date&&x.status==='approved'&&overlap(ts,te,x.timeStart||x.time,x.timeEnd||x.time));
     if(cf){alert('Time conflict with '+cf.company+' ('+(cf.timeStart||cf.time)+'–'+(cf.timeEnd||cf.time)+'). Resolve first.');return;}
   }
+  const beforeEdit = snapshotDelivery(d);
   // Apply
   d.company=company;d.contact=contact;d.phone=phone;d.material=material;
   d.date=date;d.time=ts;d.timeStart=ts;d.timeEnd=te;d.truck=truck;d.notes=notes;d.zone=newZone;
@@ -4813,7 +4887,10 @@ function saveEdit(){
     }
   }
   notif('Edited: '+company+' — '+fmtDate(date)+' '+ts+'–'+te+'.',d.status==='approved'?'approved':'pending');
-  saveDelivery(d);closeModal('modal-edit');renderAdmin();renderWeekCalendar();updateBadges();
+  const changes = deliveryChanges(beforeEdit, snapshotDelivery(d));
+  saveDelivery(d);
+  if(changes && changes.length) queueDeliveryEmail(d, 'modified', changes);
+  closeModal('modal-edit');renderAdmin();renderWeekCalendar();updateBadges();
 }
 
 // ── EXPORT ────────────────────────────────────────────────
@@ -5198,6 +5275,7 @@ function userCancelDelivery(id){
   d.status='cancelled';
   d.rejectionNote='Annulée par le sous-traitant.';
   saveDelivery(d);
+  queueDeliveryEmail(d, 'cancelled');
   notif(d.company+' cancelled their delivery ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').','rejected');
   openMyDeliveries(); // refresh modal
   renderWeekCalendar();
@@ -5377,6 +5455,7 @@ function submitQuickBook(){
   saveMobileBookingPrefs({company, contact, phone, truck});
   notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===zoneId)||{name:'?'}).name+')','approved');
   saveDelivery(d);
+  if(d.status === 'approved') queueDeliveryEmail(d, 'confirmed');
   closeModal('modal-quick-book');
   renderWeekCalendar();updateBadges();
   ['qb-company','qb-contact','qb-phone','qb-material','qb-notes'].forEach(id=>{const el=g(id);if(el)el.value='';});
