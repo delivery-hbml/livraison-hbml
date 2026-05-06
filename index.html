@@ -1079,7 +1079,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
              setDoc, deleteDoc, getDoc }
                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-             signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail, updatePassword }
+             signOut, onAuthStateChanged, updateProfile }
                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
     // ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE ▼▼▼
@@ -1114,8 +1114,6 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     window._signIn     = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
     window._signOut    = () => signOut(auth);
     window._updateProfile = (user, data) => updateProfile(user, data);
-    window._sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
-    window._updatePassword = (user, pass) => updatePassword(user, pass);
 
     // ── Auth state listener — fires on every login/logout ────────────────────
     onAuthStateChanged(auth, (firebaseUser) => {
@@ -1152,7 +1150,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <span class="role-pill admin-only" id="tb-role">Admin</span>
       <button class="tb-btn" id="btn-user-login" onclick="openMyDeliveries()" style="display:none;">Mes livraisons</button>
 
-      <button class="tb-btn primary" id="btn-login" onclick="openUserAuth()">Se connecter</button>
+      <button class="tb-btn primary" id="btn-login" onclick="openAdminLogin()">Connexion admin</button>
       <button class="tb-btn admin-only" id="btn-logout" onclick="doLogout()" style="display:none;">Se déconnecter</button>
     </div>
   </nav>
@@ -1829,15 +1827,15 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <label>Compagnie / Votre nom <span class="req">*</span></label>
       <input type="text" id="auth-name" placeholder="e.g. Montoni Group">
     </div>
-    <div class="mf" style="margin-bottom:11px;"><label id="auth-email-label">Courriel ou identifiant <span class="req">*</span></label><input type="text" id="auth-email" placeholder="vous@entreprise.com ou admin"></div>
-    <div class="mf" style="margin-bottom:6px;"><label>Mot de passe <span class="req">*</span></label><input type="password" id="auth-pass" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')submitUserAuth()"></div>
-    <div class="mf" id="auth-new-pass-field" style="display:none;margin-bottom:6px;"><label>Nouveau mot de passe <span class="req">*</span></label><input type="password" id="auth-new-pass" placeholder="Nouveau mot de passe"></div>
+    <div class="mf" style="margin-bottom:11px;"><label>Courriel <span class="req">*</span></label><input type="email" id="auth-email" placeholder="vous@entreprise.com"></div>
+    <div class="mf" style="margin-bottom:6px;"><label>Password <span class="req">*</span></label><input type="password" id="auth-pass" placeholder="Password" onkeydown="if(event.key==='Enter')submitUserAuth()"></div>
     <div class="modal-err" id="auth-err" style="margin-bottom:8px;"></div>
     <div class="m-actions" style="margin-top:14px;flex-direction:column;gap:8px;">
       <button class="btn btn-ac" style="width:100%;padding:11px;" onclick="submitUserAuth()" id="auth-submit-btn">Se connecter</button>
       <button class="btn btn-gh" style="width:100%;font-size:12px;" onclick="toggleAuthMode()" id="auth-toggle-btn">Pas de compte ? S’inscrire</button>
-      <button class="btn btn-gh" style="width:100%;font-size:12px;" onclick="sendUserPasswordReset()" id="auth-reset-btn">Mot de passe oublié</button>
-      <button class="btn btn-gh" style="width:100%;font-size:12px;display:none;" onclick="changeCurrentUserPassword()" id="auth-change-pass-btn">Changer mon mot de passe</button>
+    </div>
+    <div style="text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+      <button onclick="closeModal('modal-user-auth')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">Continuer sans compte</button>
     </div>
   </div>
 </div>
@@ -1852,7 +1850,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     <div id="my-del-list" style="overflow-y:auto;flex:1;"></div>
     <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;">
       <button class="btn btn-gh" style="flex:1;" onclick="doLogout();closeModal('modal-my-deliveries');">Se déconnecter</button>
-      <button class="btn btn-ac" style="flex:1;" onclick="closeModal('modal-my-deliveries');showView('deliveries');">+ Nouvelle livraison</button>
+      <button class="btn btn-ac" style="flex:1;" onclick="closeModal('modal-my-deliveries');">+ Nouvelle livraison</button>
     </div>
   </div>
 </div>
@@ -2004,6 +2002,7 @@ const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 const ZONES_PREF_KEY = 'hbml_zones_v1';
 const ICON_MARKERS_PREF_KEY = 'hbml_icon_markers_v1';
+const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v1';
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -2072,6 +2071,43 @@ async function saveIconMarkersConfig(){
   if(window._db){
     await fbSaveConfig('iconMarkers', iconMarkers);
   }
+}
+
+function loadLocalSubcontractors(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(SUBCONTRACTORS_PREF_KEY) || 'null');
+    if(Array.isArray(saved)) return saved;
+    if(saved && Array.isArray(saved.subcontractors)) return saved.subcontractors;
+  }catch(_){}
+  return null;
+}
+function saveLocalSubcontractors(){
+  try{
+    localStorage.setItem(SUBCONTRACTORS_PREF_KEY, JSON.stringify({
+      updatedAt: Date.now(),
+      subcontractors
+    }));
+  }catch(_){}
+}
+async function saveSubcontractorsConfig(){
+  // Save locally first so new companies survive an immediate refresh,
+  // even if Firebase is unavailable or the remote write is delayed.
+  saveLocalSubcontractors();
+  renderCompanyDropdowns();
+  if(window._db){
+    await fbSaveConfig('subcontractors', subcontractors);
+  }
+}
+function renderCompanyDropdowns(){
+  const options = '<option value="">Sélectionner la compagnie…</option>'
+    + subcontractors.map(c => '<option value="'+String(c).replace(/"/g,'&quot;')+'">'+String(c).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</option>').join('');
+  ['b-company','qb-company'].forEach(id=>{
+    const sel = g(id);
+    if(!sel) return;
+    const prev = sel.value;
+    sel.innerHTML = options;
+    if(prev && subcontractors.includes(prev)) sel.value = prev;
+  });
 }
 
 function loadLocalProjectInfo(){
@@ -2206,6 +2242,7 @@ async function save(){
     saveLocalProjectInfo();
     await fbSaveConfig('projectInfo', projectInfo);
     await fbSaveConfig('notifications', notifications);
+    await saveSubcontractorsConfig();
     await fbSaveConfig('siteNotices', siteNotices);
     if(mapImg){ await fbSaveConfig('mapImg', mapImg); }
   }
@@ -2886,6 +2923,7 @@ function doAdminLogin(){
   try{ localStorage.setItem('sd_admin_session', u); }catch(e){}
   closeModal('modal-login');
   applyAdminUI();
+  renderCompanyDropdowns();
   showView('home');
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
@@ -2894,16 +2932,6 @@ function doAdminLogin(){
     });
   });
 }
-function doAdminLoginWithCredentials(username, password){
-  const acc = ACCOUNTS[username];
-  if(!acc || acc.pass !== password) return false;
-  currentUser = { username, ...acc };
-  try{ localStorage.setItem('sd_admin_session', username); }catch(e){}
-  applyAdminUI();
-  showView('home');
-  return true;
-}
-
 function applyAdminUI(){
   g('tb-role').style.display='';
   g('tb-username').textContent='Superintendent';
@@ -2979,15 +3007,6 @@ function openUserAuth(){
   setTimeout(()=>g('auth-email').focus(),50);
 }
 function renderAuthModal(){
-  const resetBtn = g('auth-reset-btn');
-  const changeBtn = g('auth-change-pass-btn');
-  const newPassField = g('auth-new-pass-field');
-  const emailLabel = g('auth-email-label');
-  if(resetBtn) resetBtn.style.display = 'none';
-  if(changeBtn) changeBtn.style.display = 'none';
-  if(newPassField) newPassField.style.display = 'none';
-  if(emailLabel) emailLabel.innerHTML = 'Courriel ou identifiant <span class="req">*</span>';
-
   if(firebaseUser){
     // Logged in — show account info
     g('auth-modal-title').textContent = 'Mon compte';
@@ -2996,30 +3015,26 @@ function renderAuthModal(){
     g('auth-email').value = firebaseUser.email;
     g('auth-email').disabled = true;
     g('auth-pass').style.display='none';
-    if(newPassField) newPassField.style.display = '';
     g('auth-submit-btn').textContent = 'Se déconnecter';
     g('auth-submit-btn').onclick = ()=>{ doLogout(); closeModal('modal-user-auth'); };
     g('auth-toggle-btn').style.display='none';
-    if(changeBtn) changeBtn.style.display = '';
     g('auth-err').style.display='none';
   } else if(_authMode==='login'){
-    g('auth-modal-title').textContent = 'Se connecter';
-    g('auth-modal-sub').textContent = 'Connectez-vous pour réserver, suivre, modifier ou annuler vos livraisons. Les administrateurs peuvent utiliser le même identifiant qu’avant.';
+    g('auth-modal-title').textContent = 'Connexion sous-traitant';
+    g('auth-modal-sub').textContent = 'Connectez-vous pour soumettre et suivre vos livraisons.';
     g('auth-name-field').style.display='none';
-    g('auth-email').value=''; g('auth-email').disabled=false; g('auth-email').type='text';
+    g('auth-email').value=''; g('auth-email').disabled=false;
     g('auth-pass').value=''; g('auth-pass').style.display='';
     g('auth-submit-btn').textContent='Se connecter';
     g('auth-submit-btn').onclick = submitUserAuth;
     g('auth-toggle-btn').style.display='';
-    g('auth-toggle-btn').textContent = 'Pas de compte ? S’inscrire';
-    if(resetBtn) resetBtn.style.display = '';
+    g('auth-toggle-btn').textContent = "Pas de compte ? S’inscrire";
     g('auth-err').style.display='none';
   } else {
     g('auth-modal-title').textContent = 'Créer un compte';
-    g('auth-modal-sub').textContent = 'Créez un compte pour réserver une livraison et la retrouver plus tard.';
+    g('auth-modal-sub').textContent = 'Create an account to track all your deliveries.';
     g('auth-name-field').style.display='';
-    g('auth-email').value=''; g('auth-email').disabled=false; g('auth-email').type='email';
-    if(emailLabel) emailLabel.innerHTML = 'Courriel <span class="req">*</span>';
+    g('auth-email').value=''; g('auth-email').disabled=false;
     g('auth-pass').value=''; g('auth-pass').style.display='';
     g('auth-submit-btn').textContent='Créer un compte';
     g('auth-submit-btn').onclick = submitUserAuth;
@@ -3033,23 +3048,15 @@ function toggleAuthMode(){
   renderAuthModal();
 }
 async function submitUserAuth(){
-  const loginId = g('auth-email').value.trim();
-  const email = loginId;
+  const email = g('auth-email').value.trim();
   const pass  = g('auth-pass').value.trim();
   const errEl = g('auth-err');
   errEl.style.display='none';
-  if(!loginId||!pass){ errEl.textContent='Entrez votre courriel/identifiant et votre mot de passe.'; errEl.style.display='block'; return; }
-
-  // Admins use the same credentials as before, but from the unified login modal.
-  if(_authMode === 'login' && doAdminLoginWithCredentials(loginId, pass)){
-    closeModal('modal-user-auth');
-    return;
-  }
-
+  if(!email||!pass){ errEl.textContent='Please enter email and password.'; errEl.style.display='block'; return; }
   try{
     if(_authMode==='signup'){
       const name = g('auth-name').value.trim();
-      if(!name){ errEl.textContent='Entrez votre compagnie ou votre nom.'; errEl.style.display='block'; return; }
+      if(!name){ errEl.textContent='Please enter your company or name.'; errEl.style.display='block'; return; }
       const cred = await window._createUser(email, pass);
       await window._updateProfile(cred.user, {displayName: name});
       closeModal('modal-user-auth');
@@ -3058,69 +3065,13 @@ async function submitUserAuth(){
       closeModal('modal-user-auth');
     }
   } catch(err){
-    const msg = err.code==='auth/email-already-in-use' ? 'Ce courriel est déjà inscrit. Essayez de vous connecter.'
-              : err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential' ? 'Courriel, identifiant ou mot de passe invalide.'
-              : err.code==='auth/weak-password' ? 'Le mot de passe doit contenir au moins 6 caractères.'
-              : err.code==='auth/invalid-email' ? 'Adresse courriel invalide.'
+    const msg = err.code==='auth/email-already-in-use' ? 'Email already registered. Try signing in.'
+              : err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential' ? 'Invalid email or password.'
+              : err.code==='auth/weak-password' ? 'Password must be at least 6 characters.'
+              : err.code==='auth/invalid-email' ? 'Invalid email address.'
               : err.message;
     errEl.textContent = msg; errEl.style.display='block';
   }
-}
-
-async function sendUserPasswordReset(){
-  const email = g('auth-email').value.trim();
-  const errEl = g('auth-err');
-  errEl.style.display='none';
-  if(!email || !email.includes('@')){
-    errEl.textContent = 'Entrez votre courriel, puis cliquez de nouveau sur « Mot de passe oublié ».';
-    errEl.style.display = 'block';
-    return;
-  }
-  try{
-    await window._sendPasswordReset(email);
-    errEl.textContent = 'Courriel de réinitialisation envoyé. Vérifiez votre boîte de réception.';
-    errEl.style.display = 'block';
-    errEl.style.color = 'var(--green)';
-    setTimeout(()=>{ errEl.style.color=''; }, 4000);
-  }catch(err){
-    errEl.textContent = err.code === 'auth/user-not-found' ? 'Aucun compte trouvé pour ce courriel.' : err.message;
-    errEl.style.display = 'block';
-  }
-}
-
-async function changeCurrentUserPassword(){
-  const errEl = g('auth-err');
-  const newPass = g('auth-new-pass').value.trim();
-  errEl.style.display = 'none';
-  if(!firebaseUser){ openUserAuth(); return; }
-  if(!newPass || newPass.length < 6){
-    errEl.textContent = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
-    errEl.style.display = 'block';
-    return;
-  }
-  try{
-    await window._updatePassword(firebaseUser, newPass);
-    g('auth-new-pass').value = '';
-    errEl.textContent = 'Mot de passe mis à jour.';
-    errEl.style.display = 'block';
-    errEl.style.color = 'var(--green)';
-    setTimeout(()=>{ errEl.style.color=''; }, 4000);
-  }catch(err){
-    errEl.textContent = err.code === 'auth/requires-recent-login'
-      ? 'Par sécurité, reconnectez-vous avant de changer votre mot de passe.'
-      : err.message;
-    errEl.style.display = 'block';
-  }
-}
-
-function requireLoginForBooking(){
-  if(isAdmin() || firebaseUser) return true;
-  _authMode = 'login';
-  renderAuthModal();
-  g('auth-modal-sub').textContent = 'Vous devez vous connecter ou créer un compte avant de réserver une livraison.';
-  g('modal-user-auth').classList.add('open');
-  setTimeout(()=>g('auth-email')?.focus(),50);
-  return false;
 }
 
 // ── HOME ──────────────────────────────────────────────────
@@ -4417,7 +4368,6 @@ function goToToday(){
 
 // ── SUBMIT ────────────────────────────────────────────────
 function submitDelivery(){
-  if(!requireLoginForBooking()) return;
   try{
     const company=g('b-company').value.trim(),contact=g('b-contact').value.trim(),
           phone=g('b-phone').value.trim(),date=g('b-date').value.trim(),
@@ -4902,23 +4852,17 @@ function addSubcontractor(){
   const inp=g('sub-input'); if(!inp) return;
   const val=inp.value.trim();
   if(!val) return;
-  if(subcontractors.includes(val)){ alert('Cette compagnie existe déjà.'); return; }
+  const exists = subcontractors.some(c => String(c).toLowerCase() === val.toLowerCase());
+  if(exists){ alert('Cette compagnie existe déjà.'); return; }
   subcontractors.push(val);
-  fbSaveConfig('subcontractors', subcontractors).catch(()=>{});
   inp.value='';
   renderSubList();
-  // Refresh company dropdowns
-  const coSel=g('b-company');
-  if(coSel) coSel.innerHTML='<option value="">Sélectionner la compagnie…</option>'
-    +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+  saveSubcontractorsConfig().catch(()=>{});
 }
 function removeSubcontractor(idx){
   subcontractors.splice(idx,1);
-  fbSaveConfig('subcontractors', subcontractors).catch(()=>{});
   renderSubList();
-  const coSel=g('b-company');
-  if(coSel) coSel.innerHTML='<option value="">Sélectionner la compagnie…</option>'
-    +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+  saveSubcontractorsConfig().catch(()=>{});
 }
 
 function renderBlackoutPanel(){
@@ -5345,7 +5289,6 @@ function resetQuickBookSheetPosition(){
   try{ modal.scrollTo({top:0, left:0, behavior:'instant'}); }catch(_){}
 }
 function quickBook(date, time, preferredZone){
-  if(!requireLoginForBooking()) return;
 
   const dateObj = new Date(date+'T12:00:00');
   const dateDisp = dateObj.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'});
@@ -5392,7 +5335,6 @@ function qbStartChange(){
   if(endSel.options.length>1) endSel.selectedIndex=1;
 }
 function submitQuickBook(){
-  if(!requireLoginForBooking()) return;
   const date=g('qb-date').value, zoneId=g('qb-zone').value;
   const ts=g('qb-start').value, te=g('qb-end').value;
   const company=g('qb-company').value.trim(), contact=g('qb-contact').value.trim();
@@ -5533,6 +5475,8 @@ async function initApp(){
   const localIconMarkersBeforeDb = loadLocalIconMarkers();
   if(localIconMarkersBeforeDb) iconMarkers = localIconMarkersBeforeDb;
   projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
+  const localSubcontractorsBeforeDb = loadLocalSubcontractors();
+  if(localSubcontractorsBeforeDb) subcontractors = localSubcontractorsBeforeDb;
 
   if(window._db){
     // Load config docs in parallel
@@ -5562,7 +5506,9 @@ async function initApp(){
     mapPdf         = null;
     siteSchedule   = sch;
     blackoutDates  = bd;
-    subcontractors = sc;
+    const localSubcontractorsAfterDb = loadLocalSubcontractors();
+    subcontractors = localSubcontractorsAfterDb || sc;
+    if(localSubcontractorsAfterDb) saveSubcontractorsConfig().catch(()=>{});
     const localIconMarkersAfterDb = loadLocalIconMarkers();
     iconMarkers    = localIconMarkersAfterDb || im; // PDF is always converted to image on upload, stored as mapImg
     if(localIconMarkersAfterDb) saveIconMarkersConfig().catch(()=>{});
@@ -5581,6 +5527,7 @@ async function initApp(){
     }
   }catch(e){}
 
+  renderCompanyDropdowns();
   showView('home');
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
