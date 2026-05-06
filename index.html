@@ -1086,7 +1086,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
              setDoc, deleteDoc, getDoc }
                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
-             signOut, onAuthStateChanged, updateProfile }
+             signOut, onAuthStateChanged, updateProfile, sendPasswordResetEmail }
                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
     // ▼▼▼ PASTE YOUR FIREBASE CONFIG HERE ▼▼▼
@@ -1120,6 +1120,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     window._createUser = (email, pass) => createUserWithEmailAndPassword(auth, email, pass);
     window._signIn     = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
     window._signOut    = () => signOut(auth);
+    window._resetPassword = (email) => sendPasswordResetEmail(auth, email);
     window._updateProfile = (user, data) => updateProfile(user, data);
 
     // ── Auth state listener — fires on every login/logout ────────────────────
@@ -1840,6 +1841,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     <div class="m-actions" style="margin-top:14px;flex-direction:column;gap:8px;">
       <button class="btn btn-ac" style="width:100%;padding:11px;" onclick="submitUserAuth()" id="auth-submit-btn">Se connecter</button>
       <button class="btn btn-gh" style="width:100%;font-size:12px;" onclick="toggleAuthMode()" id="auth-toggle-btn">Pas de compte ? S’inscrire</button>
+      <button class="btn btn-gh" style="width:100%;font-size:12px;display:none;" onclick="sendPasswordReset()" id="auth-reset-btn">Mot de passe oublié?</button>
     </div>
     <div style="text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
       <button onclick="closeModal('modal-user-auth')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">Annuler</button>
@@ -3094,6 +3096,7 @@ function renderAuthModal(){
     g('auth-submit-btn').textContent = 'Se déconnecter';
     g('auth-submit-btn').onclick = ()=>{ doLogout(); closeModal('modal-user-auth'); };
     g('auth-toggle-btn').style.display='none';
+    g('auth-reset-btn').style.display='none';
     g('auth-err').style.display='none';
   } else if(_authMode==='login'){
     g('auth-modal-title').textContent = 'Se connecter';
@@ -3105,6 +3108,7 @@ function renderAuthModal(){
     g('auth-submit-btn').onclick = submitUserAuth;
     g('auth-toggle-btn').style.display='';
     g('auth-toggle-btn').textContent = "Pas de compte ? S’inscrire";
+    g('auth-reset-btn').style.display='';
     g('auth-err').style.display='none';
   } else {
     g('auth-modal-title').textContent = 'Créer un compte';
@@ -3116,6 +3120,7 @@ function renderAuthModal(){
     g('auth-submit-btn').onclick = submitUserAuth;
     g('auth-toggle-btn').style.display='';
     g('auth-toggle-btn').textContent = 'Déjà un compte ? Se connecter';
+    g('auth-reset-btn').style.display='none';
     g('auth-err').style.display='none';
   }
 }
@@ -3123,11 +3128,37 @@ function toggleAuthMode(){
   _authMode = _authMode==='login' ? 'signup' : 'login';
   renderAuthModal();
 }
+
+async function sendPasswordReset(){
+  const email = g('auth-email').value.trim();
+  const errEl = g('auth-err');
+  errEl.style.display='none';
+  if(!email){
+    errEl.textContent='Veuillez entrer votre courriel, puis cliquez sur Mot de passe oublié.';
+    errEl.style.display='block';
+    return;
+  }
+  try{
+    await window._resetPassword(email);
+    errEl.textContent='Un courriel de réinitialisation du mot de passe a été envoyé. Vérifiez votre boîte de réception et vos courriels indésirables.';
+    errEl.style.display='block';
+    errEl.style.color='var(--green)';
+  } catch(err){
+    errEl.style.color='var(--red)';
+    const msg = err.code==='auth/invalid-email' ? 'Adresse courriel invalide.'
+              : err.code==='auth/user-not-found' ? 'Aucun compte trouvé avec ce courriel.'
+              : 'Impossible d’envoyer le courriel de réinitialisation. Veuillez réessayer.';
+    errEl.textContent = msg;
+    errEl.style.display='block';
+  }
+}
+
 async function submitUserAuth(){
   const email = g('auth-email').value.trim();
   const pass  = g('auth-pass').value.trim();
   const errEl = g('auth-err');
   errEl.style.display='none';
+  errEl.style.color='var(--red)';
   if(!email||!pass){ errEl.textContent='Please enter email and password.'; errEl.style.display='block'; return; }
   try{
     if(_authMode==='signup'){
