@@ -318,12 +318,29 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .ci-pick:hover{background:var(--accent2);}
 
 /* ZONE MGR */
-.zm-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);}
+.zm-row{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
 .zm-row:last-child{border-bottom:none;}
-.zm-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;}
-.zm-input{flex:1;background:transparent;border:none;color:var(--text);font-size:13px;font-weight:500;outline:none;padding:2px 5px;border-radius:4px;}
+.zm-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:none;}
+.zm-current-color{width:18px;height:18px;border-radius:5px;flex:0 0 18px;border:1px solid rgba(255,255,255,.22);box-shadow:0 0 0 2px rgba(255,255,255,.03);margin-top:3px;cursor:pointer;transition:transform .12s, box-shadow .12s, border-color .12s;}
+.zm-current-color:hover{transform:translateY(-1px);box-shadow:0 3px 8px rgba(0,0,0,.20),0 0 0 2px rgba(255,255,255,.06);border-color:rgba(255,255,255,.42);}
+.zm-main{flex:1;min-width:0;}
+.zm-topline{display:flex;align-items:center;gap:8px;}
+.zm-input{flex:1;background:transparent;border:none;color:var(--text);font-size:13px;font-weight:500;outline:none;padding:2px 5px;border-radius:4px;min-width:0;}
 .zm-input:hover,.zm-input:focus{background:var(--bg3);}
-.zm-del{width:24px;height:24px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--red);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;}
+.zm-del{width:24px;height:24px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--red);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex:0 0 24px;}
+.zone-color-modal{width:360px;max-width:92vw;}
+.zone-color-preview{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--r2);background:var(--bg3);margin-bottom:14px;}
+.zone-color-preview-dot{width:18px;height:18px;border-radius:5px;border:1px solid rgba(255,255,255,.22);flex:0 0 18px;}
+.zone-color-preview-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.zone-color-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:14px;}
+.zone-color-swatch{width:100%;aspect-ratio:1;border-radius:8px;border:1px solid rgba(255,255,255,.18);cursor:pointer;transition:transform .12s, box-shadow .12s, border-color .12s;padding:0;}
+.zone-color-swatch:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.22);}
+.zone-color-swatch.active{box-shadow:0 0 0 2px var(--bg2),0 0 0 4px var(--accent);border-color:rgba(255,255,255,.45);}
+.zone-color-custom{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid var(--border);}
+.zone-color-custom label{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;}
+.zone-color-custom input{width:54px;height:34px;border-radius:8px;border:1px solid var(--border2);background:transparent;padding:0;cursor:pointer;overflow:hidden;}
+.zone-color-custom input::-webkit-color-swatch-wrapper{padding:0;}
+.zone-color-custom input::-webkit-color-swatch{border:none;border-radius:7px;}
 .zm-del:hover{background:var(--red-dim);}
 .add-zone-btn{width:100%;padding:8px;border:1.5px dashed var(--border2);border-radius:var(--r);background:transparent;color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;margin-top:10px;transition:all .14s;}
 .add-zone-btn:hover{border-color:var(--accent-bd);color:var(--accent);background:var(--accent-dim);}
@@ -1779,6 +1796,25 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   </div>
 </div>
 
+<!-- ZONE COLOR MODAL -->
+<div class="modal-backdrop" id="modal-zone-color" onclick="if(event.target===this)closeModal('modal-zone-color')">
+  <div class="modal zone-color-modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;">
+      <h2 style="margin:0;">Choisir la couleur</h2>
+      <button class="btn btn-gh" onclick="closeModal('modal-zone-color')" style="padding:5px 10px;font-size:12px;">✕</button>
+    </div>
+    <div class="zone-color-preview">
+      <span id="zone-color-preview-dot" class="zone-color-preview-dot"></span>
+      <span id="zone-color-preview-name" class="zone-color-preview-name"></span>
+    </div>
+    <div id="zone-color-grid" class="zone-color-grid"></div>
+    <div class="zone-color-custom">
+      <label for="zone-color-custom-input">Couleur personnalisée</label>
+      <input type="color" id="zone-color-custom-input" onchange="selectZoneColor(this.value)">
+    </div>
+  </div>
+</div>
+
 <!-- USER AUTH MODAL (signup / login for subcontractors) -->
 <div class="modal-backdrop" id="modal-user-auth">
   <div class="modal" style="width:380px;">
@@ -1936,11 +1972,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 // ── CONSTANTS ─────────────────────────────────────────────
 const ACCOUNTS = { admin: { pass: 'admin123', role: 'admin', name: 'Superintendent' } };
 const ZONE_COLORS = ['#4A8FD4','#4CAF7D','#E8622A','#A855F7','#E8A02A','#E05555','#0EA5E9','#6B7280'];
+const ZONE_COLOR_PALETTE = ['#4A8FD4','#4CAF7D','#E8622A','#A855F7','#E8A02A','#E05555','#0EA5E9','#6B7280','#5DCAA5','#C9A96E','#F97316','#EF4444','#10B981','#3B82F6','#8B5CF6','#111827'];
 const TIME_SLOTS = [];
 for (let h=6; h<=18; h++) { TIME_SLOTS.push(String(h).padStart(2,'0')+':00'); if(h<18) TIME_SLOTS.push(String(h).padStart(2,'0')+':30'); }
 
 // ── STATE ─────────────────────────────────────────────────
 let currentUser   = { role:'guest' }; // role: 'guest' | 'user' | 'admin'
+let editingZoneColorId = null;
 let firebaseUser  = null;  // Firebase Auth user object
 let deliveries    = [];
 let zones         = [
@@ -1963,6 +2001,7 @@ let subcontractors = []; // list of company names for dropdown
 const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 const ZONES_PREF_KEY = 'hbml_zones_v1';
+const ICON_MARKERS_PREF_KEY = 'hbml_icon_markers_v1';
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -2005,6 +2044,31 @@ async function saveZonesConfig(){
   saveLocalZones();
   if(window._db){
     await fbSaveConfig('zones', zones);
+  }
+}
+
+function loadLocalIconMarkers(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(ICON_MARKERS_PREF_KEY) || 'null');
+    if(Array.isArray(saved)) return saved;
+    if(saved && Array.isArray(saved.iconMarkers)) return saved.iconMarkers;
+  }catch(_){}
+  return null;
+}
+function saveLocalIconMarkers(){
+  try{
+    localStorage.setItem(ICON_MARKERS_PREF_KEY, JSON.stringify({
+      updatedAt: Date.now(),
+      iconMarkers
+    }));
+  }catch(_){}
+}
+async function saveIconMarkersConfig(){
+  // Save locally first so add/delete/move/resize survives an immediate refresh,
+  // even if Firebase is unavailable or the remote write is delayed.
+  saveLocalIconMarkers();
+  if(window._db){
+    await fbSaveConfig('iconMarkers', iconMarkers);
   }
 }
 
@@ -3226,7 +3290,7 @@ function renderIconMarkers(){
           m.yPct=parseFloat(Math.max(0,Math.min(100,(e.clientY-sr.top-oy)/sr.height*100)).toFixed(3));
           el.style.left=m.xPct+'%'; el.style.top=m.yPct+'%';
         };
-        const up=()=>{ fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{}); document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
+        const up=()=>{ saveIconMarkersConfig().catch(()=>{}); document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
         document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
       });
       // Resize handle
@@ -3240,7 +3304,7 @@ function renderIconMarkers(){
           m.size=Math.max(24,Math.min(120,Math.round(startSz+delta)));
           renderIconMarkers();
         };
-        const up=()=>{ fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{}); document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
+        const up=()=>{ saveIconMarkersConfig().catch(()=>{}); document.removeEventListener('mousemove',mv); document.removeEventListener('mouseup',up); };
         document.addEventListener('mousemove',mv); document.addEventListener('mouseup',up);
       });
     }
@@ -4417,9 +4481,15 @@ function renderAdmin(){
   const can=deliveries.filter(d=>d.status==='cancelled'||d.status==='rejected');
   g('cancelled-count').textContent=can.length||'None';
   g('cancelled-list').innerHTML=can.length?can.map(d=>drHTML(d,false)).join(''):'<div class="empty">No cancelled deliveries.</div>';
-  g('zone-mgr').innerHTML=zones.map(z=>`<div class="zm-row"><span class="zm-dot" style="background:${z.color}"></span>
-    <input class="zm-input" value="${z.name}" onchange="renameZone('${z.id}',this.value)">
-    <button class="zm-del" onclick="deleteZone('${z.id}')">×</button></div>`).join('');
+  g('zone-mgr').innerHTML=zones.map(z=>`<div class="zm-row">
+    <button type="button" class="zm-current-color" style="background:${z.color}" title="Modifier la couleur de ${z.name}" onclick="openZoneColorModal('${z.id}')"></button>
+    <div class="zm-main">
+      <div class="zm-topline">
+        <input class="zm-input" value="${z.name}" onchange="renameZone('${z.id}',this.value)">
+        <button class="zm-del" onclick="deleteZone('${z.id}')">×</button>
+      </div>
+    </div>
+  </div>`).join('');
   renderScheduleMgr();
   renderSubList();
   renderSiteNoticesAdmin();
@@ -4536,17 +4606,69 @@ function addIconMarker(){
   const color=g('im-color')?.value||'#C9A96E';
   const m={id:'im'+Date.now(),iconKey,label,color,xPct:50,yPct:50};
   iconMarkers.push(m);
-  fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{});
+  saveIconMarkersConfig().catch(()=>{});
   if(g('im-label')) g('im-label').value='';
   renderImList();
   renderIconMarkers();
 }
 function removeIconMarker(id){
   iconMarkers=iconMarkers.filter(m=>m.id!==id);
-  fbSaveConfig('iconMarkers',iconMarkers).catch(()=>{});
+  saveIconMarkersConfig().catch(()=>{});
   renderImList();
   renderIconMarkers();
 }
+
+function normalizeHexColor(color){
+  if(!color) return '#4A8FD4';
+  const c = String(color).trim();
+  if(/^#[0-9a-fA-F]{6}$/.test(c)) return c.toUpperCase();
+  if(/^#[0-9a-fA-F]{3}$/.test(c)){
+    return ('#' + c.slice(1).split('').map(ch=>ch+ch).join('')).toUpperCase();
+  }
+  return '#4A8FD4';
+}
+
+function openZoneColorModal(id){
+  const z=zones.find(z=>z.id===id);
+  if(!z) return;
+  editingZoneColorId=id;
+  const current=normalizeHexColor(z.color);
+  const previewDot=g('zone-color-preview-dot');
+  const previewName=g('zone-color-preview-name');
+  const customInput=g('zone-color-custom-input');
+  const grid=g('zone-color-grid');
+  if(previewDot) previewDot.style.background=current;
+  if(previewName) previewName.textContent=z.name;
+  if(customInput) customInput.value=current;
+  if(grid){
+    grid.innerHTML=ZONE_COLOR_PALETTE.map(c=>`<button type="button" class="zone-color-swatch ${normalizeHexColor(c)===current?'active':''}" style="background:${c}" title="${c}" onclick="selectZoneColor('${c}')"></button>`).join('');
+  }
+  g('modal-zone-color').classList.add('open');
+}
+
+async function selectZoneColor(color){
+  if(!editingZoneColorId) return;
+  await setZoneColor(editingZoneColorId,color);
+  closeModal('modal-zone-color');
+}
+
+async function setZoneColor(id,color){
+  const z=zones.find(z=>z.id===id);
+  if(!z) return;
+  z.color=normalizeHexColor(color);
+  await saveZonesConfig();
+
+  // Re-render every area where the zone color is shown.
+  renderAdmin();
+  renderHome();
+  renderZonePicker();
+  renderZoneFilters();
+  renderWeekCalendar();
+  renderMobilePlanPanel();
+  renderBlackoutPanel();
+  updateBadges();
+}
+
 async function renameZone(id,name){
   const z=zones.find(z=>z.id===id);
   if(!z) return;
@@ -5316,6 +5438,8 @@ async function initApp(){
   // Restore local zones/project settings first as a fallback for refresh/offline cases.
   const localZonesBeforeDb = loadLocalZones();
   if(localZonesBeforeDb) zones = localZonesBeforeDb;
+  const localIconMarkersBeforeDb = loadLocalIconMarkers();
+  if(localIconMarkersBeforeDb) iconMarkers = localIconMarkersBeforeDb;
   projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
 
   if(window._db){
@@ -5347,7 +5471,9 @@ async function initApp(){
     siteSchedule   = sch;
     blackoutDates  = bd;
     subcontractors = sc;
-    iconMarkers    = im; // PDF is always converted to image on upload, stored as mapImg
+    const localIconMarkersAfterDb = loadLocalIconMarkers();
+    iconMarkers    = localIconMarkersAfterDb || im; // PDF is always converted to image on upload, stored as mapImg
+    if(localIconMarkersAfterDb) saveIconMarkersConfig().catch(()=>{});
     siteNotices    = sn;
     subscribeDeliveries(); // real-time listener handles deliveries
     // Apply saved app name
