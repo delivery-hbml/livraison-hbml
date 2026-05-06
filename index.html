@@ -1284,7 +1284,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
         </div>
         <div id="booking-content">
           <div id="signin-banner" style="display:none;background:var(--blue-dim);border:1px solid var(--blue-bd);border-radius:var(--r);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--blue);display:flex;align-items:center;justify-content:space-between;gap:8px;">
-            <span>Connectez-vous pour suivre vos livraisons</span>
+            <span><strong>Connexion obligatoire</strong><br>Connectez-vous ou créez un compte pour réserver une livraison.</span>
             <button onclick="openUserAuthFromBanner()" style="padding:4px 12px;border-radius:4px;border:none;background:var(--blue);color:white;font-size:11px;font-weight:700;cursor:pointer;">Se connecter / S’inscrire</button>
           </div>
           <div id="booking-template-banner" style="display:none;background:var(--accent-dim);border:1px solid var(--accent-bd);border-radius:var(--r);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--accent);align-items:flex-start;justify-content:space-between;gap:10px;">
@@ -1842,7 +1842,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <button class="btn btn-gh" style="width:100%;font-size:12px;" onclick="toggleAuthMode()" id="auth-toggle-btn">Pas de compte ? S’inscrire</button>
     </div>
     <div style="text-align:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-      <button onclick="closeModal('modal-user-auth')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">Continuer sans compte</button>
+      <button onclick="closeModal('modal-user-auth')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;">Annuler</button>
     </div>
   </div>
 </div>
@@ -3045,6 +3045,8 @@ window._onAuthChange = function(fbUser){
     g('btn-login').style.display='';
     g('btn-logout').style.display='none';
     const mobLbl = g('mob-account-lbl'); if(mobLbl) mobLbl.textContent='Se connecter';
+    if(g('view-deliveries').classList.contains('active')) renderDeliveries();
+    if(g('view-home').classList.contains('active')) renderHome();
   }
 };
 
@@ -3061,6 +3063,24 @@ function openUserAuth(){
   renderAuthModal();
   g('modal-user-auth').classList.add('open');
   setTimeout(()=>g('auth-email').focus(),50);
+}
+
+function requireLoginForBooking(source){
+  if(firebaseUser || isAdmin()) return true;
+  const msg = '<strong>Connexion requise</strong><br>Vous devez vous connecter ou créer un compte avant de réserver une livraison.';
+  const mainErr = g('err-box');
+  if(source === 'main' && mainErr){
+    mainErr.innerHTML = msg;
+    mainErr.style.display = 'block';
+    try{ mainErr.scrollIntoView({behavior:'smooth', block:'nearest'}); }catch(e){}
+  }
+  const qbErr = g('qb-err');
+  if(source === 'quick' && qbErr){
+    qbErr.textContent = 'Connexion requise : connectez-vous ou créez un compte avant de réserver une livraison.';
+    qbErr.style.display = 'block';
+  }
+  openUserAuthFromBanner();
+  return false;
 }
 function renderAuthModal(){
   if(firebaseUser){
@@ -3673,7 +3693,14 @@ function renderDeliveries(){
     }
   }
   const banner = g('signin-banner');
-  if(banner) banner.style.display = firebaseUser ? 'none' : 'flex';
+  const bookingAllowed = !!firebaseUser || isAdmin();
+  if(banner) banner.style.display = bookingAllowed ? 'none' : 'flex';
+  document.querySelectorAll('#booking-content input, #booking-content select, #booking-content textarea, #booking-content .zpick').forEach(el=>{
+    if(el.id === 'auth-email' || el.id === 'auth-pass') return;
+    el.disabled = !bookingAllowed;
+    el.style.opacity = bookingAllowed ? '' : '0.55';
+    el.style.cursor = bookingAllowed ? '' : 'not-allowed';
+  });
   const tplBanner = g('booking-template-banner');
   if(tplBanner) tplBanner.style.display = activeBookingTemplate ? 'flex' : 'none';
   const dateEl=g('b-date');
@@ -3707,8 +3734,9 @@ function renderDeliveries(){
 }
 
 function renderZonePicker(){
+  const bookingAllowed = !!firebaseUser || isAdmin();
   g('zone-pick-grid').innerHTML=zones.map(z=>
-    `<button class="zpick ${selZone===z.id?'sel':''}" onclick="pickZone('${z.id}')">
+    `<button class="zpick ${selZone===z.id?'sel':''}" ${bookingAllowed ? '' : 'disabled'} style="${bookingAllowed ? '' : 'opacity:.55;cursor:not-allowed;'}" onclick="pickZone('${z.id}')">
       <span class="zpick-dot" style="background:${z.color}"></span>${z.name}
     </button>`).join('');
 }
@@ -4437,6 +4465,7 @@ function goToToday(){
 // ── SUBMIT ────────────────────────────────────────────────
 function submitDelivery(){
   try{
+    if(!requireLoginForBooking('main')) return;
     const company=g('b-company').value.trim(),contact=g('b-contact').value.trim(),
           phone=g('b-phone').value.trim(),date=g('b-date').value.trim(),
           material=g('b-material').value.trim(),ts=g('b-time-start').value,te=g('b-time-end').value;
@@ -5368,6 +5397,7 @@ function resetQuickBookSheetPosition(){
   try{ modal.scrollTo({top:0, left:0, behavior:'instant'}); }catch(_){}
 }
 function quickBook(date, time, preferredZone){
+  if(!requireLoginForBooking('quick')) return;
 
   const dateObj = new Date(date+'T12:00:00');
   const dateDisp = dateObj.toLocaleDateString('fr-CA',{weekday:'long',day:'numeric',month:'long'});
@@ -5414,6 +5444,7 @@ function qbStartChange(){
   if(endSel.options.length>1) endSel.selectedIndex=1;
 }
 function submitQuickBook(){
+  if(!requireLoginForBooking('quick')) return;
   const date=g('qb-date').value, zoneId=g('qb-zone').value;
   const ts=g('qb-start').value, te=g('qb-end').value;
   const company=g('qb-company').value.trim(), contact=g('qb-contact').value.trim();
@@ -5515,6 +5546,7 @@ function decideFromZoneModal(id, status) {
 }
 
 function bookForZone() {
+  if(!requireLoginForBooking('quick')) { closeModal('modal-zone'); return; }
   const zoneId = g('modal-zone').dataset.zoneId;
   closeModal('modal-zone');
   // Pre-select this zone and switch to deliveries view
