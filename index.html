@@ -1150,7 +1150,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <span class="role-pill admin-only" id="tb-role">Admin</span>
       <button class="tb-btn" id="btn-user-login" onclick="openMyDeliveries()" style="display:none;">Mes livraisons</button>
 
-      <button class="tb-btn primary" id="btn-login" onclick="openAdminLogin()">Connexion admin</button>
+      <button class="tb-btn primary" id="btn-login" onclick="openUserAuth()">Se connecter</button>
       <button class="tb-btn admin-only" id="btn-logout" onclick="doLogout()" style="display:none;">Se déconnecter</button>
     </div>
   </nav>
@@ -1176,7 +1176,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     </button>
     <button class="mob-nav-item" id="mob-nav-account" onclick="mobAccountTap()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <span id="mob-account-lbl">Admin</span>
+      <span id="mob-account-lbl">Se connecter</span>
     </button>
   </nav>
 
@@ -2864,8 +2864,8 @@ function mobAccountTap(){
     // Logged in user
     openMyDeliveries();
   } else {
-    // Not logged in: show admin login
-    openAdminLogin();
+    // Not logged in: show the same login used on desktop
+    openUserAuth();
   }
 }
 
@@ -2960,7 +2960,7 @@ function doLogout(){
   g('nav-admin').style.display='none';
   const mna=g('mob-nav-admin'); if(mna) mna.style.display='none';
   const mny=g('mob-nav-analytics'); if(mny) mny.style.display='none';
-  const lbl=g('mob-account-lbl'); if(lbl) lbl.textContent='Admin';
+  const lbl=g('mob-account-lbl'); if(lbl) lbl.textContent='Se connecter';
   showView('home');
   updateMobileFab();
   syncMobAdminTab();
@@ -2978,6 +2978,7 @@ window._onAuthChange = function(fbUser){
     g('btn-login').style.display='none';
     g('btn-logout').style.display='';
     g('tb-role').style.display='none';
+    const mobLbl = g('mob-account-lbl'); if(mobLbl) mobLbl.textContent='Mes livraisons';
     // Re-render deliveries view if open
     if(g('view-deliveries').classList.contains('active')) renderDeliveries();
     if(g('view-home').classList.contains('active')) renderHome();
@@ -2989,6 +2990,7 @@ window._onAuthChange = function(fbUser){
     g('btn-user-login').style.display='none';
     g('btn-login').style.display='';
     g('btn-logout').style.display='none';
+    const mobLbl = g('mob-account-lbl'); if(mobLbl) mobLbl.textContent='Se connecter';
   }
 };
 
@@ -3020,8 +3022,8 @@ function renderAuthModal(){
     g('auth-toggle-btn').style.display='none';
     g('auth-err').style.display='none';
   } else if(_authMode==='login'){
-    g('auth-modal-title').textContent = 'Connexion sous-traitant';
-    g('auth-modal-sub').textContent = 'Connectez-vous pour soumettre et suivre vos livraisons.';
+    g('auth-modal-title').textContent = 'Se connecter';
+    g('auth-modal-sub').textContent = 'Connectez-vous pour réserver, modifier ou annuler vos livraisons. Les administrateurs peuvent utiliser leurs identifiants admin.';
     g('auth-name-field').style.display='none';
     g('auth-email').value=''; g('auth-email').disabled=false;
     g('auth-pass').value=''; g('auth-pass').style.display='';
@@ -3032,7 +3034,7 @@ function renderAuthModal(){
     g('auth-err').style.display='none';
   } else {
     g('auth-modal-title').textContent = 'Créer un compte';
-    g('auth-modal-sub').textContent = 'Create an account to track all your deliveries.';
+    g('auth-modal-sub').textContent = 'Créez un compte pour réserver et suivre vos livraisons.';
     g('auth-name-field').style.display='';
     g('auth-email').value=''; g('auth-email').disabled=false;
     g('auth-pass').value=''; g('auth-pass').style.display='';
@@ -3061,6 +3063,17 @@ async function submitUserAuth(){
       await window._updateProfile(cred.user, {displayName: name});
       closeModal('modal-user-auth');
     } else {
+      // Allow admin to use the same Se connecter modal with the existing admin credentials.
+      if (ACCOUNTS[email] && ACCOUNTS[email].pass === pass) {
+        if (window._auth && firebaseUser) await window._signOut();
+        currentUser = { username: email, ...ACCOUNTS[email] };
+        try { localStorage.setItem('sd_admin_session', email); } catch(e) {}
+        closeModal('modal-user-auth');
+        applyAdminUI();
+        renderCompanyDropdowns();
+        showView('home');
+        return;
+      }
       await window._signIn(email, pass);
       closeModal('modal-user-auth');
     }
