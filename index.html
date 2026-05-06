@@ -1962,6 +1962,7 @@ let subcontractors = []; // list of company names for dropdown
 
 const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
+const ZONES_PREF_KEY = 'hbml_zones_v1';
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -1980,6 +1981,31 @@ function saveMobileBookingPrefs(prefs){
       truck: prefs.truck || ''
     }));
   }catch(_){}
+}
+
+function loadLocalZones(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(ZONES_PREF_KEY) || 'null');
+    if(Array.isArray(saved)) return saved;
+    if(saved && Array.isArray(saved.zones)) return saved.zones;
+  }catch(_){}
+  return null;
+}
+function saveLocalZones(){
+  try{
+    localStorage.setItem(ZONES_PREF_KEY, JSON.stringify({
+      updatedAt: Date.now(),
+      zones
+    }));
+  }catch(_){}
+}
+async function saveZonesConfig(){
+  // Save locally first so add/delete/rename survives an immediate refresh,
+  // even if Firebase is unavailable or the remote write is delayed.
+  saveLocalZones();
+  if(window._db){
+    await fbSaveConfig('zones', zones);
+  }
 }
 
 function loadLocalProjectInfo(){
@@ -2110,7 +2136,7 @@ async function save(){
     for(const d of deliveries){
       await fbSaveDelivery(d);
     }
-    await fbSaveConfig('zones', zones);
+    await saveZonesConfig();
     saveLocalProjectInfo();
     await fbSaveConfig('projectInfo', projectInfo);
     await fbSaveConfig('notifications', notifications);
@@ -3121,7 +3147,7 @@ function renderMapZones(){
         needsSave = true;
       }
     });
-    if (needsSave) fbSaveConfig('zones', zones).catch(() => {});
+    if (needsSave) saveZonesConfig().catch(() => {});
 
     // Render zone rects — positioned as % of stage (= % of image)
     zones.filter(z => z.visible).forEach(z => {
@@ -3252,7 +3278,7 @@ function makeDrag(el, z, stage){
       el.style.top  = yPct + '%';
     };
     const up = () => {
-      fbSaveConfig('zones', zones);
+      saveZonesConfig();
       document.removeEventListener('mousemove', mv);
       document.removeEventListener('mouseup', up);
     };
@@ -3279,7 +3305,7 @@ function makeResize(el, z, stage){
       el.style.height = z.hPct + '%';
     };
     const up = () => {
-      fbSaveConfig('zones', zones);
+      saveZonesConfig();
       document.removeEventListener('mousemove', mv);
       document.removeEventListener('mouseup', up);
     };
@@ -3316,7 +3342,7 @@ function uploadMap(e){
 }
 function addZone(){
   zones.push({id:'z'+Date.now(),name:'Nouvelle zone',color:ZONE_COLORS[zones.length%ZONE_COLORS.length],x:0,y:0,w:0,h:0,xPct:5,yPct:5,wPct:15,hPct:12,visible:true,icon:'none'});
-  fbSaveConfig('zones',zones);renderHome();if(g('view-admin').classList.contains('active'))renderAdmin();
+  saveZonesConfig();renderHome();if(g('view-admin').classList.contains('active'))renderAdmin();
 }
 function updateAutoApproveUI(){
   const on = projectInfo.autoApprove!==false;
@@ -4521,8 +4547,46 @@ function removeIconMarker(id){
   renderImList();
   renderIconMarkers();
 }
-function renameZone(id,name){const z=zones.find(z=>z.id===id);if(z)z.name=name;fbSaveConfig('zones',zones);renderHome();renderZonePicker();renderZoneFilters();}
-function deleteZone(id){if(!confirm('Supprimer cette zone ?'))return;zones=zones.filter(z=>z.id!==id);fbSaveConfig('zones',zones);renderAdmin();renderHome();renderZonePicker();}
+async function renameZone(id,name){
+  const z=zones.find(z=>z.id===id);
+  if(!z) return;
+  z.name=name;
+  await saveZonesConfig();
+  renderHome();
+  renderZonePicker();
+  renderZoneFilters();
+  renderMobilePlanPanel();
+}
+async function deleteZone(id){
+  if(!confirm('Supprimer cette zone ?')) return;
+
+  const deletedZone = zones.find(z => z.id === id);
+  zones = zones.filter(z => z.id !== id);
+
+  // Clean up UI state that may still point to the deleted zone.
+  activeZF.delete(id);
+  if(selZone === id) selZone = zones.length ? zones[0].id : null;
+
+  await saveZonesConfig();
+
+  // Optional: flag existing deliveries that still reference this removed zone.
+  if(deletedZone){
+    notifications.unshift({
+      msg: 'Zone supprimée : ' + deletedZone.name + '.',
+      type: 'rejected',
+      time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})
+    });
+    fbSaveConfig('notifications', notifications).catch(()=>{});
+  }
+
+  renderAdmin();
+  renderHome();
+  renderZonePicker();
+  renderZoneFilters();
+  renderWeekCalendar();
+  renderMobilePlanPanel();
+  updateBadges();
+}
 
 // ── EDIT DELIVERY ─────────────────────────────────────────
 function openEdit(id){
@@ -5249,7 +5313,9 @@ async function initApp(){
   g('week-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;grid-column:1/-1;">Connecting to database…</div>';
   bindMobileCalendarSwipe();
 
-  // Restore local project settings first as a fallback for refresh/offline cases.
+  // Restore local zones/project settings first as a fallback for refresh/offline cases.
+  const localZonesBeforeDb = loadLocalZones();
+  if(localZonesBeforeDb) zones = localZonesBeforeDb;
   projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
 
   if(window._db){
@@ -5265,7 +5331,9 @@ async function initApp(){
       fbLoadConfig('iconMarkers',    []),
       fbLoadConfig('siteNotices',     []),
     ]);
-    zones          = z;
+    const localZonesAfterDb = loadLocalZones();
+    zones          = localZonesAfterDb || z;
+    if(localZonesAfterDb) saveZonesConfig().catch(()=>{});
     // Merge order matters:
     // 1) defaults / current state
     // 2) Firebase projectInfo
