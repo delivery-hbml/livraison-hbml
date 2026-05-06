@@ -136,6 +136,10 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .cal-main{display:flex;flex-direction:column;min-height:0;overflow:hidden;}
 .cal-toolbar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg2);flex-shrink:0;}
 .cal-title{font-family:'Barlow Condensed',sans-serif;font-size:25px;font-weight:700;color:var(--text);}
+.cal-current-time-pill{display:inline-flex;align-items:center;gap:8px;padding:6px 11px;border-radius:999px;border:1px solid var(--border2);background:rgba(255,255,255,0.04);color:var(--text2);font-size:12px;font-weight:700;white-space:nowrap;}
+.cal-current-time-pill::before{content:'';width:7px;height:7px;border-radius:50%;background:#E5533D;box-shadow:0 0 0 3px rgba(229,83,61,0.14);flex-shrink:0;}
+.cal-current-time-pill span{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);}
+.cal-current-time-pill strong{font-family:var(--mono);font-size:13px;color:var(--text);font-weight:800;letter-spacing:.01em;}
 .cal-nav{width:28px;height:28px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer;font-size:14px;transition:all .14s;}
 .cal-nav:hover{background:var(--surface);color:var(--text);}
 .today-btn{padding:6px 16px;border-radius:5px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .14s;}
@@ -177,6 +181,51 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .db-free-badge:hover{background:rgba(255,255,255,0.88);}
 .db-approved{background:#FFFCF7;border:1px solid rgba(201,169,110,0.34);color:#12394A;}
 .db-pending{background:#FFF8F1;border-style:dashed !important;border-width:1.5px !important;color:#12394A;}
+
+
+/* OUTLOOK-STYLE CURRENT TIME INDICATOR */
+.current-time-line{
+  position:absolute;
+  left:0;
+  right:0;
+  height:2px;
+  background:#E5533D;
+  box-shadow:0 0 0 1px rgba(229,83,61,0.08);
+  pointer-events:none;
+  z-index:12;
+}
+.current-time-line::before{
+  content:'';
+  position:absolute;
+  left:-5px;
+  top:-4px;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#E5533D;
+  box-shadow:0 1px 4px rgba(0,0,0,0.18);
+}
+.current-time-line::after{display:none;}
+.current-time-chip{
+  position:absolute;
+  right:6px;
+  transform:translateY(-50%);
+  padding:2px 6px;
+  border-radius:999px;
+  background:#E5533D;
+  color:#fff;
+  font-family:var(--mono);
+  font-size:10px;
+  font-weight:700;
+  line-height:1.25;
+  pointer-events:none;
+  z-index:13;
+  box-shadow:0 2px 7px rgba(0,0,0,0.16);
+}
+@media(max-width:768px){
+  .current-time-chip{right:4px;font-size:9px;padding:2px 5px;}
+  .current-time-line::after{left:8px;font-size:9px;padding:2px 6px;}
+}
 
 /* ADMIN */
 .admin-wrap{padding:24px;max-width:1400px;margin:0 auto;}
@@ -445,6 +494,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   .mob-plan-zone span{font-size:9px;padding:3px 6px;}
   .cal-toolbar{padding:12px 12px 8px;gap:8px;flex-wrap:wrap;}
   .cal-title{width:100%;font-size:24px;line-height:1.1;}
+  .cal-current-time-pill{order:2;font-size:11px;padding:6px 10px;}
+  .cal-current-time-pill span{font-size:9px;}
+  .cal-current-time-pill strong{font-size:12px;}
   .cal-nav,.today-btn{padding:10px 14px;font-size:13px;}
   .zf-btn{padding:8px 14px;font-size:12px;}
   #zone-filters{width:100%;margin-left:0!important;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -954,6 +1006,14 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   color:#12394A !important;
 }
 
+#view-deliveries .cal-current-time-pill{
+  background:rgba(255,255,255,0.58) !important;
+  border-color:var(--cal-line) !important;
+  color:var(--cal-muted) !important;
+}
+#view-deliveries .cal-current-time-pill span{color:var(--cal-muted) !important;}
+#view-deliveries .cal-current-time-pill strong{color:var(--cal-text) !important;}
+
 #view-deliveries #zone-filters .zf-btn{
   background:rgba(255,255,255,0.35) !important;
 }
@@ -1235,6 +1295,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <div class="cal-main">
         <div class="cal-toolbar">
           <span class="cal-title" id="cal-title"></span>
+          <div class="cal-current-time-pill" id="cal-current-time-pill" aria-live="polite"><span>Heure actuelle</span><strong>--:--</strong></div>
           <button class="cal-nav" onclick="changeWeek(-1)">&#8592;</button>
           <button class="cal-nav" onclick="changeWeek(1)">&#8594;</button>
           <button class="today-btn" onclick="goToToday()">Aujourd'hui</button>
@@ -3939,6 +4000,54 @@ function commitDraggedReschedule(){
   updateBadges();
 }
 
+
+function timeToMinutes(t){
+  const parts = String(t || '').split(':').map(Number);
+  if(parts.length < 2 || Number.isNaN(parts[0]) || Number.isNaN(parts[1])) return null;
+  return parts[0] * 60 + parts[1];
+}
+function updateCalendarClock(){
+  const el = g('cal-current-time-pill');
+  if(!el) return;
+  const now = new Date();
+  const time = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const strong = el.querySelector('strong');
+  if(strong) strong.textContent = time;
+  el.title = now.toLocaleDateString('fr-CA', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + ' · ' + time;
+}
+
+function currentTimeMarker(SLOT_H, totalH){
+  if(!TIME_SLOTS.length) return null;
+  const now = new Date();
+  const startMin = timeToMinutes(TIME_SLOTS[0]);
+  if(startMin === null) return null;
+  const nowMin = now.getHours() * 60 + now.getMinutes() + (now.getSeconds() / 60);
+  const endMin = startMin + (TIME_SLOTS.length * 30);
+  if(nowMin < startMin || nowMin > endMin) return null;
+  const top = ((nowMin - startMin) / 30) * SLOT_H;
+  const label = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  return { top: Math.max(0, Math.min(totalH, top)), label };
+}
+function currentTimeLineHtml(dateStr, SLOT_H, totalH){
+  if(dateStr !== dk(new Date())) return '';
+  const m = currentTimeMarker(SLOT_H, totalH);
+  if(!m) return '';
+  return '<div class="current-time-line" aria-hidden="true" data-label="'+m.label+'" style="top:'+m.top+'px;"></div>';
+}
+function currentTimeChipHtml(visibleDays, SLOT_H, totalH){
+  if(!visibleDays.some(d => dk(d) === dk(new Date()))) return '';
+  const m = currentTimeMarker(SLOT_H, totalH);
+  if(!m) return '';
+  return '<div class="current-time-chip" aria-hidden="true" style="top:'+m.top+'px;">'+m.label+'</div>';
+}
+function startCurrentTimeTicker(){
+  if(window._currentTimeTicker) clearInterval(window._currentTimeTicker);
+  window._currentTimeTicker = setInterval(() => {
+    const view = g('view-deliveries');
+    if(view && view.classList.contains('active')) renderWeekCalendar();
+  }, 30000);
+}
+
 function renderWeekCalendar(){
   const allDays=Array.from({length:7},(_,i)=>addDays(weekStart,i)),tod=today();
   const workWeekDays = allDays.slice(0,5);
@@ -3975,6 +4084,7 @@ function renderWeekCalendar(){
     const half=t.endsWith(':30');
     timeHtml+='<div class="wg-t'+(half?' half':'')+'">'+(half?'':t)+'</div>';
   });
+  updateCalendarClock();
 
   // ── Day columns ──
   let dayColsHtml='';
@@ -4075,7 +4185,8 @@ function renderWeekCalendar(){
       }
     });
 
-    dayColsHtml+='<div class="wg-day-col" data-date="'+ds+'" style="position:relative;height:'+totalH+'px;flex:1;min-width:0;border-right:1px solid var(--border);">'+gridLines+blackoutStripes+blocks+'</div>';
+    const currentTimeLine = currentTimeLineHtml(ds, SLOT_H, totalH);
+    dayColsHtml+='<div class="wg-day-col" data-date="'+ds+'" style="position:relative;height:'+totalH+'px;flex:1;min-width:0;border-right:1px solid var(--border);">'+gridLines+blackoutStripes+currentTimeLine+blocks+'</div>';
   });
 
   // Assemble: header row + scrollable body row
@@ -4084,7 +4195,7 @@ function renderWeekCalendar(){
   g('week-grid').innerHTML=
     '<div style="display:flex;flex-direction:row;position:sticky;top:0;z-index:10;background:var(--bg2);">'+headerHtml+'</div>'
     +'<div style="display:flex;flex-direction:row;overflow-y:auto;flex:1;width:100%;">'
-      +'<div class="wg-time-col">'+timeHtml+'</div>'
+      +'<div class="wg-time-col" style="position:relative;height:'+totalH+'px;">'+timeHtml+'</div>'
       +dayColsHtml
     +'</div>';
 }
@@ -5127,6 +5238,7 @@ async function initApp(){
     }
   } catch(e){}
   tickClock(); setInterval(tickClock,1000);
+  startCurrentTimeTicker();
   weekStart = getMonday(new Date());
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
   g('nav-admin').style.display='none';
