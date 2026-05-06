@@ -1065,8 +1065,15 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 </style>
   <!-- PDF.js for rendering PDF site plans -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script>
     if(window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    window.EMAILJS_SERVICE_ID = 'service_60du2sb';
+    window.EMAILJS_TEMPLATE_ID = 'template_oxmy1fg';
+    window.EMAILJS_PUBLIC_KEY = '40VtN39cONqZN9nxq';
+    if(window.emailjs){
+      emailjs.init({ publicKey: window.EMAILJS_PUBLIC_KEY });
+    }
   </script>
 
   <!-- ═══════════════════════════════════════════════════════════
@@ -1076,7 +1083,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
   <script type="module">
     import { initializeApp }        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
     import { getFirestore, collection, doc, onSnapshot,
-             setDoc, deleteDoc, getDoc, addDoc, serverTimestamp }
+             setDoc, deleteDoc, getDoc }
                                     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
     import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
              signOut, onAuthStateChanged, updateProfile }
@@ -1109,8 +1116,6 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     window._setDoc     = setDoc;
     window._delDoc     = deleteDoc;
     window._getDoc     = getDoc;
-    window._addDoc     = addDoc;
-    window._serverTimestamp = serverTimestamp;
     window._onSnapshot = onSnapshot;
     window._createUser = (email, pass) => createUserWithEmailAndPassword(auth, email, pass);
     window._signIn     = (email, pass) => signInWithEmailAndPassword(auth, email, pass);
@@ -1978,6 +1983,53 @@ const ZONE_COLOR_PALETTE = ['#4A8FD4','#4CAF7D','#E8622A','#A855F7','#E8A02A','#
 const TIME_SLOTS = [];
 for (let h=6; h<=18; h++) { TIME_SLOTS.push(String(h).padStart(2,'0')+':00'); if(h<18) TIME_SLOTS.push(String(h).padStart(2,'0')+':30'); }
 
+// ── EMAILJS NOTIFICATIONS ─────────────────────────────────
+function isValidEmail(value){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value || '').trim());
+}
+function deliveryZoneName(d){
+  return zones.find(z => z.id === d.zone)?.name || d.zone || 'Non précisée';
+}
+function deliveryTimeLabel(d){
+  const start = d.timeStart || d.time || '';
+  const end = d.timeEnd || '';
+  return end ? start + ' – ' + end : start;
+}
+function deliveryEmailText(type){
+  if(type === 'approved') return {
+    subject: 'Livraison confirmée',
+    message: 'Votre livraison a été confirmée.'
+  };
+  if(type === 'modified') return {
+    subject: 'Livraison modifiée',
+    message: 'Votre livraison a été modifiée. Voici les informations mises à jour.'
+  };
+  if(type === 'cancelled') return {
+    subject: 'Livraison annulée',
+    message: 'Votre livraison a été annulée.'
+  };
+  return { subject: 'Mise à jour de livraison', message: 'Une mise à jour a été apportée à votre livraison.' };
+}
+async function sendDeliveryEmail(d, type){
+  try{
+    if(!d || !d.userEmail || !isValidEmail(d.userEmail)) return;
+    if(!window.emailjs){ console.warn('EmailJS is not loaded.'); return; }
+    const txt = deliveryEmailText(type);
+    await emailjs.send(window.EMAILJS_SERVICE_ID, window.EMAILJS_TEMPLATE_ID, {
+      to_email: d.userEmail,
+      subject: txt.subject + ' — ' + (d.company || 'Livraison'),
+      message: txt.message,
+      company: d.company || 'Non précisée',
+      delivery_date: d.date ? fmtDate(d.date) : 'Non précisée',
+      delivery_time: deliveryTimeLabel(d) || 'Non précisée',
+      zone: deliveryZoneName(d),
+      truck_type: d.truck || 'Non précisé'
+    });
+  }catch(err){
+    console.warn('Email notification failed:', err);
+  }
+}
+
 // ── STATE ─────────────────────────────────────────────────
 let currentUser   = { role:'guest' }; // role: 'guest' | 'user' | 'admin'
 let editingZoneColorId = null;
@@ -2266,71 +2318,6 @@ function notif(msg,type){
   notifications.unshift({msg,type,time:new Date().toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit'})});
   if(notifications.length>40)notifications.pop();
   fbSaveConfig('notifications', notifications).catch(()=>{});
-}
-
-// ── EMAIL NOTIFICATIONS ─────────────────────────────────────
-// The static website only queues email events in Firestore.
-// A Firebase Cloud Function sends the real email securely from the server.
-function deliveryEmailPayload(d, type, changes){
-  if(!d || !d.userEmail) return null; // only notify the person who booked the delivery
-  const z = zones.find(x => x.id === d.zone);
-  return {
-    type,
-    deliveryId: d.id,
-    to: d.userEmail,
-    bookedByUserId: d.userId || null,
-    company: d.company || '',
-    contact: d.contact || '',
-    phone: d.phone || '',
-    material: d.material || '',
-    zoneName: z ? z.name : '',
-    date: d.date || '',
-    timeStart: d.timeStart || d.time || '',
-    timeEnd: d.timeEnd || '',
-    truck: d.truck || '',
-    notes: d.notes || '',
-    status: d.status || '',
-    changes: changes || null,
-    createdAt: window._serverTimestamp ? window._serverTimestamp() : new Date().toISOString()
-  };
-}
-
-async function queueDeliveryEmail(d, type, changes){
-  try{
-    if(!window._db || !window._addDoc) return;
-    const payload = deliveryEmailPayload(d, type, changes);
-    if(!payload) return;
-    await window._addDoc(window._col('deliveryEmailEvents'), payload);
-  }catch(e){
-    console.error('queueDeliveryEmail', e);
-  }
-}
-
-function snapshotDelivery(d){
-  if(!d) return null;
-  return {
-    company:d.company||'', contact:d.contact||'', phone:d.phone||'', material:d.material||'',
-    date:d.date||'', timeStart:d.timeStart||d.time||'', timeEnd:d.timeEnd||'',
-    truck:d.truck||'', notes:d.notes||'', zone:d.zone||'', status:d.status||''
-  };
-}
-
-function deliveryChanges(before, after){
-  if(!before || !after) return null;
-  const labels = {company:'Compagnie',contact:'Contact',phone:'Téléphone',material:'Matériel',date:'Date',timeStart:'Heure de début',timeEnd:'Heure de fin',truck:'Camion',notes:'Notes',zone:'Zone'};
-  const changes = [];
-  Object.keys(labels).forEach(k => {
-    if((before[k]||'') !== (after[k]||'')){
-      let oldValue = before[k] || '';
-      let newValue = after[k] || '';
-      if(k==='zone'){
-        oldValue = (zones.find(z=>z.id===before[k])||{}).name || oldValue;
-        newValue = (zones.find(z=>z.id===after[k])||{}).name || newValue;
-      }
-      changes.push({field:labels[k], oldValue, newValue});
-    }
-  });
-  return changes;
 }
 
 // Subscribe to real-time delivery updates
@@ -4204,6 +4191,7 @@ function commitDraggedReschedule(){
   del.zone = pendingReschedule.zone;
   notif('Déplacement rapide : '+del.company+' — '+oldLabel+' → '+fmtDate(del.date)+' '+del.timeStart+' – '+del.timeEnd+'.', del.status==='approved' ? 'approved' : 'pending');
   saveDelivery(del);
+  sendDeliveryEmail(del, 'modified');
   closeModal('modal-reschedule');
   if(g('view-admin').classList.contains('active')) renderAdmin();
   if(g('view-deliveries').classList.contains('active')) renderWeekCalendar();
@@ -4480,9 +4468,9 @@ function submitDelivery(){
       userId: firebaseUser ? firebaseUser.uid : null,
       userEmail: firebaseUser ? firebaseUser.email : null};
     deliveries.unshift(d);
-    notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===selZone)||{name:'?'}).name+')',d.status==='approved'?'approved':'pending');
+    notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===selZone)||{name:'?'}).name+')','pending');
     saveDelivery(d);
-    if(d.status === 'approved') queueDeliveryEmail(d, 'confirmed');
+    if(d.status === 'approved') sendDeliveryEmail(d, 'approved');
     activeBookingTemplate = null;
     const tplBanner=g('booking-template-banner'); if(tplBanner) tplBanner.style.display='none';
     g('booking-content').style.display='none';
@@ -4557,7 +4545,9 @@ function decideDetail(id,status){
   const note=g('det-note')?.value.trim()||'';
   d.status=status;if(note)d.rejectionNote=note;
   notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
-  saveDelivery(d);closeModal('modal-detail');renderAdmin();renderWeekCalendar();
+  saveDelivery(d);
+  if(status === 'approved') sendDeliveryEmail(d, 'approved');
+  closeModal('modal-detail');renderAdmin();renderWeekCalendar();
 }
 
 // ── ADMIN ─────────────────────────────────────────────────
@@ -4680,7 +4670,7 @@ function decide(id,status){
   d.status=status;if(note)d.rejectionNote=note;
   notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
   saveDelivery(d);
-  if(status === 'approved') queueDeliveryEmail(d, 'confirmed');
+  if(status === 'approved') sendDeliveryEmail(d, 'approved');
   renderAdmin();renderWeekCalendar();
 }
 function pickSlot(id){
@@ -4689,7 +4679,7 @@ function pickSlot(id){
     .forEach(x=>{x.status='rejected';x.rejectionNote='Un autre créneau a été sélectionné.';});
   d.status='approved';
   notif(d.company+' selected for '+(zones.find(z=>z.id===d.zone)||{name:'?'}).name+' · '+(d.timeStart||d.time)+' · '+fmtDate(d.date)+'.','approved');
-  queueDeliveryEmail(d, 'confirmed');
+  sendDeliveryEmail(d, 'approved');
   // Save all affected deliveries
   Promise.all(deliveries.filter(x=>x.zone===d.zone&&x.date===d.date).map(x=>saveDelivery(x)));
   renderAdmin();renderWeekCalendar();
@@ -4699,7 +4689,7 @@ function cancelDel(id,fromModal){
   d.status='cancelled';d.rejectionNote='Annulée par le surintendant.';
   notif('Cancelled: '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','rejected');
   saveDelivery(d);
-  queueDeliveryEmail(d, 'cancelled');
+  sendDeliveryEmail(d, 'cancelled');
   if(fromModal)closeModal('modal-detail');renderAdmin();renderWeekCalendar();updateBadges();
 }
 function uncancelDel(id){
@@ -4874,7 +4864,6 @@ function saveEdit(){
     const cf=deliveries.find(x=>x.id!==id&&x.zone===newZone&&x.date===date&&x.status==='approved'&&overlap(ts,te,x.timeStart||x.time,x.timeEnd||x.time));
     if(cf){alert('Time conflict with '+cf.company+' ('+(cf.timeStart||cf.time)+'–'+(cf.timeEnd||cf.time)+'). Resolve first.');return;}
   }
-  const beforeEdit = snapshotDelivery(d);
   // Apply
   d.company=company;d.contact=contact;d.phone=phone;d.material=material;
   d.date=date;d.time=ts;d.timeStart=ts;d.timeEnd=te;d.truck=truck;d.notes=notes;d.zone=newZone;
@@ -4887,9 +4876,8 @@ function saveEdit(){
     }
   }
   notif('Edited: '+company+' — '+fmtDate(date)+' '+ts+'–'+te+'.',d.status==='approved'?'approved':'pending');
-  const changes = deliveryChanges(beforeEdit, snapshotDelivery(d));
   saveDelivery(d);
-  if(changes && changes.length) queueDeliveryEmail(d, 'modified', changes);
+  sendDeliveryEmail(d, 'modified');
   closeModal('modal-edit');renderAdmin();renderWeekCalendar();updateBadges();
 }
 
@@ -5275,7 +5263,7 @@ function userCancelDelivery(id){
   d.status='cancelled';
   d.rejectionNote='Annulée par le sous-traitant.';
   saveDelivery(d);
-  queueDeliveryEmail(d, 'cancelled');
+  sendDeliveryEmail(d, 'cancelled');
   notif(d.company+' cancelled their delivery ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').','rejected');
   openMyDeliveries(); // refresh modal
   renderWeekCalendar();
@@ -5455,7 +5443,7 @@ function submitQuickBook(){
   saveMobileBookingPrefs({company, contact, phone, truck});
   notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===zoneId)||{name:'?'}).name+')','approved');
   saveDelivery(d);
-  if(d.status === 'approved') queueDeliveryEmail(d, 'confirmed');
+  if(d.status === 'approved') sendDeliveryEmail(d, 'approved');
   closeModal('modal-quick-book');
   renderWeekCalendar();updateBadges();
   ['qb-company','qb-contact','qb-phone','qb-material','qb-notes'].forEach(id=>{const el=g(id);if(el)el.value='';});
