@@ -2058,7 +2058,8 @@ const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 const ZONES_PREF_KEY = 'hbml_zones_v1';
 const ICON_MARKERS_PREF_KEY = 'hbml_icon_markers_v1';
-const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v1';
+const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v2';
+const SUBCONTRACTORS_OLD_KEYS = ['hbml_subcontractors_v1'];
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -2129,34 +2130,84 @@ async function saveIconMarkersConfig(){
   }
 }
 
+function normalizeSubcontractors(list){
+  const seen = new Set();
+  return (Array.isArray(list) ? list : [])
+    .map(c => String(c || '').trim())
+    .filter(Boolean)
+    .filter(c => {
+      const key = c.toLowerCase();
+      if(seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+function mergeSubcontractorLists(){
+  const seen = new Set();
+  const out = [];
+  Array.from(arguments).forEach(list => {
+    normalizeSubcontractors(list).forEach(c => {
+      const key = c.toLowerCase();
+      if(seen.has(key)) return;
+      seen.add(key);
+      out.push(c);
+    });
+  });
+  return out;
+}
+function parseSavedSubcontractors(raw){
+  try{
+    const saved = JSON.parse(raw || 'null');
+    if(Array.isArray(saved)) return normalizeSubcontractors(saved);
+    if(saved && Array.isArray(saved.subcontractors)) return normalizeSubcontractors(saved.subcontractors);
+  }catch(_){}
+  return null;
+}
 function loadLocalSubcontractors(){
   try{
-    const saved = JSON.parse(localStorage.getItem(SUBCONTRACTORS_PREF_KEY) || 'null');
-    if(Array.isArray(saved)) return saved;
-    if(saved && Array.isArray(saved.subcontractors)) return saved.subcontractors;
-  }catch(_){}
+    const lists = [];
+    const current = parseSavedSubcontractors(localStorage.getItem(SUBCONTRACTORS_PREF_KEY));
+    if(current) lists.push(current);
+    (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => {
+      const oldList = parseSavedSubcontractors(localStorage.getItem(key));
+      if(oldList) lists.push(oldList);
+    });
+    const merged = mergeSubcontractorLists.apply(null, lists);
+    return merged.length ? merged : null;
+  }catch(_){ }
   return null;
 }
 function saveLocalSubcontractors(){
   try{
+    subcontractors = normalizeSubcontractors(subcontractors);
     localStorage.setItem(SUBCONTRACTORS_PREF_KEY, JSON.stringify({
       updatedAt: Date.now(),
       subcontractors
     }));
+    // Remove the old cache key so a regular browser window cannot keep
+    // showing or re-saving a stale company list.
+    (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => localStorage.removeItem(key));
   }catch(_){}
 }
 async function saveSubcontractorsConfig(){
-  // Save locally first so new companies survive an immediate refresh,
-  // even if Firebase is unavailable or the remote write is delayed.
+  subcontractors = normalizeSubcontractors(subcontractors);
   saveLocalSubcontractors();
   renderCompanyDropdowns();
   if(window._db){
-    await fbSaveConfig('subcontractors', subcontractors);
+    try{
+      await window._setDoc(window._doc('config','subcontractors'), {
+        data: JSON.stringify(subcontractors),
+        updatedAt: Date.now()
+      });
+    }catch(e){
+      console.error('saveSubcontractorsConfig', e);
+      alert('La liste a été sauvegardée dans cette fenêtre, mais elle n’a pas pu être synchronisée avec Firebase. Vérifiez les permissions Firestore ou la connexion, puis réessayez.');
+    }
   }
 }
 function renderCompanyDropdowns(){
   const options = '<option value="">Sélectionner la compagnie…</option>'
-    + subcontractors.map(c => '<option value="'+String(c).replace(/"/g,'&quot;')+'">'+String(c).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</option>').join('');
+    + subcontractors.map(c => '<option value="'+String(c).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'">'+String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</option>').join('');
   ['b-company','qb-company'].forEach(id=>{
     const sel = g(id);
     if(!sel) return;
@@ -2259,6 +2310,7 @@ let selZone       = null;
 let zonesLocked   = true;
 let iconsLocked   = true; // zones are locked by default; admin can unlock to reposition
 let _unsubDeliveries = null; // Firestore real-time listener handle
+let _unsubSubcontractors = null; // Firestore real-time listener handle for shared subcontractor list
 
 // ── PERSISTENCE (Firestore) ───────────────────────────────
 // Deliveries: each delivery = one Firestore document (id = delivery.id)
@@ -2280,7 +2332,12 @@ async function fbLoadConfig(key, fallback){
   if(!window._db)return fallback;
   try{
     const snap = await window._getDoc(window._doc('config',key));
-    if(snap.exists()) return JSON.parse(snap.data().data);
+    if(snap.exists()){
+      const payload = snap.data() || {};
+      if(typeof payload.data === 'string') return JSON.parse(payload.data);
+      if(payload.data !== undefined) return payload.data;
+      if(key === 'subcontractors' && Array.isArray(payload.subcontractors)) return payload.subcontractors;
+    }
   }catch(e){console.error('fbLoadConfig',e);}
   return fallback;
 }
@@ -2298,7 +2355,9 @@ async function save(){
     saveLocalProjectInfo();
     await fbSaveConfig('projectInfo', projectInfo);
     await fbSaveConfig('notifications', notifications);
-    await saveSubcontractorsConfig();
+    // Subcontractors are saved only when the admin adds/removes a company.
+    // Do not rewrite them during unrelated saves, otherwise a stale browser
+    // cache can overwrite the shared Firebase list.
     await fbSaveConfig('siteNotices', siteNotices);
     if(mapImg){ await fbSaveConfig('mapImg', mapImg); }
   }
@@ -2343,6 +2402,30 @@ function subscribeDeliveries(){
       }
     },
     (err) => console.error('Firestore listener error:', err)
+  );
+}
+
+function subscribeSubcontractorsConfig(){
+  if(!window._db)return;
+  if(_unsubSubcontractors) _unsubSubcontractors();
+  _unsubSubcontractors = window._onSnapshot(
+    window._doc('config','subcontractors'),
+    (snap) => {
+      if(!snap.exists()) return;
+      let next = [];
+      try{ next = JSON.parse(snap.data().data); }
+      catch(e){ console.error('subcontractors config parse error', e); return; }
+      if(!Array.isArray(next)) return;
+      next = normalizeSubcontractors(next);
+      if(JSON.stringify(next) === JSON.stringify(subcontractors)) return;
+      subcontractors = next;
+      saveLocalSubcontractors();
+      renderCompanyDropdowns();
+      renderSubList();
+      const activeView = document.querySelector('.view.active');
+      if(activeView && activeView.id === 'view-deliveries') renderDeliveries();
+    },
+    (err) => console.error('Subcontractors listener error:', err)
   );
 }
 
@@ -5619,7 +5702,7 @@ async function initApp(){
   if(localIconMarkersBeforeDb) iconMarkers = localIconMarkersBeforeDb;
   projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
   const localSubcontractorsBeforeDb = loadLocalSubcontractors();
-  if(localSubcontractorsBeforeDb) subcontractors = localSubcontractorsBeforeDb;
+  if(!window._db && localSubcontractorsBeforeDb) subcontractors = localSubcontractorsBeforeDb;
 
   if(window._db){
     // Load config docs in parallel
@@ -5649,14 +5732,27 @@ async function initApp(){
     mapPdf         = null;
     siteSchedule   = sch;
     blackoutDates  = bd;
+    // Firebase is the shared source of truth, but during this one-time migration
+    // we also look at the local cache. If a private window has extra companies
+    // that were not synced before, merge them into Firebase instead of letting
+    // two browser windows keep two separate lists.
+    const remoteSubcontractors = normalizeSubcontractors(sc);
     const localSubcontractorsAfterDb = loadLocalSubcontractors();
-    subcontractors = localSubcontractorsAfterDb || sc;
-    if(localSubcontractorsAfterDb) saveSubcontractorsConfig().catch(()=>{});
+    const remoteKeys = new Set(remoteSubcontractors.map(c => c.toLowerCase()));
+    const localHasExtra = (localSubcontractorsAfterDb || []).some(c => !remoteKeys.has(String(c).toLowerCase()));
+    subcontractors = (localHasExtra && (!remoteSubcontractors.length || localSubcontractorsAfterDb.length >= remoteSubcontractors.length))
+      ? mergeSubcontractorLists(remoteSubcontractors, localSubcontractorsAfterDb)
+      : remoteSubcontractors;
+    saveLocalSubcontractors();
+    if(JSON.stringify(subcontractors) !== JSON.stringify(remoteSubcontractors)){
+      await saveSubcontractorsConfig();
+    }
     const localIconMarkersAfterDb = loadLocalIconMarkers();
     iconMarkers    = localIconMarkersAfterDb || im; // PDF is always converted to image on upload, stored as mapImg
     if(localIconMarkersAfterDb) saveIconMarkersConfig().catch(()=>{});
     siteNotices    = sn;
     subscribeDeliveries(); // real-time listener handles deliveries
+    subscribeSubcontractorsConfig(); // keep admin/company dropdowns synced across browsers
     // Apply saved app name
     const _an=g('app-name'); if(_an) _an.textContent=projectInfo.appname||'SiteDelivery';
   }
