@@ -1404,9 +1404,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
             <div class="panel-note">Ajoutez les entreprises récurrentes pour accélérer les réservations.</div>
             <div style="display:flex;gap:8px;margin-bottom:12px;">
               <input type="text" id="sub-input" placeholder="ex. Les Constructions Leblanc"
-                onkeydown="if(event.key==='Enter')addSubcontractor()"
+                onkeydown="if(event.key==='Enter'){event.preventDefault();addSubcontractor();}"
                 style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
-              <button class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
+              <button type="button" class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
             </div>
             <div id="sub-list"></div>
           </div>
@@ -2217,6 +2217,26 @@ function saveLocalSubcontractors(){
 function listsEqual(a,b){
   return JSON.stringify(normalizeSubcontractors(a)) === JSON.stringify(normalizeSubcontractors(b));
 }
+function listContainsAllSubcontractors(list, required){
+  const have = new Set(normalizeSubcontractors(list).map(c => c.toLowerCase()));
+  return normalizeSubcontractors(required).every(c => have.has(c.toLowerCase()));
+}
+function protectPendingSubcontractorWrite(list, updatedAt){
+  _subcontractorPendingList = normalizeSubcontractors(list);
+  _subcontractorPendingUpdatedAt = Number(updatedAt || Date.now()) || Date.now();
+  // Firestore listeners can emit older cached snapshots immediately after a local edit.
+  // Keep the local edit visible while the server confirms the write.
+  _subcontractorPendingUntil = Date.now() + 15000;
+}
+function clearPendingSubcontractorWriteIfConfirmed(list, updatedAt){
+  if(!_subcontractorPendingList) return;
+  const remoteUpdatedAt = Number(updatedAt || 0) || 0;
+  if(listsEqual(list, _subcontractorPendingList) || (remoteUpdatedAt >= _subcontractorPendingUpdatedAt && listContainsAllSubcontractors(list, _subcontractorPendingList))){
+    _subcontractorPendingList = null;
+    _subcontractorPendingUpdatedAt = 0;
+    _subcontractorPendingUntil = 0;
+  }
+}
 
 function makeSubcontractorRegistryDoc(list, updatedAt){
   const nowIso = new Date(updatedAt || Date.now()).toISOString();
@@ -2262,6 +2282,7 @@ async function fbLoadSubcontractorRegistry(){
 async function saveSubcontractorsConfig(){
   subcontractors = normalizeSubcontractors(subcontractors);
   subcontractorsUpdatedAt = Date.now();
+  protectPendingSubcontractorWrite(subcontractors, subcontractorsUpdatedAt);
   saveLocalSubcontractors();
   renderCompanyDropdowns();
   renderSubList();
@@ -2273,9 +2294,13 @@ async function saveSubcontractorsConfig(){
   saveLocalProjectInfo();
 
   if(window._db){
-    // Write to every storage location that may be permitted by the current
-    // Firestore rules. The deliveries registry is the strongest fallback because
-    // delivery writes are already required for the app to work.
+    // Save to the deliveries registry first because this collection is already
+    // required by the booking app and is the least likely to be blocked by rules.
+    try{
+      await fbSaveSubcontractorRegistry(subcontractors, subcontractorsUpdatedAt);
+    }catch(e){
+      console.error('subcontractor registry sync failed:', e);
+    }
     try{
       await window._setDoc(window._doc('config','projectInfo'), {data: JSON.stringify(projectInfo)});
     }catch(e){
@@ -2287,11 +2312,6 @@ async function saveSubcontractorsConfig(){
       });
     }catch(e){
       console.warn('legacy subcontractor config sync skipped:', e);
-    }
-    try{
-      await fbSaveSubcontractorRegistry(subcontractors, subcontractorsUpdatedAt);
-    }catch(e){
-      console.error('subcontractor registry sync failed:', e);
     }
   }
 }
@@ -2407,6 +2427,9 @@ let iconsLocked   = true; // zones are locked by default; admin can unlock to re
 let _unsubDeliveries = null; // Firestore real-time listener handle
 let _unsubSubcontractors = null; // Firestore real-time listener handle for shared subcontractor list
 let _unsubProjectInfoSubcontractors = null; // Firestore listener for subcontractors stored in projectInfo
+let _subcontractorPendingList = null; // protects a just-added/removed company from older Firestore snapshots
+let _subcontractorPendingUpdatedAt = 0;
+let _subcontractorPendingUntil = 0;
 
 // ── PERSISTENCE (Firestore) ───────────────────────────────
 // Deliveries: each delivery = one Firestore document (id = delivery.id)
@@ -2508,8 +2531,25 @@ function applyRemoteSubcontractors(next, updatedAt){
   updatedAt = Number(updatedAt || 0) || 0;
   if(!next.length && subcontractors.length) return;
 
-  // Do not let an older config document overwrite the newer shared registry.
-  if(updatedAt && subcontractorsUpdatedAt && updatedAt < subcontractorsUpdatedAt && !listsEqual(next, subcontractors)) return;
+  const now = Date.now();
+  const remoteIsOlderOrUnversioned = subcontractorsUpdatedAt && (!updatedAt || updatedAt < subcontractorsUpdatedAt);
+
+  // Key fix: older/unversioned config snapshots must never overwrite a newer
+  // local/shared list. Some legacy docs are arrays with no updatedAt, which was
+  // causing a newly added company to disappear right after clicking Add.
+  if(remoteIsOlderOrUnversioned && !listsEqual(next, subcontractors)){
+    return;
+  }
+
+  // While a local add/remove is being written, ignore cached remote snapshots
+  // that do not confirm the pending list. This prevents the UI from flashing back
+  // to the old list before Firestore returns the new registry document.
+  if(_subcontractorPendingList && now < _subcontractorPendingUntil && !listsEqual(next, _subcontractorPendingList)){
+    const remoteConfirmsPending = updatedAt >= _subcontractorPendingUpdatedAt && listContainsAllSubcontractors(next, _subcontractorPendingList);
+    if(!remoteConfirmsPending) return;
+  }
+
+  clearPendingSubcontractorWriteIfConfirmed(next, updatedAt);
 
   if(listsEqual(next, subcontractors)){
     if(updatedAt > subcontractorsUpdatedAt){
