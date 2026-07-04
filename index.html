@@ -2058,8 +2058,8 @@ const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 const ZONES_PREF_KEY = 'hbml_zones_v1';
 const ICON_MARKERS_PREF_KEY = 'hbml_icon_markers_v1';
-const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v2';
-const SUBCONTRACTORS_OLD_KEYS = ['hbml_subcontractors_v1'];
+const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v3';
+const SUBCONTRACTORS_OLD_KEYS = ['hbml_subcontractors_v1','hbml_subcontractors_v2'];
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -2193,15 +2193,29 @@ async function saveSubcontractorsConfig(){
   subcontractors = normalizeSubcontractors(subcontractors);
   saveLocalSubcontractors();
   renderCompanyDropdowns();
+
+  // Store the shared subcontractor list inside the existing projectInfo config doc.
+  // Some Firestore rule sets allow known config documents only, so creating a new
+  // config/subcontractors document can fail even though projectInfo saves correctly.
+  projectInfo.subcontractors = subcontractors;
+  projectInfo.subcontractorsUpdatedAt = Date.now();
+  saveLocalProjectInfo();
+
   if(window._db){
     try{
+      await fbSaveConfig('projectInfo', projectInfo);
+    }catch(e){
+      console.error('saveSubcontractorsConfig projectInfo sync failed', e);
+    }
+
+    // Best-effort legacy write for older deployments. If Firestore rules block this
+    // document, ignore it; projectInfo above is the shared source of truth.
+    try{
       await window._setDoc(window._doc('config','subcontractors'), {
-        data: JSON.stringify(subcontractors),
-        updatedAt: Date.now()
+        data: JSON.stringify(subcontractors)
       });
     }catch(e){
-      console.error('saveSubcontractorsConfig', e);
-      alert('La liste a été sauvegardée dans cette fenêtre, mais elle n’a pas pu être synchronisée avec Firebase. Vérifiez les permissions Firestore ou la connexion, puis réessayez.');
+      console.warn('Legacy subcontractor config write skipped:', e);
     }
   }
 }
@@ -2230,6 +2244,11 @@ function saveLocalProjectInfo(){
   }catch(_){}
 }
 async function saveProjectInfoConfig(){
+  // Keep the shared subcontractor list attached to projectInfo so project-info
+  // edits cannot accidentally erase it from the synced config document.
+  projectInfo.subcontractors = normalizeSubcontractors(subcontractors);
+  if(!projectInfo.subcontractorsUpdatedAt) projectInfo.subcontractorsUpdatedAt = Date.now();
+
   // Save locally immediately so refresh always keeps the selected setting.
   saveLocalProjectInfo();
 
@@ -2311,6 +2330,7 @@ let zonesLocked   = true;
 let iconsLocked   = true; // zones are locked by default; admin can unlock to reposition
 let _unsubDeliveries = null; // Firestore real-time listener handle
 let _unsubSubcontractors = null; // Firestore real-time listener handle for shared subcontractor list
+let _unsubProjectInfoSubcontractors = null; // Firestore listener for subcontractors stored in projectInfo
 
 // ── PERSISTENCE (Firestore) ───────────────────────────────
 // Deliveries: each delivery = one Firestore document (id = delivery.id)
@@ -2405,27 +2425,59 @@ function subscribeDeliveries(){
   );
 }
 
+function applyRemoteSubcontractors(next){
+  if(!Array.isArray(next)) return;
+  next = normalizeSubcontractors(next);
+  if(JSON.stringify(next) === JSON.stringify(subcontractors)) return;
+  subcontractors = next;
+  projectInfo.subcontractors = subcontractors;
+  saveLocalSubcontractors();
+  saveLocalProjectInfo();
+  renderCompanyDropdowns();
+  renderSubList();
+  renderAdminKPIs();
+  const activeView = document.querySelector('.view.active');
+  if(activeView && activeView.id === 'view-deliveries') renderDeliveries();
+}
+
 function subscribeSubcontractorsConfig(){
   if(!window._db)return;
   if(_unsubSubcontractors) _unsubSubcontractors();
+  if(_unsubProjectInfoSubcontractors) _unsubProjectInfoSubcontractors();
+
+  // Primary shared source: config/projectInfo.data.subcontractors
+  _unsubProjectInfoSubcontractors = window._onSnapshot(
+    window._doc('config','projectInfo'),
+    (snap) => {
+      if(!snap.exists()) return;
+      try{
+        const payload = snap.data() || {};
+        const data = typeof payload.data === 'string' ? JSON.parse(payload.data) : (payload.data || payload);
+        if(data && Array.isArray(data.subcontractors)){
+          applyRemoteSubcontractors(data.subcontractors);
+        }
+      }catch(e){
+        console.error('projectInfo subcontractors parse error', e);
+      }
+    },
+    (err) => console.error('ProjectInfo subcontractors listener error:', err)
+  );
+
+  // Legacy listener for deployments that already created config/subcontractors.
+  // Read/write errors here should not block the app.
   _unsubSubcontractors = window._onSnapshot(
     window._doc('config','subcontractors'),
     (snap) => {
       if(!snap.exists()) return;
-      let next = [];
-      try{ next = JSON.parse(snap.data().data); }
-      catch(e){ console.error('subcontractors config parse error', e); return; }
-      if(!Array.isArray(next)) return;
-      next = normalizeSubcontractors(next);
-      if(JSON.stringify(next) === JSON.stringify(subcontractors)) return;
-      subcontractors = next;
-      saveLocalSubcontractors();
-      renderCompanyDropdowns();
-      renderSubList();
-      const activeView = document.querySelector('.view.active');
-      if(activeView && activeView.id === 'view-deliveries') renderDeliveries();
+      try{
+        const payload = snap.data() || {};
+        const next = typeof payload.data === 'string' ? JSON.parse(payload.data) : (payload.subcontractors || payload.data);
+        applyRemoteSubcontractors(next);
+      }catch(e){
+        console.error('subcontractors config parse error', e);
+      }
     },
-    (err) => console.error('Subcontractors listener error:', err)
+    (err) => console.warn('Legacy subcontractors listener skipped:', err)
   );
 }
 
@@ -5700,9 +5752,13 @@ async function initApp(){
   if(localZonesBeforeDb) zones = localZonesBeforeDb;
   const localIconMarkersBeforeDb = loadLocalIconMarkers();
   if(localIconMarkersBeforeDb) iconMarkers = localIconMarkersBeforeDb;
-  projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
-  const localSubcontractorsBeforeDb = loadLocalSubcontractors();
-  if(!window._db && localSubcontractorsBeforeDb) subcontractors = localSubcontractorsBeforeDb;
+  const localProjectInfoBeforeDb = loadLocalProjectInfo();
+  projectInfo = {...projectInfo, ...localProjectInfoBeforeDb};
+  const localSubcontractorsBeforeDb = mergeSubcontractorLists(
+    loadLocalSubcontractors() || [],
+    Array.isArray(localProjectInfoBeforeDb.subcontractors) ? localProjectInfoBeforeDb.subcontractors : []
+  );
+  if(!window._db && localSubcontractorsBeforeDb.length) subcontractors = localSubcontractorsBeforeDb;
 
   if(window._db){
     // Load config docs in parallel
@@ -5723,27 +5779,37 @@ async function initApp(){
     // Merge order matters:
     // 1) defaults / current state
     // 2) Firebase projectInfo
-    // 3) local projectInfo, so a recently toggled autoApprove value survives refresh
-    //    even if Firebase did not write quickly enough or is temporarily unavailable.
-    projectInfo    = {...projectInfo, ...pi, ...loadLocalProjectInfo()};
-    saveLocalProjectInfo();
+    // 3) local projectInfo fields, but NOT local projectInfo.subcontractors.
+    //    The company list must remain shared and must not be replaced by a stale
+    //    browser-specific cache.
+    const localProjectInfoAfterDb = loadLocalProjectInfo();
+    const localProjectInfoSubcontractors = Array.isArray(localProjectInfoAfterDb.subcontractors)
+      ? localProjectInfoAfterDb.subcontractors
+      : [];
+    delete localProjectInfoAfterDb.subcontractors;
+    delete localProjectInfoAfterDb.subcontractorsUpdatedAt;
+    projectInfo    = {...projectInfo, ...pi, ...localProjectInfoAfterDb};
     notifications  = no;
     mapImg         = mi;
     mapPdf         = null;
     siteSchedule   = sch;
     blackoutDates  = bd;
-    // Firebase is the shared source of truth, but during this one-time migration
-    // we also look at the local cache. If a private window has extra companies
-    // that were not synced before, merge them into Firebase instead of letting
-    // two browser windows keep two separate lists.
-    const remoteSubcontractors = normalizeSubcontractors(sc);
-    const localSubcontractorsAfterDb = loadLocalSubcontractors();
+
+    // Primary remote list is now stored inside projectInfo. The old
+    // config/subcontractors doc is treated only as a legacy fallback.
+    const projectInfoRemoteSubcontractors = Array.isArray(pi && pi.subcontractors) ? pi.subcontractors : [];
+    const legacyRemoteSubcontractors = normalizeSubcontractors(sc);
+    const remoteSubcontractors = mergeSubcontractorLists(projectInfoRemoteSubcontractors, legacyRemoteSubcontractors);
+    const localSubcontractorsAfterDb = mergeSubcontractorLists(loadLocalSubcontractors() || [], localProjectInfoSubcontractors);
     const remoteKeys = new Set(remoteSubcontractors.map(c => c.toLowerCase()));
-    const localHasExtra = (localSubcontractorsAfterDb || []).some(c => !remoteKeys.has(String(c).toLowerCase()));
+    const localHasExtra = localSubcontractorsAfterDb.some(c => !remoteKeys.has(String(c).toLowerCase()));
+
     subcontractors = (localHasExtra && (!remoteSubcontractors.length || localSubcontractorsAfterDb.length >= remoteSubcontractors.length))
       ? mergeSubcontractorLists(remoteSubcontractors, localSubcontractorsAfterDb)
       : remoteSubcontractors;
+    projectInfo.subcontractors = subcontractors;
     saveLocalSubcontractors();
+    saveLocalProjectInfo();
     if(JSON.stringify(subcontractors) !== JSON.stringify(remoteSubcontractors)){
       await saveSubcontractorsConfig();
     }
