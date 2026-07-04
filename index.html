@@ -637,6 +637,23 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 .notice-mini-btn.good{border-color:var(--green-bd);color:var(--green);background:var(--green-dim);}
 .notice-mini-btn.good:hover{background:var(--green);color:#0a1f14;}
 .notice-empty{padding:20px 0;text-align:center;color:var(--text3);font-size:12px;}
+/* Notice chip (mobile) + notice sheet */
+.notice-chip-wrap{display:none;margin:12px 20px 0;}
+.notice-chip{display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;text-align:left;}
+.notice-chip.info{border-color:var(--blue-bd);background:var(--blue-dim);color:var(--blue);}
+.notice-chip.warning{border-color:var(--amber-bd);background:var(--amber-dim);color:var(--amber);}
+.notice-chip.urgent{border-color:var(--red-bd);background:var(--red-dim);color:var(--red);}
+.notice-chip-icon{font-size:15px;flex-shrink:0;}
+.notice-chip-label{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.notice-sheet-list{max-height:50vh;overflow-y:auto;}
+.notice-sheet-item{padding:12px 0;border-bottom:1px solid var(--border);}
+.notice-sheet-item:last-child{border-bottom:none;}
+.btn-am{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);}
+.btn-am:hover{background:var(--amber);color:#1a0f00;}
+@media(max-width:768px){
+  .notice-chip-wrap{display:block;margin:10px 12px 0;}
+  .notice-banner.show{display:none!important;}
+}
 @media(max-width:1200px){.admin-kpis{grid-template-columns:repeat(3,minmax(0,1fr));}.admin-grid-tight{grid-template-columns:1fr;}}
 @media(max-width:1100px){.notice-admin-grid{grid-template-columns:1fr 1fr;}.notice-admin-grid .notice-full{grid-column:1/-1;}.notice-admin-grid .notice-form-btn{grid-column:1/-1;}}
 @media(max-width:768px){.notice-banner{margin:10px 12px 0;padding:12px;gap:10px;flex-direction:column;}.notice-title{font-size:22px;}.notice-actions{width:100%;justify-content:flex-end;}.notice-admin-grid{grid-template-columns:1fr;}.notice-row{flex-direction:column;}.notice-row-actions{justify-content:flex-start;}.admin-kpis{grid-template-columns:1fr 1fr;}.admin-section{flex-direction:column;align-items:flex-start;}.admin-toolbar{margin-top:14px;}.admin-toolbar-btn{width:100%;text-align:left;}.admin-grid,.admin-grid-tight{grid-template-columns:1fr;}}
@@ -1301,7 +1318,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
           <div class="fg"><label>Téléphone <span class="req">*</span></label><input type="tel" id="b-phone" placeholder="514-555-0100"></div>
           <div class="fg"><label>Matériel / Description <span class="req">*</span></label><input type="text" id="b-material" placeholder="ex. Poutrelles d’acier, 12 pcs"></div>
           <div class="fg"><label>Taille du camion</label>
-            <select id="b-truck"><option value="">Select…</option><option>Pickup / Van</option><option>Single-axle (20 ft)</option><option>Tandem (30 ft)</option><option>Semi-trailer (53 ft)</option><option>Flatbed</option><option>Crane truck</option></select>
+            <select id="b-truck"><option value="">Sélectionner…</option><option>Pickup / Fourgonnette</option><option>Essieu simple (20 pi)</option><option>Tandem (30 pi)</option><option>Semi-remorque (53 pi)</option><option>Plateau</option><option>Camion-grue</option></select>
           </div>
           <div class="fg"><label>Zone de dépôt <span class="req">*</span></label><div class="zpick-grid" id="zone-pick-grid"></div></div>
           <div class="fg"><label>Heure de début <span class="req">*</span></label><select id="b-time-start" onchange="onStartChange()"><option value="">Sélectionner début…</option></select></div>
@@ -1313,7 +1330,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
         </div>
         <div id="booking-success" style="display:none;" class="success-box">
           <h3>Demande soumise</h3>
-          <p>Votre livraison a été approuvée automatiquement.</p>
+          <p id="booking-success-msg">Votre livraison a été approuvée automatiquement.</p>
           <button onclick="resetBooking()">Soumettre une autre demande</button>
         </div>
       </div>
@@ -1404,9 +1421,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
             <div class="panel-note">Ajoutez les entreprises récurrentes pour accélérer les réservations.</div>
             <div style="display:flex;gap:8px;margin-bottom:12px;">
               <input type="text" id="sub-input" placeholder="ex. Les Constructions Leblanc"
-                onkeydown="if(event.key==='Enter'){event.preventDefault();addSubcontractor();}"
+                onkeydown="if(event.key==='Enter')addSubcontractor()"
                 style="flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
-              <button type="button" class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
+              <button class="add-zone-btn" onclick="addSubcontractor()">+ Ajouter</button>
             </div>
             <div id="sub-list"></div>
           </div>
@@ -1744,12 +1761,12 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
         <div class="mf"><label>Téléphone</label><input type="tel" id="qb-phone" placeholder="514-555-0100"></div>
         <div class="mf"><label>Taille du camion</label>
           <select id="qb-truck" style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 10px;color:var(--text);font-size:13px;outline:none;">
-            <option value="">Sélectionner...</option>
-            <option>SINGLE-AXLE (20 FT)</option><option>TANDEM (28 FT)</option>
-            <option>SEMI-TRAILER (48 FT)</option><option>SEMI-TRAILER (53 FT)</option>
-            <option>B-TRAIN</option><option>LOWBOY</option><option>FLATBED</option>
-            <option>BOOM TRUCK</option><option>CRANE TRUCK</option><option>MIXER</option>
-            <option>PUMP TRUCK</option><option>ROLL-OFF</option><option>DUMP TRUCK</option><option>TANKER</option>
+            <option value="">Sélectionner…</option>
+            <option>Essieu simple (20 pi)</option><option>Tandem (28 pi)</option>
+            <option>Semi-remorque (48 pi)</option><option>Semi-remorque (53 pi)</option>
+            <option>Train B</option><option>Fardier</option><option>Plateau</option>
+            <option>Camion-flèche</option><option>Camion-grue</option><option>Bétonnière</option>
+            <option>Camion-pompe</option><option>Conteneur (roll-off)</option><option>Camion-benne</option><option>Citerne</option>
           </select>
         </div>
         <div class="mf" style="grid-column:1/-1;"><label>Notes</label><input type="text" id="qb-notes" placeholder="Exigences spéciales..."></div>
@@ -1836,7 +1853,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <input type="text" id="auth-name" placeholder="e.g. Montoni Group">
     </div>
     <div class="mf" style="margin-bottom:11px;"><label>Courriel <span class="req">*</span></label><input type="email" id="auth-email" placeholder="vous@entreprise.com"></div>
-    <div class="mf" style="margin-bottom:6px;"><label>Password <span class="req">*</span></label><input type="password" id="auth-pass" placeholder="Password" onkeydown="if(event.key==='Enter')submitUserAuth()"></div>
+    <div class="mf" style="margin-bottom:6px;"><label>Mot de passe <span class="req">*</span></label><input type="password" id="auth-pass" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')submitUserAuth()"></div>
     <div class="modal-err" id="auth-err" style="margin-bottom:8px;"></div>
     <div class="m-actions" style="margin-top:14px;flex-direction:column;gap:8px;">
       <button class="btn btn-ac" style="width:100%;padding:11px;" onclick="submitUserAuth()" id="auth-submit-btn">Se connecter</button>
@@ -1871,9 +1888,9 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
       <div class="logo-icon"><svg viewBox="0 0 24 24" fill="white" width="16" height="16"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg></div>
       <h2 style="margin:0;">Connexion administrateur</h2>
     </div>
-    <div class="mf" style="margin-bottom:11px;"><label>Username</label><input type="text" id="ali-user" placeholder="admin"></div>
-    <div class="mf"><label>Mot de passe</label><input type="password" id="ali-pass" placeholder="password" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
-    <div class="m-err" id="ali-err">Identifiants invalides. Try: admin / admin123</div>
+    <div class="mf" style="margin-bottom:11px;"><label>Nom d’utilisateur</label><input type="text" id="ali-user" placeholder="Nom d’utilisateur"></div>
+    <div class="mf"><label>Mot de passe</label><input type="password" id="ali-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
+    <div class="m-err" id="ali-err">Identifiants invalides.</div>
     <div class="m-actions">
       <button class="btn btn-gh" onclick="closeModal('modal-login')">Annuler</button>
       <button class="btn btn-ac" onclick="doAdminLogin()">Se connecter</button>
@@ -1898,13 +1915,13 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
     </div>
     <input type="hidden" id="ed-id">
     <div class="mgrid">
-      <div class="mf"><label>Company <span class="req">*</span></label><input type="text" id="ed-company"></div>
+      <div class="mf"><label>Compagnie <span class="req">*</span></label><input type="text" id="ed-company"></div>
       <div class="mf"><label>Contact <span class="req">*</span></label><input type="text" id="ed-contact"></div>
-      <div class="mf"><label>Phone</label><input type="text" id="ed-phone"></div>
-      <div class="mf"><label>Material <span class="req">*</span></label><input type="text" id="ed-material"></div>
+      <div class="mf"><label>Téléphone</label><input type="text" id="ed-phone"></div>
+      <div class="mf"><label>Matériel <span class="req">*</span></label><input type="text" id="ed-material"></div>
       <div class="mf"><label>Date <span class="req">*</span></label><input type="date" id="ed-date"></div>
-      <div class="mf"><label>Truck</label>
-        <select id="ed-truck"><option value="">Select…</option><option>Pickup / Van</option><option>Single-axle (20 ft)</option><option>Tandem (30 ft)</option><option>Semi-trailer (53 ft)</option><option>Flatbed</option><option>Crane truck</option></select>
+      <div class="mf"><label>Camion</label>
+        <select id="ed-truck"><option value="">Sélectionner…</option><option>Pickup / Fourgonnette</option><option>Essieu simple (20 pi)</option><option>Tandem (30 pi)</option><option>Semi-remorque (53 pi)</option><option>Plateau</option><option>Camion-grue</option></select>
       </div>
       <div class="mf"><label>Heure de début <span class="req">*</span></label><select id="ed-start" onchange="edStartChange()"><option value="">Select…</option></select></div>
       <div class="mf"><label>Heure de fin <span class="req">*</span></label><select id="ed-end"><option value="">Select…</option></select></div>
@@ -1979,7 +1996,7 @@ button,input,select,textarea{font-family:'Barlow',sans-serif;}
 
 <script>
 // ── CONSTANTS ─────────────────────────────────────────────
-const ACCOUNTS = { admin: { pass: 'admin123', role: 'admin', name: 'Superintendent' } };
+const ACCOUNTS = { admin: { pass: 'admin123', role: 'admin', name: 'Surintendant' } };
 const ZONE_COLORS = ['#4A8FD4','#4CAF7D','#E8622A','#A855F7','#E8A02A','#E05555','#0EA5E9','#6B7280'];
 const ZONE_COLOR_PALETTE = ['#4A8FD4','#4CAF7D','#E8622A','#A855F7','#E8A02A','#E05555','#0EA5E9','#6B7280','#5DCAA5','#C9A96E','#F97316','#EF4444','#10B981','#3B82F6','#8B5CF6','#111827'];
 const TIME_SLOTS = [];
@@ -2051,17 +2068,13 @@ let projectInfo   = {
   autoApprove:true
 };
 let mapImg        = null;
-let mapPdf        = null;
 let subcontractors = []; // list of company names for dropdown
-let subcontractorsUpdatedAt = 0; // shared-list version timestamp
 
 const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 const ZONES_PREF_KEY = 'hbml_zones_v1';
 const ICON_MARKERS_PREF_KEY = 'hbml_icon_markers_v1';
-const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v4';
-const SUBCONTRACTORS_OLD_KEYS = ['hbml_subcontractors_v1','hbml_subcontractors_v2','hbml_subcontractors_v3'];
-const SUBCONTRACTORS_REGISTRY_ID = '__hbml_subcontractors_registry__';
+const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v1';
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -2132,192 +2145,34 @@ async function saveIconMarkersConfig(){
   }
 }
 
-function normalizeSubcontractors(list){
-  const seen = new Set();
-  return (Array.isArray(list) ? list : [])
-    .map(c => String(c || '').trim())
-    .filter(Boolean)
-    .filter(c => {
-      const key = c.toLowerCase();
-      if(seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-}
-function mergeSubcontractorLists(){
-  const seen = new Set();
-  const out = [];
-  Array.from(arguments).forEach(list => {
-    normalizeSubcontractors(list).forEach(c => {
-      const key = c.toLowerCase();
-      if(seen.has(key)) return;
-      seen.add(key);
-      out.push(c);
-    });
-  });
-  return out;
-}
-
-function parseSavedSubcontractorsState(raw){
-  try{
-    const saved = JSON.parse(raw || 'null');
-    if(Array.isArray(saved)) return {list: normalizeSubcontractors(saved), updatedAt: 0};
-    if(saved && Array.isArray(saved.subcontractors)){
-      return {
-        list: normalizeSubcontractors(saved.subcontractors),
-        updatedAt: Number(saved.updatedAt || saved.subcontractorsUpdatedAt || 0) || 0
-      };
-    }
-  }catch(_){ }
-  return null;
-}
-function parseSavedSubcontractors(raw){
-  const state = parseSavedSubcontractorsState(raw);
-  return state ? state.list : null;
-}
-function loadLocalSubcontractorsState(){
-  try{
-    let best = null;
-    const states = [];
-    const current = parseSavedSubcontractorsState(localStorage.getItem(SUBCONTRACTORS_PREF_KEY));
-    if(current) states.push(current);
-    (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => {
-      const oldState = parseSavedSubcontractorsState(localStorage.getItem(key));
-      if(oldState) states.push(oldState);
-    });
-    states.forEach(st => {
-      if(!st || !st.list || !st.list.length) return;
-      if(!best || (st.updatedAt || 0) > (best.updatedAt || 0)) best = st;
-    });
-    if(!best && states.length){
-      const merged = mergeSubcontractorLists.apply(null, states.map(st => st.list));
-      if(merged.length) best = {list: merged, updatedAt: 0};
-    }
-    return best;
-  }catch(_){ }
-  return null;
-}
 function loadLocalSubcontractors(){
-  const state = loadLocalSubcontractorsState();
-  return state ? state.list : null;
+  try{
+    const saved = JSON.parse(localStorage.getItem(SUBCONTRACTORS_PREF_KEY) || 'null');
+    if(Array.isArray(saved)) return saved;
+    if(saved && Array.isArray(saved.subcontractors)) return saved.subcontractors;
+  }catch(_){}
+  return null;
 }
 function saveLocalSubcontractors(){
   try{
-    subcontractors = normalizeSubcontractors(subcontractors);
-    if(!subcontractorsUpdatedAt) subcontractorsUpdatedAt = Date.now();
     localStorage.setItem(SUBCONTRACTORS_PREF_KEY, JSON.stringify({
-      updatedAt: subcontractorsUpdatedAt,
+      updatedAt: Date.now(),
       subcontractors
     }));
-    // Remove old cache keys so a regular browser window cannot keep
-    // showing or re-saving a stale company list.
-    (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => localStorage.removeItem(key));
-  }catch(_){ }
-}
-function listsEqual(a,b){
-  return JSON.stringify(normalizeSubcontractors(a)) === JSON.stringify(normalizeSubcontractors(b));
-}
-function listContainsAllSubcontractors(list, required){
-  const have = new Set(normalizeSubcontractors(list).map(c => c.toLowerCase()));
-  return normalizeSubcontractors(required).every(c => have.has(c.toLowerCase()));
-}
-function protectPendingSubcontractorWrite(list, updatedAt){
-  _subcontractorPendingList = normalizeSubcontractors(list);
-  _subcontractorPendingUpdatedAt = Number(updatedAt || Date.now()) || Date.now();
-  // Firestore listeners can emit older cached snapshots immediately after a local edit.
-  // Keep the local edit visible while the server confirms the write.
-  _subcontractorPendingUntil = Date.now() + 15000;
-}
-function clearPendingSubcontractorWriteIfConfirmed(list, updatedAt){
-  if(!_subcontractorPendingList) return;
-  const remoteUpdatedAt = Number(updatedAt || 0) || 0;
-  if(listsEqual(list, _subcontractorPendingList) || (remoteUpdatedAt >= _subcontractorPendingUpdatedAt && listContainsAllSubcontractors(list, _subcontractorPendingList))){
-    _subcontractorPendingList = null;
-    _subcontractorPendingUpdatedAt = 0;
-    _subcontractorPendingUntil = 0;
-  }
-}
-
-function makeSubcontractorRegistryDoc(list, updatedAt){
-  const nowIso = new Date(updatedAt || Date.now()).toISOString();
-  return {
-    id: SUBCONTRACTORS_REGISTRY_ID,
-    __config: true,
-    configKey: 'subcontractors',
-    company: '__CONFIG_SUBCONTRACTORS__',
-    contact: '',
-    phone: '',
-    zone: '',
-    date: '2099-01-01',
-    time: '00:00',
-    timeStart: '00:00',
-    timeEnd: '00:01',
-    truck: '',
-    notes: 'System document — shared subcontractor list. Do not delete.',
-    status: 'config',
-    submittedAt: nowIso,
-    updatedAt: updatedAt || Date.now(),
-    subcontractors: normalizeSubcontractors(list)
-  };
-}
-async function fbSaveSubcontractorRegistry(list, updatedAt){
-  if(!window._db) return false;
-  await window._setDoc(window._doc('deliveries', SUBCONTRACTORS_REGISTRY_ID), makeSubcontractorRegistryDoc(list, updatedAt));
-  return true;
-}
-async function fbLoadSubcontractorRegistry(){
-  if(!window._db) return null;
-  try{
-    const snap = await window._getDoc(window._doc('deliveries', SUBCONTRACTORS_REGISTRY_ID));
-    if(!snap.exists()) return null;
-    const data = snap.data() || {};
-    if(Array.isArray(data.subcontractors)){
-      return {list: normalizeSubcontractors(data.subcontractors), updatedAt: Number(data.updatedAt || 0) || 0};
-    }
-  }catch(e){
-    console.warn('Subcontractor registry load skipped:', e);
-  }
-  return null;
+  }catch(_){}
 }
 async function saveSubcontractorsConfig(){
-  subcontractors = normalizeSubcontractors(subcontractors);
-  subcontractorsUpdatedAt = Date.now();
-  protectPendingSubcontractorWrite(subcontractors, subcontractorsUpdatedAt);
+  // Save locally first so new companies survive an immediate refresh,
+  // even if Firebase is unavailable or the remote write is delayed.
   saveLocalSubcontractors();
   renderCompanyDropdowns();
-  renderSubList();
-  renderAdminKPIs();
-
-  // Keep the shared list in projectInfo for compatibility with previous versions.
-  projectInfo.subcontractors = subcontractors;
-  projectInfo.subcontractorsUpdatedAt = subcontractorsUpdatedAt;
-  saveLocalProjectInfo();
-
   if(window._db){
-    // Save to the deliveries registry first because this collection is already
-    // required by the booking app and is the least likely to be blocked by rules.
-    try{
-      await fbSaveSubcontractorRegistry(subcontractors, subcontractorsUpdatedAt);
-    }catch(e){
-      console.error('subcontractor registry sync failed:', e);
-    }
-    try{
-      await window._setDoc(window._doc('config','projectInfo'), {data: JSON.stringify(projectInfo)});
-    }catch(e){
-      console.warn('projectInfo subcontractor sync skipped:', e);
-    }
-    try{
-      await window._setDoc(window._doc('config','subcontractors'), {
-        data: JSON.stringify({subcontractors, updatedAt: subcontractorsUpdatedAt})
-      });
-    }catch(e){
-      console.warn('legacy subcontractor config sync skipped:', e);
-    }
+    await fbSaveConfig('subcontractors', subcontractors);
   }
 }
 function renderCompanyDropdowns(){
   const options = '<option value="">Sélectionner la compagnie…</option>'
-    + subcontractors.map(c => '<option value="'+String(c).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'">'+String(c).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</option>').join('');
+    + subcontractors.map(c => '<option value="'+String(c).replace(/"/g,'&quot;')+'">'+String(c).replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</option>').join('');
   ['b-company','qb-company'].forEach(id=>{
     const sel = g(id);
     if(!sel) return;
@@ -2340,11 +2195,6 @@ function saveLocalProjectInfo(){
   }catch(_){}
 }
 async function saveProjectInfoConfig(){
-  // Keep the shared subcontractor list attached to projectInfo so project-info
-  // edits cannot accidentally erase it from the synced config document.
-  projectInfo.subcontractors = normalizeSubcontractors(subcontractors);
-  if(!projectInfo.subcontractorsUpdatedAt) projectInfo.subcontractorsUpdatedAt = Date.now();
-
   // Save locally immediately so refresh always keeps the selected setting.
   saveLocalProjectInfo();
 
@@ -2409,7 +2259,7 @@ let siteSchedule  = {
   Wed: { open: '06:00', close: '18:00', closed: false },
   Thu: { open: '06:00', close: '18:00', closed: false },
   Fri: { open: '06:00', close: '18:00', closed: false },
-  Sat: { open: '06:00', close: '12:00', closed: false },
+  Sat: { open: '06:00', close: '12:00', closed: true  },
   Sun: { open: '06:00', close: '12:00', closed: true  },
 };
 let notifications = [];
@@ -2425,11 +2275,6 @@ let selZone       = null;
 let zonesLocked   = true;
 let iconsLocked   = true; // zones are locked by default; admin can unlock to reposition
 let _unsubDeliveries = null; // Firestore real-time listener handle
-let _unsubSubcontractors = null; // Firestore real-time listener handle for shared subcontractor list
-let _unsubProjectInfoSubcontractors = null; // Firestore listener for subcontractors stored in projectInfo
-let _subcontractorPendingList = null; // protects a just-added/removed company from older Firestore snapshots
-let _subcontractorPendingUpdatedAt = 0;
-let _subcontractorPendingUntil = 0;
 
 // ── PERSISTENCE (Firestore) ───────────────────────────────
 // Deliveries: each delivery = one Firestore document (id = delivery.id)
@@ -2451,12 +2296,7 @@ async function fbLoadConfig(key, fallback){
   if(!window._db)return fallback;
   try{
     const snap = await window._getDoc(window._doc('config',key));
-    if(snap.exists()){
-      const payload = snap.data() || {};
-      if(typeof payload.data === 'string') return JSON.parse(payload.data);
-      if(payload.data !== undefined) return payload.data;
-      if(key === 'subcontractors' && Array.isArray(payload.subcontractors)) return payload.subcontractors;
-    }
+    if(snap.exists()) return JSON.parse(snap.data().data);
   }catch(e){console.error('fbLoadConfig',e);}
   return fallback;
 }
@@ -2474,9 +2314,7 @@ async function save(){
     saveLocalProjectInfo();
     await fbSaveConfig('projectInfo', projectInfo);
     await fbSaveConfig('notifications', notifications);
-    // Subcontractors are saved only when the admin adds/removes a company.
-    // Do not rewrite them during unrelated saves, otherwise a stale browser
-    // cache can overwrite the shared Firebase list.
+    await saveSubcontractorsConfig();
     await fbSaveConfig('siteNotices', siteNotices);
     if(mapImg){ await fbSaveConfig('mapImg', mapImg); }
   }
@@ -2507,7 +2345,7 @@ function subscribeDeliveries(){
   _unsubDeliveries = window._onSnapshot(
     window._col('deliveries'),
     (snapshot) => {
-      deliveries = snapshot.docs.map(d => d.data()).filter(d => !(d && (d.__config || d.configKey === 'subcontractors' || d.id === SUBCONTRACTORS_REGISTRY_ID)));
+      deliveries = snapshot.docs.map(d => d.data());
       deliveries.sort((a,b)=> new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
       updateBadges();
       // Re-render whichever view is active
@@ -2524,115 +2362,18 @@ function subscribeDeliveries(){
   );
 }
 
-
-function applyRemoteSubcontractors(next, updatedAt){
-  if(!Array.isArray(next)) return;
-  next = normalizeSubcontractors(next);
-  updatedAt = Number(updatedAt || 0) || 0;
-  if(!next.length && subcontractors.length) return;
-
-  const now = Date.now();
-  const remoteIsOlderOrUnversioned = subcontractorsUpdatedAt && (!updatedAt || updatedAt < subcontractorsUpdatedAt);
-
-  // Key fix: older/unversioned config snapshots must never overwrite a newer
-  // local/shared list. Some legacy docs are arrays with no updatedAt, which was
-  // causing a newly added company to disappear right after clicking Add.
-  if(remoteIsOlderOrUnversioned && !listsEqual(next, subcontractors)){
-    return;
-  }
-
-  // While a local add/remove is being written, ignore cached remote snapshots
-  // that do not confirm the pending list. This prevents the UI from flashing back
-  // to the old list before Firestore returns the new registry document.
-  if(_subcontractorPendingList && now < _subcontractorPendingUntil && !listsEqual(next, _subcontractorPendingList)){
-    const remoteConfirmsPending = updatedAt >= _subcontractorPendingUpdatedAt && listContainsAllSubcontractors(next, _subcontractorPendingList);
-    if(!remoteConfirmsPending) return;
-  }
-
-  clearPendingSubcontractorWriteIfConfirmed(next, updatedAt);
-
-  if(listsEqual(next, subcontractors)){
-    if(updatedAt > subcontractorsUpdatedAt){
-      subcontractorsUpdatedAt = updatedAt;
-      saveLocalSubcontractors();
-    }
-    return;
-  }
-
-  subcontractors = next;
-  subcontractorsUpdatedAt = updatedAt || Date.now();
-  projectInfo.subcontractors = subcontractors;
-  projectInfo.subcontractorsUpdatedAt = subcontractorsUpdatedAt;
-  saveLocalSubcontractors();
-  saveLocalProjectInfo();
-  renderCompanyDropdowns();
-  renderSubList();
-  renderAdminKPIs();
-  const activeView = document.querySelector('.view.active');
-  if(activeView && activeView.id === 'view-deliveries') renderDeliveries();
-}
-
-function parseSubcontractorPayload(payload){
-  if(!payload) return null;
-  try{
-    const data = typeof payload.data === 'string' ? JSON.parse(payload.data) : (payload.data || payload);
-    if(Array.isArray(data)) return {list: normalizeSubcontractors(data), updatedAt: 0};
-    if(data && Array.isArray(data.subcontractors)){
-      return {list: normalizeSubcontractors(data.subcontractors), updatedAt: Number(data.updatedAt || data.subcontractorsUpdatedAt || 0) || 0};
-    }
-  }catch(e){
-    console.error('subcontractor payload parse error', e);
-  }
-  return null;
-}
-
-function subscribeSubcontractorsConfig(){
-  if(!window._db)return;
-  if(_unsubSubcontractors) _unsubSubcontractors();
-  if(_unsubProjectInfoSubcontractors) _unsubProjectInfoSubcontractors();
-  if(window._unsubSubcontractorRegistry) window._unsubSubcontractorRegistry();
-
-  _unsubProjectInfoSubcontractors = window._onSnapshot(
-    window._doc('config','projectInfo'),
-    (snap) => {
-      if(!snap.exists()) return;
-      const parsed = parseSubcontractorPayload(snap.data() || {});
-      if(parsed) applyRemoteSubcontractors(parsed.list, parsed.updatedAt);
-    },
-    (err) => console.warn('ProjectInfo subcontractors listener skipped:', err)
-  );
-
-  _unsubSubcontractors = window._onSnapshot(
-    window._doc('config','subcontractors'),
-    (snap) => {
-      if(!snap.exists()) return;
-      const parsed = parseSubcontractorPayload(snap.data() || {});
-      if(parsed) applyRemoteSubcontractors(parsed.list, parsed.updatedAt);
-    },
-    (err) => console.warn('Legacy subcontractors listener skipped:', err)
-  );
-
-  window._unsubSubcontractorRegistry = window._onSnapshot(
-    window._doc('deliveries', SUBCONTRACTORS_REGISTRY_ID),
-    (snap) => {
-      if(!snap.exists()) return;
-      const data = snap.data() || {};
-      if(Array.isArray(data.subcontractors)) applyRemoteSubcontractors(data.subcontractors, data.updatedAt || 0);
-    },
-    (err) => console.warn('Subcontractor registry listener skipped:', err)
-  );
-}
-
 // ── UTILS ─────────────────────────────────────────────────
 function today(){ const d=new Date(); return dk(d); }
 function dk(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function todayDateObj(){ return new Date(today()+'T12:00:00'); }
 function getMonday(d){ const dt=new Date(d),day=dt.getDay(); dt.setDate(dt.getDate()-(day===0?6:day-1)); dt.setHours(0,0,0,0); return dt; }
 function addDays(d,n){ const dt=new Date(d); dt.setDate(dt.getDate()+n); return dt; }
-function fmtDate(s){ if(!s)return''; return new Date(s+'T12:00:00').toLocaleDateString('en-CA',{weekday:'short',month:'short',day:'numeric'}); }
+function fmtDate(s){ if(!s)return''; return new Date(s+'T12:00:00').toLocaleDateString('fr-CA',{weekday:'short',month:'short',day:'numeric'}); }
 function overlap(s1,e1,s2,e2){ return s1<e2&&e1>s2; }
 function isAdmin(){ return currentUser.role==='admin'; }
 function g(id){ return document.getElementById(id); }
+function escapeHtml(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function statusFr(s){ return s==='approved'?'approuvée':s==='pending'?'en attente':s==='rejected'?'rejetée':s==='cancelled'?'annulée':s; }
 
 
 function noticeSeverityRank(sev){ return sev==='urgent' ? 3 : sev==='warning' ? 2 : 1; }
@@ -2871,7 +2612,6 @@ let _mobActiveDayIndex = -1;
 
 function getMobileTodayIndex(){
   const t = todayDateObj();
-  const diff = Math.round((getMonday(t) - weekStart) / 86400000);
   const idx = Math.round((t - weekStart) / 86400000);
   return (idx >= 0 && idx <= 6) ? idx : 0;
 }
@@ -3204,8 +2944,11 @@ function mobAccountTap(){
 
 function updateBadges(){
   const pend=deliveries.filter(d=>d.status==='pending').length;
-  g('pending-badge').style.display='none'; // no pending — auto-approved
-  const mobBadge=g('mob-pending-badge'); if(mobBadge) mobBadge.style.display='none';
+  const showBadge = isAdmin() && pend>0;
+  const badge=g('pending-badge');
+  if(badge){ badge.textContent=pend; badge.style.display=showBadge?'':'none'; }
+  const mobBadge=g('mob-pending-badge');
+  if(mobBadge){ mobBadge.textContent=pend; mobBadge.style.display=showBadge?'flex':'none'; }
   const tod=today(), wk=Array.from({length:7},(_,i)=>dk(addDays(getMonday(new Date()),i)));
   if(g('ss-pending')){
     g('ss-pending').textContent=pend;
@@ -3226,16 +2969,6 @@ function getConflicts(){
 }
 
 // ── CLOCK ─────────────────────────────────────────────────
-function toggleTheme(){
-  const isLight = document.body.classList.toggle('light');
-  const knob = g('theme-knob');
-  if (knob) {
-    knob.style.left = isLight ? '21px' : '3px';
-    knob.style.background = isLight ? '#1C4A4A' : '#C9A96E';
-  }
-  try { localStorage.setItem('sd_theme', isLight ? 'light' : 'dark'); } catch(e){}
-}
-
 function tickClock(){
   const n=new Date();
   const clk=g('clock'); if(clk) clk.textContent=n.toLocaleTimeString('en-CA',{hour:'2-digit',minute:'2-digit',hour12:false});
@@ -3267,7 +3000,7 @@ function doAdminLogin(){
 }
 function applyAdminUI(){
   g('tb-role').style.display='';
-  g('tb-username').textContent='Superintendent';
+  g('tb-username').textContent='Surintendant';
   g('btn-login').style.display='none';
   g('btn-user-login').style.display='none';
   g('btn-logout').style.display='';
@@ -3436,11 +3169,11 @@ async function submitUserAuth(){
   const errEl = g('auth-err');
   errEl.style.display='none';
   errEl.style.color='var(--red)';
-  if(!email||!pass){ errEl.textContent='Please enter email and password.'; errEl.style.display='block'; return; }
+  if(!email||!pass){ errEl.textContent='Veuillez entrer votre courriel et votre mot de passe.'; errEl.style.display='block'; return; }
   try{
     if(_authMode==='signup'){
       const name = g('auth-name').value.trim();
-      if(!name){ errEl.textContent='Please enter your company or name.'; errEl.style.display='block'; return; }
+      if(!name){ errEl.textContent='Veuillez entrer votre compagnie ou votre nom.'; errEl.style.display='block'; return; }
       const cred = await window._createUser(email, pass);
       await window._updateProfile(cred.user, {displayName: name});
       closeModal('modal-user-auth');
@@ -3460,10 +3193,10 @@ async function submitUserAuth(){
       closeModal('modal-user-auth');
     }
   } catch(err){
-    const msg = err.code==='auth/email-already-in-use' ? 'Email already registered. Try signing in.'
-              : err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential' ? 'Invalid email or password.'
-              : err.code==='auth/weak-password' ? 'Password must be at least 6 characters.'
-              : err.code==='auth/invalid-email' ? 'Invalid email address.'
+    const msg = err.code==='auth/email-already-in-use' ? 'Ce courriel est déjà enregistré. Essayez de vous connecter.'
+              : err.code==='auth/user-not-found'||err.code==='auth/wrong-password'||err.code==='auth/invalid-credential' ? 'Courriel ou mot de passe invalide.'
+              : err.code==='auth/weak-password' ? 'Le mot de passe doit contenir au moins 6 caractères.'
+              : err.code==='auth/invalid-email' ? 'Adresse courriel invalide.'
               : err.message;
     errEl.textContent = msg; errEl.style.display='block';
   }
@@ -3507,7 +3240,7 @@ function renderTodayDeliveries(){
     return '<div style="display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);">'
       + '<span style="width:7px;height:7px;border-radius:50%;background:' + dotColor + ';flex-shrink:0;margin-top:4px;"></span>'
       + '<div style="flex:1;min-width:0;">'
-      +   '<div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.company + '</div>'
+      +   '<div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(d.company) + '</div>'
       +   '<div style="font-size:11px;color:var(--text2);margin-top:1px;">'
       +     (z ? '<span style="display:inline-block;width:7px;height:7px;border-radius:1px;background:' + z.color + ';margin-right:4px;vertical-align:middle;"></span>' : '')
       +     (z ? z.name + ' · ' : '') + timeStr
@@ -3829,7 +3562,7 @@ function uploadMap(e){
         mapImg=cvs.toDataURL('image/jpeg',0.88);
         await fbSaveConfig('mapImg',mapImg);
         renderHome(); renderMobilePlanPanel();
-      }catch(err){alert('Could not render PDF: '+err.message);}
+      }catch(err){alert('Impossible de lire le PDF : '+err.message);}
     };
     r.readAsArrayBuffer(file);
   } else {
@@ -3995,7 +3728,7 @@ function renderDeliveries(){
   if(coSel){
     const prev = coSel.value;
     coSel.innerHTML = '<option value="">Sélectionner la compagnie…</option>'
-      + subcontractors.map(c=>'<option value="'+c+'"'+(c===prev?' selected':'')+'>'+c+'</option>').join('');
+      + subcontractors.map(c=>'<option value="'+escapeHtml(c)+'"'+(c===prev?' selected':'')+'>'+escapeHtml(c)+'</option>').join('');
     if(!subcontractors.length){
       coSel.innerHTML += '<option value="" disabled>— Aucune compagnie (voir Admin)</option>';
     }
@@ -4269,6 +4002,7 @@ function allowedSlotsForDate(dateStr){
   if (!dateStr) return TIME_SLOTS;
   const d = new Date(dateStr + 'T12:00:00');
   const dayKey = DAY_KEYS[d.getDay()];
+  if (dayKey === 'Sat' || dayKey === 'Sun') return []; // aucune livraison la fin de semaine
   const sch = siteSchedule[dayKey];
   if (!sch || sch.closed) return [];
   const openIdx  = TIME_SLOTS.indexOf(sch.open);
@@ -4303,6 +4037,7 @@ function validateCalendarMove(del, newDate, newStart, newZone){
   const endIdx = slotIndex(endTime);
   if(!endTime || endIdx <= startIdx) return {ok:false,msg:'La durée ne peut pas être conservée dans ce créneau.'};
   const dayKey = DAY_KEYS[new Date(newDate+'T12:00:00').getDay()];
+  if(dayKey === 'Sat' || dayKey === 'Sun') return {ok:false,msg:'Aucune livraison la fin de semaine.'};
   const sch = siteSchedule[dayKey];
   if(!sch || sch.closed) return {ok:false,msg:'Le chantier est fermé cette journée.'};
   const openIdx = slotIndex(sch.open);
@@ -4589,7 +4324,7 @@ function renderWeekCalendar(){
   const isMobile = window.innerWidth <= 768;
   const useDayView = isMobile && _mobCalView === 'day';
   const days = useDayView ? [allDays[_mobActiveDayIndex] || allDays[0]] : workWeekDays;
-  const months=[...new Set(days.map(d=>d.toLocaleDateString('en-CA',{month:'long',year:'numeric'})))];
+  const months=[...new Set(days.map(d=>{const s=d.toLocaleDateString('fr-CA',{month:'long',year:'numeric'});return s.charAt(0).toUpperCase()+s.slice(1);}))];
   if(useDayView){
     const active = days[0];
     const full = active.toLocaleDateString('fr-CA',{weekday:'long', day:'numeric', month:'long', year:'numeric'});
@@ -4691,7 +4426,7 @@ function renderWeekCalendar(){
         +'onmousedown="startCalendarDrag(event,\''+del.id+'\',this)" '
         +dragTitle+' '
         +'onclick="openDetail(\''+del.id+'\',event)">'
-        +'<div class="db-co">'+del.company+'</div>'
+        +'<div class="db-co">'+escapeHtml(del.company)+'</div>'
         +(!appr?'<div class="db-status db-status-pending">À approuver</div>':'')
         +'<div class="db-sub">'+(z?z.name:'')+(z?' \xb7 ':'')+tsDisp+teDisp+'</div>'
         +conflictWarn
@@ -4732,12 +4467,6 @@ function renderWeekCalendar(){
       +'<div class="wg-time-col" style="position:relative;height:'+totalH+'px;">'+timeHtml+'</div>'
       +dayColsHtml
     +'</div>';
-}
-function cellClick(date,time){
-  g('b-date').value=date; renderStartTimes();
-  const s=g('b-time-start');
-  for(let i=0;i<s.options.length;i++){if(s.options[i].value===time){s.selectedIndex=i;break;}}
-  onStartChange();
 }
 function changeWeek(dir){
   weekStart=addDays(weekStart,dir*7);
@@ -4811,9 +4540,13 @@ function submitDelivery(){
     activeBookingTemplate = null;
     const tplBanner=g('booking-template-banner'); if(tplBanner) tplBanner.style.display='none';
     g('booking-content').style.display='none';
+    const msgEl=g('booking-success-msg');
+    if(msgEl) msgEl.textContent = d.status==='approved'
+      ? 'Votre livraison a été approuvée automatiquement.'
+      : 'Votre demande a été soumise et sera examinée par l’équipe de chantier.';
     g('booking-success').style.display='block';
     renderWeekCalendar();updateBadges();
-  }catch(err){alert('Error: '+err.message);console.error(err);}
+  }catch(err){alert('Erreur : '+err.message);console.error(err);}
 }
 function resetBooking(){
   clearBookingTemplate(true);
@@ -4838,30 +4571,30 @@ function openDetail(id,e){
     <div class="sheet-head">
       <div class="sheet-grab"></div>
       <div class="sheet-head-row">
-        <h2>${d.company}</h2>
+        <h2>${escapeHtml(d.company)}</h2>
         <button class="btn btn-gh sheet-x" onclick="closeModal('modal-detail')">✕</button>
       </div>
     </div>
     <div class="df-grid">
-      ${[['Contact',d.contact],['Phone',d.phone||'—'],['Material',d.material],['Truck',d.truck||'—'],
-         ['Zone',z?.name||d.zone],['Date',fmtDate(d.date)],['Time',tdisp],
-         ['Status',`<span style="color:${sc};font-weight:700;">${statusLabel}</span>`]
+      ${[['Contact',escapeHtml(d.contact)],['Téléphone',escapeHtml(d.phone)||'—'],['Matériel',escapeHtml(d.material)],['Camion',escapeHtml(d.truck)||'—'],
+         ['Zone',escapeHtml(z?.name||d.zone)],['Date',fmtDate(d.date)],['Heure',tdisp],
+         ['Statut',`<span style="color:${sc};font-weight:700;">${statusLabel}</span>`]
         ].map(([k,v])=>`<div><div class="df-lbl">${k}</div><div class="df-val">${v}</div></div>`).join('')}
     </div>`;
-  if(d.notes)html+=`<div style="background:var(--bg3);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--text2);margin-bottom:14px;"><strong>Notes:</strong> ${d.notes}</div>`;
-  if(d.rejectionNote&&d.status!=='cancelled')html+=`<div style="background:var(--red-dim);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;">Reason: ${d.rejectionNote}</div>`;
+  if(d.notes)html+=`<div style="background:var(--bg3);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--text2);margin-bottom:14px;"><strong>Notes :</strong> ${escapeHtml(d.notes)}</div>`;
+  if(d.rejectionNote&&d.status!=='cancelled')html+=`<div style="background:var(--red-dim);border-radius:var(--r);padding:9px 12px;font-size:12px;color:var(--red);margin-bottom:14px;">Motif : ${escapeHtml(d.rejectionNote)}</div>`;
   if(adm){
     if(d.status==='pending'){
       html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
         <input id="det-note" placeholder="Motif de rejet (optionnel)…" style="flex:1;min-width:140px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 11px;color:var(--text);font-size:12px;outline:none;">
-        <button class="btn btn-gr" onclick="decideDetail('${d.id}','approved')">Approve</button>
-        <button class="btn btn-re" onclick="decideDetail('${d.id}','rejected')">Reject</button>
-        <button class="btn btn-bl" onclick="closeModal('modal-detail');openEdit('${d.id}')">Edit</button>
+        <button class="btn btn-gr" onclick="decideDetail('${d.id}','approved')">Approuver</button>
+        <button class="btn btn-re" onclick="decideDetail('${d.id}','rejected')">Rejeter</button>
+        <button class="btn btn-bl" onclick="closeModal('modal-detail');openEdit('${d.id}')">Modifier</button>
       </div>`;
     } else if(d.status==='approved'){
       html+=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
         <button class="btn btn-bl" onclick="closeModal('modal-detail');openEdit('${d.id}')">Modifier la livraison</button>
-        <button class="btn" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);" onclick="cancelDel('${d.id}',true)">Cancel Delivery</button>
+        <button class="btn" style="background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-bd);" onclick="cancelDel('${d.id}',true)">Annuler la livraison</button>
       </div>`;
     }
   } else if(ownEditable) {
@@ -4881,7 +4614,7 @@ function decideDetail(id,status){
   }
   const note=g('det-note')?.value.trim()||'';
   d.status=status;if(note)d.rejectionNote=note;
-  notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
+  notif(d.company+' — '+statusFr(status)+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
   saveDelivery(d);
   if(status === 'approved') sendDeliveryEmail(d, 'approved');
   closeModal('modal-detail');renderAdmin();renderWeekCalendar();
@@ -4912,23 +4645,23 @@ function renderAdmin(){
     .filter(d=>d.status==='pending')
     .sort((a,b)=>(a.date||'').localeCompare(b.date||'') || (a.timeStart||a.time||'').localeCompare(b.timeStart||b.time||''));
   const pendingEmpty = '<div class="empty">Aucune demande en attente.</div>';
-  if(g('ap-count')) g('ap-count').textContent=pend.length+' request'+(pend.length!==1?'s':'');
+  if(g('ap-count')) g('ap-count').textContent=pend.length+' demande'+(pend.length!==1?'s':'');
   if(g('approval-count')) g('approval-count').textContent=pend.length;
   if(g('pending-list')) g('pending-list').innerHTML=pend.length?pend.map(d=>drHTML(d,true)).join(''):pendingEmpty;
   if(g('approval-list')) g('approval-list').innerHTML=pend.length?pend.map(d=>drHTML(d,true)).join(''):pendingEmpty;
   const cfs=getConflicts();
-  g('conflict-count').textContent=cfs.length?cfs.length+' conflict'+(cfs.length!==1?'s':''):'None';
+  g('conflict-count').textContent=cfs.length?cfs.length+' conflit'+(cfs.length!==1?'s':''):'Aucun';
   g('conflict-list').innerHTML=cfs.length?cfs.map(grp=>{
     const f=grp[0],z=zones.find(z=>z.id===f.zone);
-    return `<div class="cg"><div class="cg-hd">⚡ ${z?.name||''} · ${fmtDate(f.date)} · ${f.timeStart||f.time} — pick one</div>
-      ${grp.map(d=>`<div class="ci"><div class="ci-info"><strong>${d.company}</strong><br><span style="color:var(--text2);">${d.contact}${d.truck?' · '+d.truck:''}</span></div>
-      <button class="ci-pick" onclick="pickSlot('${d.id}')">Approve This</button></div>`).join('')}</div>`;
-  }).join(''):'<div class="empty">No conflicts.</div>';
+    return `<div class="cg"><div class="cg-hd">⚡ ${z?.name||''} · ${fmtDate(f.date)} · ${f.timeStart||f.time} — choisissez-en une</div>
+      ${grp.map(d=>`<div class="ci"><div class="ci-info"><strong>${escapeHtml(d.company)}</strong><br><span style="color:var(--text2);">${escapeHtml(d.contact)}${d.truck?' · '+escapeHtml(d.truck):''}</span></div>
+      <button class="ci-pick" onclick="pickSlot('${d.id}')">Approuver celle-ci</button></div>`).join('')}</div>`;
+  }).join(''):'<div class="empty">Aucun conflit.</div>';
   const nonCan=deliveries.filter(d=>d.status!=='cancelled'&&d.status!=='rejected');
-  g('all-list').innerHTML=nonCan.length?nonCan.slice(0,30).map(d=>drHTML(d,false)).join(''):'<div class="empty">No deliveries yet.</div>';
+  g('all-list').innerHTML=nonCan.length?nonCan.slice(0,30).map(d=>drHTML(d,false)).join(''):'<div class="empty">Aucune livraison pour le moment.</div>';
   const can=deliveries.filter(d=>d.status==='cancelled'||d.status==='rejected');
-  g('cancelled-count').textContent=can.length||'None';
-  g('cancelled-list').innerHTML=can.length?can.map(d=>drHTML(d,false)).join(''):'<div class="empty">No cancelled deliveries.</div>';
+  g('cancelled-count').textContent=can.length||'Aucune';
+  g('cancelled-list').innerHTML=can.length?can.map(d=>drHTML(d,false)).join(''):'<div class="empty">Aucune livraison annulée.</div>';
   g('zone-mgr').innerHTML=zones.map(z=>`<div class="zm-row">
     <button type="button" class="zm-current-color" style="background:${z.color}" title="Modifier la couleur de ${z.name}" onclick="openZoneColorModal('${z.id}')"></button>
     <div class="zm-main">
@@ -4946,7 +4679,7 @@ function renderAdmin(){
   g('notif-log').innerHTML=notifications.length?notifications.slice(0,15).map(n=>
     `<div class="ni"><span class="ni-dot" style="background:${n.type==='approved'?'var(--green)':n.type==='rejected'?'var(--red)':'var(--amber)'}"></span>
     <span class="ni-msg">${n.msg}</span><span class="ni-t">${n.time}</span></div>`).join('')
-    :'<div class="empty">No notifications.</div>';
+    :'<div class="empty">Aucune notification.</div>';
   syncMobAdminTab();
 }
 
@@ -4962,7 +4695,7 @@ function drHTML(d,showPend){
     </div>`;
   } else if(d.status==='approved'){
     acts=`<div class="dr-acts">
-      <button class="act act-edit"   onclick="openEdit('${d.id}')">Edit</button>
+      <button class="act act-edit"   onclick="openEdit('${d.id}')">Modifier</button>
       <button class="act act-cancel" onclick="cancelDel('${d.id}')">Annuler</button>
     </div>`;
   } else if(d.status==='cancelled'){
@@ -4979,7 +4712,7 @@ function drHTML(d,showPend){
   }
   return `<div class="dr">
     <div class="dr-top">
-      <div><div class="dr-co">${d.company}</div><div class="dr-meta">${d.contact}${d.phone?' · '+d.phone:''} · ${d.material}</div></div>
+      <div><div class="dr-co">${escapeHtml(d.company)}</div><div class="dr-meta">${escapeHtml(d.contact)}${d.phone?' · '+escapeHtml(d.phone):''} · ${escapeHtml(d.material)}</div></div>
       <span class="badge b-${d.status==='cancelled'?'cancelled':d.status}">${
         d.status==='approved'?'APPROUVÉE':
         d.status==='pending'?'EN ATTENTE':
@@ -4991,7 +4724,7 @@ function drHTML(d,showPend){
       ${z?`<span class="badge b-zone" style="background:${z.color}22;color:${z.color};border-color:${z.color}55;">${z.name}</span>`:''}
       <span class="badge b-time">${td}</span>
       <span class="badge b-time" style="font-family:inherit;">${fmtDate(d.date)}</span>
-      ${d.truck?`<span class="badge" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);">${d.truck}</span>`:''}
+      ${d.truck?`<span class="badge" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);">${escapeHtml(d.truck)}</span>`:''}
     </div>
     ${acts}
   </div>`;
@@ -5005,7 +4738,7 @@ function decide(id,status){
   }
   const note=g('note-'+id)?.value.trim()||'';
   d.status=status;if(note)d.rejectionNote=note;
-  notif(d.company+' '+status+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
+  notif(d.company+' — '+statusFr(status)+' ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').',status);
   saveDelivery(d);
   if(status === 'approved') sendDeliveryEmail(d, 'approved');
   renderAdmin();renderWeekCalendar();
@@ -5015,7 +4748,7 @@ function pickSlot(id){
   deliveries.filter(x=>x.zone===d.zone&&x.date===d.date&&(x.timeStart||x.time)===(d.timeStart||d.time)&&x.status==='pending'&&x.id!==id)
     .forEach(x=>{x.status='rejected';x.rejectionNote='Un autre créneau a été sélectionné.';});
   d.status='approved';
-  notif(d.company+' selected for '+(zones.find(z=>z.id===d.zone)||{name:'?'}).name+' · '+(d.timeStart||d.time)+' · '+fmtDate(d.date)+'.','approved');
+  notif(d.company+' sélectionnée pour '+(zones.find(z=>z.id===d.zone)||{name:'?'}).name+' · '+(d.timeStart||d.time)+' · '+fmtDate(d.date)+'.','approved');
   sendDeliveryEmail(d, 'approved');
   // Save all affected deliveries
   Promise.all(deliveries.filter(x=>x.zone===d.zone&&x.date===d.date).map(x=>saveDelivery(x)));
@@ -5024,7 +4757,7 @@ function pickSlot(id){
 function cancelDel(id,fromModal){
   const d=deliveries.find(x=>x.id===id);if(!d)return;
   d.status='cancelled';d.rejectionNote='Annulée par le surintendant.';
-  notif('Cancelled: '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','rejected');
+  notif('Annulée : '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','rejected');
   saveDelivery(d);
   sendDeliveryEmail(d, 'cancelled');
   if(fromModal)closeModal('modal-detail');renderAdmin();renderWeekCalendar();updateBadges();
@@ -5032,9 +4765,9 @@ function cancelDel(id,fromModal){
 function uncancelDel(id){
   const d=deliveries.find(x=>x.id===id);if(!d)return;
   const cf=deliveries.find(x=>x.id!==id&&x.zone===d.zone&&x.date===d.date&&x.status==='approved'&&overlap(d.timeStart||d.time,d.timeEnd||d.time,x.timeStart||x.time,x.timeEnd||x.time));
-  if(cf){alert('Slot now taken by '+cf.company+'.');return;}
+  if(cf){alert('Créneau maintenant occupé par '+cf.company+'.');return;}
   d.status='approved';delete d.rejectionNote;
-  notif('Reinstated: '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','approved');
+  notif('Rétablie : '+d.company+' — '+fmtDate(d.date)+' '+(d.timeStart||d.time)+'.','approved');
   saveDelivery(d);renderAdmin();renderWeekCalendar();updateBadges();
 }
 function deleteDel(id){removeDelivery(id);renderAdmin();updateBadges();}
@@ -5170,6 +4903,10 @@ function openEdit(id){
   g('ed-company').value=d.company||'';g('ed-contact').value=d.contact||'';g('ed-phone').value=d.phone||'';
   g('ed-material').value=d.material||'';g('ed-date').value=d.date||'';
   g('ed-notes').value=d.notes||'';g('ed-truck').value=d.truck||'';
+  if(d.truck && g('ed-truck').value!==d.truck){
+    const o=document.createElement('option');o.value=d.truck;o.textContent=d.truck;
+    g('ed-truck').appendChild(o);g('ed-truck').value=d.truck;
+  }
   const ss=g('ed-start');
   ss.innerHTML='<option value="">Sélectionner…</option>';
   TIME_SLOTS.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;if(t===(d.timeStart||d.time))o.selected=true;ss.appendChild(o);});
@@ -5195,11 +4932,11 @@ function saveEdit(){
   const selZ=document.querySelector('#ed-zone-grid .zpick.sel');
   const newZone=selZ?selZ.id.replace('ezp-',''):d.zone;
   const editingOwn = !!firebaseUser && d.userId===firebaseUser.uid && !isAdmin();
-  if(!company||!contact||!date||!material||!ts||!te||!selZ){alert('Please fill all required fields.');return;}
+  if(!company||!contact||!date||!material||!ts||!te||!selZ){alert('Veuillez remplir tous les champs obligatoires.');return;}
   // Conflict check BEFORE mutating
   if(d.status==='approved' || editingOwn){
     const cf=deliveries.find(x=>x.id!==id&&x.zone===newZone&&x.date===date&&x.status==='approved'&&overlap(ts,te,x.timeStart||x.time,x.timeEnd||x.time));
-    if(cf){alert('Time conflict with '+cf.company+' ('+(cf.timeStart||cf.time)+'–'+(cf.timeEnd||cf.time)+'). Resolve first.');return;}
+    if(cf){alert('Conflit d’horaire avec '+cf.company+' ('+(cf.timeStart||cf.time)+'–'+(cf.timeEnd||cf.time)+'). Résolvez-le d’abord.');return;}
   }
   // Apply
   d.company=company;d.contact=contact;d.phone=phone;d.material=material;
@@ -5212,7 +4949,7 @@ function saveEdit(){
       d.status='pending';
     }
   }
-  notif('Edited: '+company+' — '+fmtDate(date)+' '+ts+'–'+te+'.',d.status==='approved'?'approved':'pending');
+  notif('Modifiée : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+'.',d.status==='approved'?'approved':'pending');
   saveDelivery(d);
   sendDeliveryEmail(d, 'modified');
   closeModal('modal-edit');renderAdmin();renderWeekCalendar();updateBadges();
@@ -5221,8 +4958,8 @@ function saveEdit(){
 // ── EXPORT ────────────────────────────────────────────────
 function renderScheduleMgr(){
   const el = g('schedule-mgr'); if (!el) return;
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const dayLabels = { Mon:'Lun', Tue:'Mar', Wed:'Mer', Thu:'Jeu', Fri:'Ven', Sat:'Sam', Sun:'Dim' };
+  const days = ['Mon','Tue','Wed','Thu','Fri'];
+  const dayLabels = { Mon:'Lun', Tue:'Mar', Wed:'Mer', Thu:'Jeu', Fri:'Ven' };
   el.innerHTML = days.map(day => {
     const sch = siteSchedule[day];
     const timeOpts = TIME_SLOTS.map(t => `<option value="${t}" ${t===sch.open?'selected':''} >${t}</option>`).join('');
@@ -5238,7 +4975,7 @@ function renderScheduleMgr(){
         <select onchange="setDayHour('${day}','close',this.value)" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);padding:5px 8px;color:var(--text);font-size:12px;font-family:var(--mono);outline:none;">${timeOptsClose}</select>
       </div>
     </div>`;
-  }).join('');
+  }).join('') + '<div style="font-size:11px;color:var(--text3);padding-top:10px;">Aucune livraison la fin de semaine.</div>';
 }
 
 function setDayOpen(day, isOpen){
@@ -5534,10 +5271,11 @@ function togglePanel(id){
 }
 
 function exportCSV(){
-  let csv='Date,Start,End,Zone,Company,Contact,Phone,Material,Truck,Status,Notes\n';
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  let csv='Date,Début,Fin,Zone,Compagnie,Contact,Téléphone,Matériel,Camion,Statut,Notes\n';
   deliveries.forEach(d=>{const z=zones.find(z=>z.id===d.zone);
-    csv+=`"${d.date}","${d.timeStart||d.time}","${d.timeEnd||''}","${z?z.name:d.zone}","${d.company}","${d.contact}","${d.phone||''}","${d.material}","${d.truck||''}","${d.status}","${d.notes||''}"\n`;});
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='deliveries.csv';a.click();
+    csv+=[d.date,d.timeStart||d.time,d.timeEnd||'',z?z.name:d.zone,d.company,d.contact,d.phone||'',d.material,d.truck||'',statusFr(d.status),d.notes||''].map(q).join(',')+'\n';});
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='livraisons.csv';a.click();
 }
 
 // ── MODALS ────────────────────────────────────────────────
@@ -5558,11 +5296,11 @@ function openMyDeliveries(){
       return '<div style="padding:12px 0;border-bottom:1px solid var(--border);">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">'
         +  '<div>'
-        +    '<div style="font-size:14px;font-weight:600;color:var(--text);">'+d.company+'</div>'
+        +    '<div style="font-size:14px;font-weight:600;color:var(--text);">'+escapeHtml(d.company)+'</div>'
         +    '<div style="font-size:11px;color:var(--text2);margin-top:2px;">'+fmtDate(d.date)+' · '+timeStr+(z?' · '+z.name:'')+'</div>'
-        +    '<div style="font-size:11px;color:var(--text2);">'+d.material+'</div>'
+        +    '<div style="font-size:11px;color:var(--text2);">'+escapeHtml(d.material)+'</div>'
         +  '</div>'
-        +  '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+sc+'22;color:'+sc+';border:1px solid '+sc+'55;white-space:nowrap;text-transform:uppercase;">'+d.status+'</span>'
+        +  '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:'+sc+'22;color:'+sc+';border:1px solid '+sc+'55;white-space:nowrap;text-transform:uppercase;">'+statusFr(d.status)+'</span>'
         +'</div>'
         +'<div class="_user-del-actions" data-id="'+d.id+'" data-can-edit="'+(canEdit?'1':'0')+'" style="display:flex;gap:6px;flex-wrap:wrap;"></div>'
           +((d.status==='cancelled') ? '<div style="font-size:11px;color:var(--text3);margin-top:6px;">Livraison annulée.</div>' : '')
@@ -5596,12 +5334,13 @@ function openMyDeliveries(){
 
 function userCancelDelivery(id){
   const d = deliveries.find(x=>x.id===id);
-  if(!d||d.userId!==firebaseUser?.uid||d.status!=='pending') return;
+  if(!d||d.userId!==firebaseUser?.uid||(d.status!=='pending'&&d.status!=='approved')) return;
+  if(!confirm('Annuler cette livraison ?')) return;
   d.status='cancelled';
   d.rejectionNote='Annulée par le sous-traitant.';
   saveDelivery(d);
   sendDeliveryEmail(d, 'cancelled');
-  notif(d.company+' cancelled their delivery ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').','rejected');
+  notif(d.company+' a annulé sa livraison ('+fmtDate(d.date)+' '+(d.timeStart||d.time)+').','rejected');
   openMyDeliveries(); // refresh modal
   renderWeekCalendar();
   updateBadges();
@@ -5715,7 +5454,7 @@ function quickBook(date, time, preferredZone){
   // Populate company dropdown
   const coQb=g('qb-company');
   if(coQb) coQb.innerHTML='<option value="">Sélectionner la compagnie…</option>'
-    +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
+    +subcontractors.map(c=>'<option value="'+escapeHtml(c)+'">'+escapeHtml(c)+'</option>').join('');
   const zsel=g('qb-zone');
   zsel.innerHTML=zones.map(z=>'<option value="'+z.id+'">'+ z.name+'</option>').join('');
   if(preferredZone && zones.some(z=>z.id===preferredZone)) zsel.value=preferredZone;
@@ -5760,11 +5499,7 @@ function submitQuickBook(){
   const truck=g('qb-truck').value, notes=g('qb-notes').value.trim();
   const errEl=g('qb-err');
   // Also update main form dropdown
-  const coSel2=g('b-company');
-  if(coSel2){
-    coSel2.innerHTML='<option value="">Sélectionner la compagnie…</option>'
-      +subcontractors.map(c=>'<option value="'+c+'">'+c+'</option>').join('');
-  }
+  renderCompanyDropdowns();
   const errs=[];
   if(!company)  errs.push('Compagnie');
   if(!contact)  errs.push('Contact');
@@ -5780,7 +5515,7 @@ function submitQuickBook(){
     userId:firebaseUser?firebaseUser.uid:null,userEmail:firebaseUser?firebaseUser.email:null};
   deliveries.unshift(d);
   saveMobileBookingPrefs({company, contact, phone, truck});
-  notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===zoneId)||{name:'?'}).name+')','approved');
+  notif('Nouvelle livraison : '+company+' — '+fmtDate(date)+' '+ts+'–'+te+' ('+(zones.find(z=>z.id===zoneId)||{name:'?'}).name+')',d.status==='approved'?'approved':'pending');
   saveDelivery(d);
   if(d.status === 'approved') sendDeliveryEmail(d, 'approved');
   closeModal('modal-quick-book');
@@ -5824,8 +5559,8 @@ function openZoneModal(zoneId){
       row.innerHTML =
         '<div style="font-family:var(--mono);font-size:11px;color:var(--text2);flex-shrink:0;min-width:90px;">' + timeStr + '</div>'
         + '<div style="flex:1;min-width:0;">'
-        +   '<div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + d.company + '</div>'
-        +   '<div style="font-size:11px;color:var(--text2);">' + d.contact + (d.truck ? ' · ' + d.truck : '') + '</div>'
+        +   '<div style="font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(d.company) + '</div>'
+        +   '<div style="font-size:11px;color:var(--text2);">' + escapeHtml(d.contact) + (d.truck ? ' · ' + escapeHtml(d.truck) : '') + '</div>'
         + '</div>'
         + '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:' + statusBg + ';color:' + statusColor + ';border:1px solid ' + statusBd + ';white-space:nowrap;text-transform:uppercase;letter-spacing:0.04em;">' + (d.status==='approved'?'Approuvée':d.status==='pending'?'En attente':'Rejetée') + '</span>';
 
@@ -5846,7 +5581,7 @@ function decideFromZoneModal(id, status) {
     if (cf) { alert('Pris par ' + cf.company + '.'); return; }
   }
   d.status = status;
-  notif(d.company + ' ' + status + ' (' + fmtDate(d.date) + ' ' + (d.timeStart||d.time) + ').', status);
+  notif(d.company + ' — ' + statusFr(status) + ' (' + fmtDate(d.date) + ' ' + (d.timeStart||d.time) + ').', status);
   saveDelivery(d);
   // Refresh the modal in place
   openZoneModal(d.zone);
@@ -5867,16 +5602,6 @@ document.querySelectorAll('.modal-backdrop').forEach(el=>{
 
 // ── INIT ──────────────────────────────────────────────────
 async function initApp(){
-  // Restore saved theme
-  try {
-    if (localStorage.getItem('sd_theme') === 'light') {
-      document.body.classList.add('light');
-      setTimeout(() => {
-        const knob = g('theme-knob');
-        if (knob) { knob.style.left='21px'; knob.style.background='#1C4A4A'; }
-      }, 50);
-    }
-  } catch(e){}
   tickClock(); setInterval(tickClock,1000);
   startCurrentTimeTicker();
   weekStart = getMonday(new Date());
@@ -5886,7 +5611,7 @@ async function initApp(){
   g('tb-role').style.display='none';
 
   // Show loading state
-  g('week-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;grid-column:1/-1;">Connecting to database…</div>';
+  g('week-grid').innerHTML='<div style="padding:40px;text-align:center;color:var(--text3);font-size:13px;grid-column:1/-1;">Connexion à la base de données…</div>';
   bindMobileCalendarSwipe();
 
   // Restore local zones/project settings first as a fallback for refresh/offline cases.
@@ -5894,17 +5619,13 @@ async function initApp(){
   if(localZonesBeforeDb) zones = localZonesBeforeDb;
   const localIconMarkersBeforeDb = loadLocalIconMarkers();
   if(localIconMarkersBeforeDb) iconMarkers = localIconMarkersBeforeDb;
-  const localProjectInfoBeforeDb = loadLocalProjectInfo();
-  projectInfo = {...projectInfo, ...localProjectInfoBeforeDb};
-  const localSubcontractorsBeforeDb = mergeSubcontractorLists(
-    loadLocalSubcontractors() || [],
-    Array.isArray(localProjectInfoBeforeDb.subcontractors) ? localProjectInfoBeforeDb.subcontractors : []
-  );
-  if(!window._db && localSubcontractorsBeforeDb.length) subcontractors = localSubcontractorsBeforeDb;
+  projectInfo = {...projectInfo, ...loadLocalProjectInfo()};
+  const localSubcontractorsBeforeDb = loadLocalSubcontractors();
+  if(localSubcontractorsBeforeDb) subcontractors = localSubcontractorsBeforeDb;
 
   if(window._db){
     // Load config docs in parallel
-    const [z, pi, no, mi, sch, bd, sc, im, sn, sr] = await Promise.all([
+    const [z, pi, no, mi, sch, bd, sc, im, sn] = await Promise.all([
       fbLoadConfig('zones',          zones),
       fbLoadConfig('projectInfo',    projectInfo),
       fbLoadConfig('notifications',  []),
@@ -5914,7 +5635,6 @@ async function initApp(){
       fbLoadConfig('subcontractors', []),
       fbLoadConfig('iconMarkers',    []),
       fbLoadConfig('siteNotices',     []),
-      fbLoadSubcontractorRegistry(),
     ]);
     const localZonesAfterDb = loadLocalZones();
     zones          = localZonesAfterDb || z;
@@ -5922,67 +5642,22 @@ async function initApp(){
     // Merge order matters:
     // 1) defaults / current state
     // 2) Firebase projectInfo
-    // 3) local projectInfo fields, but NOT local projectInfo.subcontractors.
-    //    The company list must remain shared and must not be replaced by a stale
-    //    browser-specific cache.
-    const localProjectInfoAfterDb = loadLocalProjectInfo();
-    const localProjectInfoSubcontractors = Array.isArray(localProjectInfoAfterDb.subcontractors)
-      ? localProjectInfoAfterDb.subcontractors
-      : [];
-    delete localProjectInfoAfterDb.subcontractors;
-    delete localProjectInfoAfterDb.subcontractorsUpdatedAt;
-    projectInfo    = {...projectInfo, ...pi, ...localProjectInfoAfterDb};
+    // 3) local projectInfo, so a recently toggled autoApprove value survives refresh
+    //    even if Firebase did not write quickly enough or is temporarily unavailable.
+    projectInfo    = {...projectInfo, ...pi, ...loadLocalProjectInfo()};
+    saveLocalProjectInfo();
     notifications  = no;
     mapImg         = mi;
-    mapPdf         = null;
     siteSchedule   = sch;
     blackoutDates  = bd;
-
-    // Shared subcontractors can be read from three places:
-    // 1) deliveries/__hbml_subcontractors_registry__ (best fallback for strict Firestore rules)
-    // 2) config/projectInfo.data.subcontractors
-    // 3) legacy config/subcontractors
-    const registryState = sr && Array.isArray(sr.list) ? sr : null;
-    const projectInfoRemoteState = Array.isArray(pi && pi.subcontractors)
-      ? {list: normalizeSubcontractors(pi.subcontractors), updatedAt: Number(pi.subcontractorsUpdatedAt || 0) || 0}
-      : null;
-    const legacyParsedState = parseSubcontractorPayload({data: sc});
-    const remoteStates = [registryState, projectInfoRemoteState, legacyParsedState].filter(st => st && st.list && st.list.length);
-    const freshestRemote = remoteStates.reduce((best, st) => !best || (st.updatedAt || 0) > (best.updatedAt || 0) ? st : best, null);
-    const localSubState = loadLocalSubcontractorsState();
-    const localProjectInfoSubState = localProjectInfoSubcontractors.length ? {list: localProjectInfoSubcontractors, updatedAt: Number(localProjectInfoAfterDb.subcontractorsUpdatedAt || 0) || 0} : null;
-
-    const baseList = freshestRemote ? freshestRemote.list : [];
-    const localList = mergeSubcontractorLists(
-      localSubState ? localSubState.list : [],
-      localProjectInfoSubState ? localProjectInfoSubState.list : []
-    );
-    const mergedForRepair = mergeSubcontractorLists(baseList, localList);
-
-    subcontractors = mergedForRepair.length ? mergedForRepair : baseList;
-    subcontractorsUpdatedAt = Math.max(
-      freshestRemote ? (freshestRemote.updatedAt || 0) : 0,
-      localSubState ? (localSubState.updatedAt || 0) : 0,
-      localProjectInfoSubState ? (localProjectInfoSubState.updatedAt || 0) : 0,
-      Date.now()
-    );
-    projectInfo.subcontractors = subcontractors;
-    projectInfo.subcontractorsUpdatedAt = subcontractorsUpdatedAt;
-    saveLocalSubcontractors();
-    saveLocalProjectInfo();
-
-    // One-time repair: if this browser has companies that are missing from the
-    // shared list, push the union to the registry/config. This is what brings the
-    // private-window list and normal-window list back together.
-    if(!freshestRemote || !listsEqual(subcontractors, freshestRemote.list)){
-      await saveSubcontractorsConfig();
-    }
+    const localSubcontractorsAfterDb = loadLocalSubcontractors();
+    subcontractors = localSubcontractorsAfterDb || sc;
+    if(localSubcontractorsAfterDb) saveSubcontractorsConfig().catch(()=>{});
     const localIconMarkersAfterDb = loadLocalIconMarkers();
     iconMarkers    = localIconMarkersAfterDb || im; // PDF is always converted to image on upload, stored as mapImg
     if(localIconMarkersAfterDb) saveIconMarkersConfig().catch(()=>{});
     siteNotices    = sn;
     subscribeDeliveries(); // real-time listener handles deliveries
-    subscribeSubcontractorsConfig(); // keep admin/company dropdowns synced across browsers
     // Apply saved app name
     const _an=g('app-name'); if(_an) _an.textContent=projectInfo.appname||'SiteDelivery';
   }
