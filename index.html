@@ -2053,13 +2053,15 @@ let projectInfo   = {
 let mapImg        = null;
 let mapPdf        = null;
 let subcontractors = []; // list of company names for dropdown
+let subcontractorsUpdatedAt = 0; // shared-list version timestamp
 
 const MOBILE_BOOKING_PREF_KEY = 'hbml_mobile_booking_prefs_v1';
 const PROJECT_INFO_PREF_KEY = 'hbml_project_info_v1';
 const ZONES_PREF_KEY = 'hbml_zones_v1';
 const ICON_MARKERS_PREF_KEY = 'hbml_icon_markers_v1';
-const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v3';
-const SUBCONTRACTORS_OLD_KEYS = ['hbml_subcontractors_v1','hbml_subcontractors_v2'];
+const SUBCONTRACTORS_PREF_KEY = 'hbml_subcontractors_v4';
+const SUBCONTRACTORS_OLD_KEYS = ['hbml_subcontractors_v1','hbml_subcontractors_v2','hbml_subcontractors_v3'];
+const SUBCONTRACTORS_REGISTRY_ID = '__hbml_subcontractors_registry__';
 let mobZoneFiltersExpanded = false;
 
 function loadMobileBookingPrefs(){
@@ -2155,67 +2157,141 @@ function mergeSubcontractorLists(){
   });
   return out;
 }
-function parseSavedSubcontractors(raw){
+
+function parseSavedSubcontractorsState(raw){
   try{
     const saved = JSON.parse(raw || 'null');
-    if(Array.isArray(saved)) return normalizeSubcontractors(saved);
-    if(saved && Array.isArray(saved.subcontractors)) return normalizeSubcontractors(saved.subcontractors);
-  }catch(_){}
+    if(Array.isArray(saved)) return {list: normalizeSubcontractors(saved), updatedAt: 0};
+    if(saved && Array.isArray(saved.subcontractors)){
+      return {
+        list: normalizeSubcontractors(saved.subcontractors),
+        updatedAt: Number(saved.updatedAt || saved.subcontractorsUpdatedAt || 0) || 0
+      };
+    }
+  }catch(_){ }
+  return null;
+}
+function parseSavedSubcontractors(raw){
+  const state = parseSavedSubcontractorsState(raw);
+  return state ? state.list : null;
+}
+function loadLocalSubcontractorsState(){
+  try{
+    let best = null;
+    const states = [];
+    const current = parseSavedSubcontractorsState(localStorage.getItem(SUBCONTRACTORS_PREF_KEY));
+    if(current) states.push(current);
+    (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => {
+      const oldState = parseSavedSubcontractorsState(localStorage.getItem(key));
+      if(oldState) states.push(oldState);
+    });
+    states.forEach(st => {
+      if(!st || !st.list || !st.list.length) return;
+      if(!best || (st.updatedAt || 0) > (best.updatedAt || 0)) best = st;
+    });
+    if(!best && states.length){
+      const merged = mergeSubcontractorLists.apply(null, states.map(st => st.list));
+      if(merged.length) best = {list: merged, updatedAt: 0};
+    }
+    return best;
+  }catch(_){ }
   return null;
 }
 function loadLocalSubcontractors(){
-  try{
-    const lists = [];
-    const current = parseSavedSubcontractors(localStorage.getItem(SUBCONTRACTORS_PREF_KEY));
-    if(current) lists.push(current);
-    (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => {
-      const oldList = parseSavedSubcontractors(localStorage.getItem(key));
-      if(oldList) lists.push(oldList);
-    });
-    const merged = mergeSubcontractorLists.apply(null, lists);
-    return merged.length ? merged : null;
-  }catch(_){ }
-  return null;
+  const state = loadLocalSubcontractorsState();
+  return state ? state.list : null;
 }
 function saveLocalSubcontractors(){
   try{
     subcontractors = normalizeSubcontractors(subcontractors);
+    if(!subcontractorsUpdatedAt) subcontractorsUpdatedAt = Date.now();
     localStorage.setItem(SUBCONTRACTORS_PREF_KEY, JSON.stringify({
-      updatedAt: Date.now(),
+      updatedAt: subcontractorsUpdatedAt,
       subcontractors
     }));
-    // Remove the old cache key so a regular browser window cannot keep
+    // Remove old cache keys so a regular browser window cannot keep
     // showing or re-saving a stale company list.
     (SUBCONTRACTORS_OLD_KEYS || []).forEach(key => localStorage.removeItem(key));
-  }catch(_){}
+  }catch(_){ }
+}
+function listsEqual(a,b){
+  return JSON.stringify(normalizeSubcontractors(a)) === JSON.stringify(normalizeSubcontractors(b));
+}
+
+function makeSubcontractorRegistryDoc(list, updatedAt){
+  const nowIso = new Date(updatedAt || Date.now()).toISOString();
+  return {
+    id: SUBCONTRACTORS_REGISTRY_ID,
+    __config: true,
+    configKey: 'subcontractors',
+    company: '__CONFIG_SUBCONTRACTORS__',
+    contact: '',
+    phone: '',
+    zone: '',
+    date: '2099-01-01',
+    time: '00:00',
+    timeStart: '00:00',
+    timeEnd: '00:01',
+    truck: '',
+    notes: 'System document — shared subcontractor list. Do not delete.',
+    status: 'config',
+    submittedAt: nowIso,
+    updatedAt: updatedAt || Date.now(),
+    subcontractors: normalizeSubcontractors(list)
+  };
+}
+async function fbSaveSubcontractorRegistry(list, updatedAt){
+  if(!window._db) return false;
+  await window._setDoc(window._doc('deliveries', SUBCONTRACTORS_REGISTRY_ID), makeSubcontractorRegistryDoc(list, updatedAt));
+  return true;
+}
+async function fbLoadSubcontractorRegistry(){
+  if(!window._db) return null;
+  try{
+    const snap = await window._getDoc(window._doc('deliveries', SUBCONTRACTORS_REGISTRY_ID));
+    if(!snap.exists()) return null;
+    const data = snap.data() || {};
+    if(Array.isArray(data.subcontractors)){
+      return {list: normalizeSubcontractors(data.subcontractors), updatedAt: Number(data.updatedAt || 0) || 0};
+    }
+  }catch(e){
+    console.warn('Subcontractor registry load skipped:', e);
+  }
+  return null;
 }
 async function saveSubcontractorsConfig(){
   subcontractors = normalizeSubcontractors(subcontractors);
+  subcontractorsUpdatedAt = Date.now();
   saveLocalSubcontractors();
   renderCompanyDropdowns();
+  renderSubList();
+  renderAdminKPIs();
 
-  // Store the shared subcontractor list inside the existing projectInfo config doc.
-  // Some Firestore rule sets allow known config documents only, so creating a new
-  // config/subcontractors document can fail even though projectInfo saves correctly.
+  // Keep the shared list in projectInfo for compatibility with previous versions.
   projectInfo.subcontractors = subcontractors;
-  projectInfo.subcontractorsUpdatedAt = Date.now();
+  projectInfo.subcontractorsUpdatedAt = subcontractorsUpdatedAt;
   saveLocalProjectInfo();
 
   if(window._db){
+    // Write to every storage location that may be permitted by the current
+    // Firestore rules. The deliveries registry is the strongest fallback because
+    // delivery writes are already required for the app to work.
     try{
-      await fbSaveConfig('projectInfo', projectInfo);
+      await window._setDoc(window._doc('config','projectInfo'), {data: JSON.stringify(projectInfo)});
     }catch(e){
-      console.error('saveSubcontractorsConfig projectInfo sync failed', e);
+      console.warn('projectInfo subcontractor sync skipped:', e);
     }
-
-    // Best-effort legacy write for older deployments. If Firestore rules block this
-    // document, ignore it; projectInfo above is the shared source of truth.
     try{
       await window._setDoc(window._doc('config','subcontractors'), {
-        data: JSON.stringify(subcontractors)
+        data: JSON.stringify({subcontractors, updatedAt: subcontractorsUpdatedAt})
       });
     }catch(e){
-      console.warn('Legacy subcontractor config write skipped:', e);
+      console.warn('legacy subcontractor config sync skipped:', e);
+    }
+    try{
+      await fbSaveSubcontractorRegistry(subcontractors, subcontractorsUpdatedAt);
+    }catch(e){
+      console.error('subcontractor registry sync failed:', e);
     }
   }
 }
@@ -2408,7 +2484,7 @@ function subscribeDeliveries(){
   _unsubDeliveries = window._onSnapshot(
     window._col('deliveries'),
     (snapshot) => {
-      deliveries = snapshot.docs.map(d => d.data());
+      deliveries = snapshot.docs.map(d => d.data()).filter(d => !(d && (d.__config || d.configKey === 'subcontractors' || d.id === SUBCONTRACTORS_REGISTRY_ID)));
       deliveries.sort((a,b)=> new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
       updateBadges();
       // Re-render whichever view is active
@@ -2425,12 +2501,28 @@ function subscribeDeliveries(){
   );
 }
 
-function applyRemoteSubcontractors(next){
+
+function applyRemoteSubcontractors(next, updatedAt){
   if(!Array.isArray(next)) return;
   next = normalizeSubcontractors(next);
-  if(JSON.stringify(next) === JSON.stringify(subcontractors)) return;
+  updatedAt = Number(updatedAt || 0) || 0;
+  if(!next.length && subcontractors.length) return;
+
+  // Do not let an older config document overwrite the newer shared registry.
+  if(updatedAt && subcontractorsUpdatedAt && updatedAt < subcontractorsUpdatedAt && !listsEqual(next, subcontractors)) return;
+
+  if(listsEqual(next, subcontractors)){
+    if(updatedAt > subcontractorsUpdatedAt){
+      subcontractorsUpdatedAt = updatedAt;
+      saveLocalSubcontractors();
+    }
+    return;
+  }
+
   subcontractors = next;
+  subcontractorsUpdatedAt = updatedAt || Date.now();
   projectInfo.subcontractors = subcontractors;
+  projectInfo.subcontractorsUpdatedAt = subcontractorsUpdatedAt;
   saveLocalSubcontractors();
   saveLocalProjectInfo();
   renderCompanyDropdowns();
@@ -2440,44 +2532,54 @@ function applyRemoteSubcontractors(next){
   if(activeView && activeView.id === 'view-deliveries') renderDeliveries();
 }
 
+function parseSubcontractorPayload(payload){
+  if(!payload) return null;
+  try{
+    const data = typeof payload.data === 'string' ? JSON.parse(payload.data) : (payload.data || payload);
+    if(Array.isArray(data)) return {list: normalizeSubcontractors(data), updatedAt: 0};
+    if(data && Array.isArray(data.subcontractors)){
+      return {list: normalizeSubcontractors(data.subcontractors), updatedAt: Number(data.updatedAt || data.subcontractorsUpdatedAt || 0) || 0};
+    }
+  }catch(e){
+    console.error('subcontractor payload parse error', e);
+  }
+  return null;
+}
+
 function subscribeSubcontractorsConfig(){
   if(!window._db)return;
   if(_unsubSubcontractors) _unsubSubcontractors();
   if(_unsubProjectInfoSubcontractors) _unsubProjectInfoSubcontractors();
+  if(window._unsubSubcontractorRegistry) window._unsubSubcontractorRegistry();
 
-  // Primary shared source: config/projectInfo.data.subcontractors
   _unsubProjectInfoSubcontractors = window._onSnapshot(
     window._doc('config','projectInfo'),
     (snap) => {
       if(!snap.exists()) return;
-      try{
-        const payload = snap.data() || {};
-        const data = typeof payload.data === 'string' ? JSON.parse(payload.data) : (payload.data || payload);
-        if(data && Array.isArray(data.subcontractors)){
-          applyRemoteSubcontractors(data.subcontractors);
-        }
-      }catch(e){
-        console.error('projectInfo subcontractors parse error', e);
-      }
+      const parsed = parseSubcontractorPayload(snap.data() || {});
+      if(parsed) applyRemoteSubcontractors(parsed.list, parsed.updatedAt);
     },
-    (err) => console.error('ProjectInfo subcontractors listener error:', err)
+    (err) => console.warn('ProjectInfo subcontractors listener skipped:', err)
   );
 
-  // Legacy listener for deployments that already created config/subcontractors.
-  // Read/write errors here should not block the app.
   _unsubSubcontractors = window._onSnapshot(
     window._doc('config','subcontractors'),
     (snap) => {
       if(!snap.exists()) return;
-      try{
-        const payload = snap.data() || {};
-        const next = typeof payload.data === 'string' ? JSON.parse(payload.data) : (payload.subcontractors || payload.data);
-        applyRemoteSubcontractors(next);
-      }catch(e){
-        console.error('subcontractors config parse error', e);
-      }
+      const parsed = parseSubcontractorPayload(snap.data() || {});
+      if(parsed) applyRemoteSubcontractors(parsed.list, parsed.updatedAt);
     },
     (err) => console.warn('Legacy subcontractors listener skipped:', err)
+  );
+
+  window._unsubSubcontractorRegistry = window._onSnapshot(
+    window._doc('deliveries', SUBCONTRACTORS_REGISTRY_ID),
+    (snap) => {
+      if(!snap.exists()) return;
+      const data = snap.data() || {};
+      if(Array.isArray(data.subcontractors)) applyRemoteSubcontractors(data.subcontractors, data.updatedAt || 0);
+    },
+    (err) => console.warn('Subcontractor registry listener skipped:', err)
   );
 }
 
@@ -5762,7 +5864,7 @@ async function initApp(){
 
   if(window._db){
     // Load config docs in parallel
-    const [z, pi, no, mi, sch, bd, sc, im, sn] = await Promise.all([
+    const [z, pi, no, mi, sch, bd, sc, im, sn, sr] = await Promise.all([
       fbLoadConfig('zones',          zones),
       fbLoadConfig('projectInfo',    projectInfo),
       fbLoadConfig('notifications',  []),
@@ -5772,6 +5874,7 @@ async function initApp(){
       fbLoadConfig('subcontractors', []),
       fbLoadConfig('iconMarkers',    []),
       fbLoadConfig('siteNotices',     []),
+      fbLoadSubcontractorRegistry(),
     ]);
     const localZonesAfterDb = loadLocalZones();
     zones          = localZonesAfterDb || z;
@@ -5795,22 +5898,43 @@ async function initApp(){
     siteSchedule   = sch;
     blackoutDates  = bd;
 
-    // Primary remote list is now stored inside projectInfo. The old
-    // config/subcontractors doc is treated only as a legacy fallback.
-    const projectInfoRemoteSubcontractors = Array.isArray(pi && pi.subcontractors) ? pi.subcontractors : [];
-    const legacyRemoteSubcontractors = normalizeSubcontractors(sc);
-    const remoteSubcontractors = mergeSubcontractorLists(projectInfoRemoteSubcontractors, legacyRemoteSubcontractors);
-    const localSubcontractorsAfterDb = mergeSubcontractorLists(loadLocalSubcontractors() || [], localProjectInfoSubcontractors);
-    const remoteKeys = new Set(remoteSubcontractors.map(c => c.toLowerCase()));
-    const localHasExtra = localSubcontractorsAfterDb.some(c => !remoteKeys.has(String(c).toLowerCase()));
+    // Shared subcontractors can be read from three places:
+    // 1) deliveries/__hbml_subcontractors_registry__ (best fallback for strict Firestore rules)
+    // 2) config/projectInfo.data.subcontractors
+    // 3) legacy config/subcontractors
+    const registryState = sr && Array.isArray(sr.list) ? sr : null;
+    const projectInfoRemoteState = Array.isArray(pi && pi.subcontractors)
+      ? {list: normalizeSubcontractors(pi.subcontractors), updatedAt: Number(pi.subcontractorsUpdatedAt || 0) || 0}
+      : null;
+    const legacyParsedState = parseSubcontractorPayload({data: sc});
+    const remoteStates = [registryState, projectInfoRemoteState, legacyParsedState].filter(st => st && st.list && st.list.length);
+    const freshestRemote = remoteStates.reduce((best, st) => !best || (st.updatedAt || 0) > (best.updatedAt || 0) ? st : best, null);
+    const localSubState = loadLocalSubcontractorsState();
+    const localProjectInfoSubState = localProjectInfoSubcontractors.length ? {list: localProjectInfoSubcontractors, updatedAt: Number(localProjectInfoAfterDb.subcontractorsUpdatedAt || 0) || 0} : null;
 
-    subcontractors = (localHasExtra && (!remoteSubcontractors.length || localSubcontractorsAfterDb.length >= remoteSubcontractors.length))
-      ? mergeSubcontractorLists(remoteSubcontractors, localSubcontractorsAfterDb)
-      : remoteSubcontractors;
+    const baseList = freshestRemote ? freshestRemote.list : [];
+    const localList = mergeSubcontractorLists(
+      localSubState ? localSubState.list : [],
+      localProjectInfoSubState ? localProjectInfoSubState.list : []
+    );
+    const mergedForRepair = mergeSubcontractorLists(baseList, localList);
+
+    subcontractors = mergedForRepair.length ? mergedForRepair : baseList;
+    subcontractorsUpdatedAt = Math.max(
+      freshestRemote ? (freshestRemote.updatedAt || 0) : 0,
+      localSubState ? (localSubState.updatedAt || 0) : 0,
+      localProjectInfoSubState ? (localProjectInfoSubState.updatedAt || 0) : 0,
+      Date.now()
+    );
     projectInfo.subcontractors = subcontractors;
+    projectInfo.subcontractorsUpdatedAt = subcontractorsUpdatedAt;
     saveLocalSubcontractors();
     saveLocalProjectInfo();
-    if(JSON.stringify(subcontractors) !== JSON.stringify(remoteSubcontractors)){
+
+    // One-time repair: if this browser has companies that are missing from the
+    // shared list, push the union to the registry/config. This is what brings the
+    // private-window list and normal-window list back together.
+    if(!freshestRemote || !listsEqual(subcontractors, freshestRemote.list)){
       await saveSubcontractorsConfig();
     }
     const localIconMarkersAfterDb = loadLocalIconMarkers();
